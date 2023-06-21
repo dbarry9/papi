@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
@@ -13,6 +15,20 @@ int sum_i32=0;
 float sum_f32=0.0;
 double sum_f64=0.0;
 
+#pragma GCC push_options
+#if defined(X86)
+  #if defined(AVX512AVAIL)
+    #pragma GCC target("avx512vl")
+  #elif defined(AVX256AVAIL)
+    #pragma GCC target("avx2")
+  #elif defined(AVX128AVAIL)
+    #pragma GCC target("avx")
+  #endif
+#elif defined(POWER)
+  #pragma GCC target("altivec")
+#elif defined(ARM)
+  #pragma GCC target("arch=armv8.2-a+fp16")
+#endif
 void test_int_add(int p, int M, int N, int EventSet, FILE *fp){
     int ret;
     long long int ev_values[2];
@@ -99,6 +115,7 @@ void test_int_add(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -154,6 +171,7 @@ void test_f64_add(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -222,6 +240,7 @@ void test_f64_add_max(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -270,6 +289,7 @@ void test_f64_add_DVEC128(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -316,6 +336,7 @@ void test_f64_add_DVEC256(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -362,6 +383,7 @@ void test_f64_add_DVEC512(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -411,6 +433,7 @@ void test_f64_add_SVEC128(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -457,6 +480,7 @@ void test_f64_add_SVEC256(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -503,6 +527,7 @@ void test_f64_add_SVEC512(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -559,6 +584,7 @@ void test_f64_sub(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -627,6 +653,7 @@ void test_f64_sub_max(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -682,6 +709,7 @@ void test_f64_mul(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -750,6 +778,7 @@ void test_f64_mul_max(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -805,6 +834,7 @@ void test_f64_div(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -873,6 +903,7 @@ void test_f64_div_max(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -919,6 +950,7 @@ void test_mem_ops_serial_RO(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -961,6 +993,7 @@ void test_mem_ops_serial_RW(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -1022,6 +1055,7 @@ void test_mem_ops_parallel_RO(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -1065,6 +1099,7 @@ void test_mem_ops_parallel_WO(int p, int M, int N, int EventSet, FILE *fp){
         }
     }
 
+    usleep(1);
     ret = PAPI_stop(EventSet, ev_values);
     if ( PAPI_OK != ret ) {
         fprintf(stderr, "PAPI_stop() error: %s\n", PAPI_strerror(ret));
@@ -1079,6 +1114,7 @@ clean_up:
 
     return;
 }
+#pragma GCC pop_options
 
 ////////////////////////////////////////////////////////////////////////////////
 //////// Main driver

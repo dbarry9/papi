@@ -28,7 +28,7 @@ ifeq ($(ARCH),X86)
     VEC=-mavx -O0 -DX86
     VEC_FMA=-mfma4 -mfma -O0 -DX86
     VEC_ALL=$(VEC) $(VEC_FMA) -O0 -DX86
-	INSTR=-mavx512vl
+    INSTR=-DAVX512AVAIL
 endif
 ifeq ($(ARCH),POWER)
     VECSRC=vec_fma_hp.o vec_fma_sp.o vec_fma_dp.o vec_nonfma_hp.o vec_nonfma_sp.o vec_nonfma_dp.o
