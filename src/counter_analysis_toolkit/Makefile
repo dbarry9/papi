@@ -47,7 +47,7 @@ ifeq ($(ARCH),ARM)
     VEC_ALL=$(VEC) -O0 -DARM
 endif
 
-all: branch.o d_cache eventstock.o flops i_cache instr vector
+all: branch.o d_cache eventstock.o flops i_cache instr cycles vector
 	make cat_collect PAPIDIR=$(PAPIDIR)
 
 d_cache: timing_kernels.o prepareArray.o compar.o dcache.o
@@ -90,6 +90,9 @@ icache_seq_kernel_0.o: icache_seq.c icache_seq.h
 
 instr: instructions.c instr.h
 	-$(CC) -c $(CFLAGS) $(OPT2) -ftree-vectorize $(INSTR) $(INCFLAGS) instructions.c -o instructions.o
+
+cycles: cycles.c cycles.h
+	$(CC) -c $(CFLAGS) $(OPT1) -pthread -fopenmp $(INCFLAGS) cycles.c -o cycles.o
 
 weak_symbols.o: weak_symbols.c vec.h
 	-$(CC) -c $(CFLAGS) weak_symbols.c
@@ -149,7 +152,7 @@ vec_nonfma_dp: vec_nonfma_dp.c vec_scalar_verify.h
 	-$(CC) -c $(CFLAGS) $(INCFLAGS) $(VEC512) vec_nonfma_dp.c -o vec_nonfma_dp-512B.o
 
 cat_collect: main.c
-	$(CC) $(CFLAGS) -fopenmp $(INCFLAGS) main.c $(wildcard *.o) -o cat_collect $(LDFLAGS)
+	$(CC) $(CFLAGS) -pthread -fopenmp $(INCFLAGS) main.c $(wildcard *.o) -o cat_collect $(LDFLAGS)
 
 clean:
 	rm -f *.o

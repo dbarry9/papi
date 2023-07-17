@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #include "papi.h"
 #include "driver.h"
@@ -38,7 +39,7 @@ int main(int argc, char*argv[])
     }
 
     // Initialize PAPI thread support.
-    ret = PAPI_thread_init( omp_get_thread_num_wrapper );
+    ret = PAPI_thread_init( pthread_self );
     if( ret != PAPI_OK ) {
 
         fprintf(stderr,"PAPI thread init error: %s Exiting...\n", PAPI_strerror(ret));
@@ -477,6 +478,8 @@ static void read_conf_file(char *conf_file_name, hw_desc_t *hw_desc){
             hw_desc->pts_per_reg[2] = value;
         }else if( !strcmp(key, "PTS_PER_L4") || !strcmp(key, "PTS_PER_MM") ){
             hw_desc->pts_per_reg[3] = value;
+        }else if( !strcmp(key, "NUM_CORES") ){
+            hw_desc->numcpus = value;
         }
 
         free(key);
@@ -972,6 +975,21 @@ void testbench(char** allevts, int cmbtotal, hw_desc_t *hw_desc, cat_params_t pa
         if(params.show_progress) print_progress(100);
     }
 
+    /* Benchmark VIII - Cycles*/
+    if( params.bench_type & BENCH_CYCLE )
+    {
+        if(params.show_progress) printf("Cycles Benchmarks: ");
+
+        for(i = low; i < cap; ++i)
+        {
+            if(params.show_progress) print_progress((100*i)/cmbtotal);
+
+            if( allevts[i] != NULL )
+                cycles_driver(allevts[i], hw_desc, params.outputdir);
+        }
+        if(params.show_progress) print_progress(100);
+    }
+
     return;
 }
 
@@ -1060,6 +1078,10 @@ int parseArgs(int argc, char **argv, cat_params_t *params){
         }
         if( !strcmp(argv[0],"-instr") ){
             params->bench_type |= BENCH_INSTR;
+            continue;
+        }
+        if( !strcmp(argv[0],"-cycles") ){
+            params->bench_type |= BENCH_CYCLE;
             continue;
         }
 

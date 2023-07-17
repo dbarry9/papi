@@ -5,6 +5,7 @@
 #include "flops.h"
 #include "vec.h"
 #include "instr.h"
+#include "cycles.h"
 #include "hw_desc.h"
 #include "params.h"
 
@@ -18,6 +19,7 @@
 #define BENCH_ICACHE_READ  0x10
 #define BENCH_VEC          0x20
 #define BENCH_INSTR        0x40
+#define BENCH_CYCLE        0x80
 
 int parseArgs(int argc, char **argv, cat_params_t *params);
 int setup_evts(char* inputfile, char*** basenames, int** cards);
