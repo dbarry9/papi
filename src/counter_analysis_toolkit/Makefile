@@ -47,7 +47,7 @@ ifeq ($(ARCH),ARM)
     VEC_ALL=$(VEC) -O0 -DARM
 endif
 
-all: branch.o d_cache eventstock.o flops i_cache instr vector
+all: branch.o d_cache eventstock.o flops i_cache instr cycles vector
 	make cat_collect PAPIDIR=$(PAPIDIR)
 
 d_cache: timing_kernels.o prepareArray.o compar.o dcache.o
@@ -90,6 +90,9 @@ icache_seq_kernel_0.o: icache_seq.c icache_seq.h
 
 instr: instructions.c instr.h
 	-$(CC) -c $(CFLAGS) $(OPT2) -ftree-vectorize $(INSTR) $(INCFLAGS) instructions.c -o instructions.o
+
+cycles: cycles.c cycles.h
+	$(CC) -c $(CFLAGS) $(OPT1) -fopenmp $(INCFLAGS) cycles.c -o cycles.o
 
 weak_symbols.o: weak_symbols.c vec.h
 	-$(CC) -c $(CFLAGS) weak_symbols.c
