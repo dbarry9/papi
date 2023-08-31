@@ -61,7 +61,7 @@ float test_sp_mac_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             r0 = FMA_VEC_PS(r0,r7,r9);
@@ -139,7 +139,7 @@ float test_sp_mac_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             r0 = FMA_VEC_PS(r0,r7,r9);
@@ -231,7 +231,7 @@ float test_sp_mac_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             r0 = FMA_VEC_PS(r0,r7,r9);

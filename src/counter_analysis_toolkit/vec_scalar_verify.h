@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <papi.h>
 #include <stdlib.h>
+#include "vec.h"
 #include "cat_arch.h"
 
 void papi_stop_and_print_placeholder(long long theory, FILE *fp);

@@ -1,21 +1,39 @@
 #include "vec_scalar_verify.h"
 
+extern int krnlIdx;
+extern float **sigTable;
+
 void papi_stop_and_print_placeholder(long long theory, FILE *fp)
 {
-    fprintf(fp, "%lld 0\n", theory);
+    int sigIdx;
+
+    fprintf(fp, "%lld 0", theory);
+    for( sigIdx = 0; sigIdx < NUMSIGS; ++sigIdx ) {
+        fprintf(fp," %.2f", sigTable[krnlIdx][sigIdx]);
+        //fprintf(stdout,"place %d %d\n", krnlIdx, sigIdx);
+    }
+    fprintf(fp,"\n");
+    krnlIdx++;
 }
 
 void papi_stop_and_print(long long theory, int EventSet, FILE *fp)
 {
     long long flpins = 0;
     int retval;
+    int sigIdx;
 
     if ( (retval=PAPI_stop(EventSet, &flpins)) != PAPI_OK){
         fprintf(stderr, "Problem.\n");
         return;
     }
 
-    fprintf(fp, "%lld %lld\n", theory, flpins);
+    fprintf(fp, "%lld %lld", theory, flpins);
+    for( sigIdx = 0; sigIdx < NUMSIGS; ++sigIdx ) {
+        fprintf(fp," %.2f", sigTable[krnlIdx][sigIdx]);
+        //fprintf(stdout,"not place %d %d\n", krnlIdx, sigIdx);
+    }
+    fprintf(fp,"\n");
+    krnlIdx++;
 }
 
 #if defined(ARM)
@@ -43,7 +61,7 @@ half test_hp_scalar_VEC_24( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             r0 = MUL_VEC_SH(r0,rC);
@@ -123,7 +141,7 @@ half test_hp_scalar_VEC_48( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             r0 = MUL_VEC_SH(r0,rC);
@@ -229,7 +247,7 @@ half test_hp_scalar_VEC_96( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             r0 = MUL_VEC_SH(r0,rC);
@@ -410,7 +428,7 @@ float test_sp_scalar_VEC_24( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             r0 = MUL_VEC_SS(r0,rC);
@@ -493,7 +511,7 @@ float test_sp_scalar_VEC_48( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             r0 = MUL_VEC_SS(r0,rC);
@@ -602,7 +620,7 @@ float test_sp_scalar_VEC_96( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             r0 = MUL_VEC_SS(r0,rC);
@@ -763,7 +781,7 @@ double test_dp_scalar_VEC_24( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             r0 = MUL_VEC_SD(r0,rC);
@@ -846,7 +864,7 @@ double test_dp_scalar_VEC_48( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             r0 = MUL_VEC_SD(r0,rC);
@@ -955,7 +973,7 @@ double test_dp_scalar_VEC_96( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             r0 = MUL_VEC_SD(r0,rC);
@@ -1114,7 +1132,7 @@ half test_hp_scalar_VEC_FMA_12( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             FMA_VEC_SH(r0,r0,r7,r9);
@@ -1177,7 +1195,7 @@ half test_hp_scalar_VEC_FMA_24( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             FMA_VEC_SH(r0,r0,r7,r9);
@@ -1254,7 +1272,7 @@ half test_hp_scalar_VEC_FMA_48( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             FMA_VEC_SH(r0,r0,r7,r9);
@@ -1382,7 +1400,7 @@ float test_sp_scalar_VEC_FMA_12( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             FMA_VEC_SS(r0,r0,r7,r9);
@@ -1448,7 +1466,7 @@ float test_sp_scalar_VEC_FMA_24( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             FMA_VEC_SS(r0,r0,r7,r9);
@@ -1528,7 +1546,7 @@ float test_sp_scalar_VEC_FMA_48( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             FMA_VEC_SS(r0,r0,r7,r9);
@@ -1636,7 +1654,7 @@ double test_dp_scalar_VEC_FMA_12( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             FMA_VEC_SD(r0,r0,r7,r9);
@@ -1702,7 +1720,7 @@ double test_dp_scalar_VEC_FMA_24( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             FMA_VEC_SD(r0,r0,r7,r9);
@@ -1782,7 +1800,7 @@ double test_dp_scalar_VEC_FMA_48( uint64 iterations ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
 
             /* The performance critical part */
             FMA_VEC_SD(r0,r0,r7,r9);

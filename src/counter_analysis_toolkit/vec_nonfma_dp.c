@@ -61,7 +61,7 @@ double test_dp_mac_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
             /* The performance critical part */
 
             r0 = MUL_VEC_PD(r0,rC);
@@ -154,7 +154,7 @@ double test_dp_mac_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
             /* The performance critical part */
 
             r0 = MUL_VEC_PD(r0,rC);
@@ -273,7 +273,7 @@ double test_dp_mac_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < 1000){
+        while (i < INNER_ITER){
             /* The performance critical part */
 
             r0 = MUL_VEC_PD(r0,rC);
