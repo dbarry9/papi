@@ -982,6 +982,21 @@ void testbench(char** allevts, int cmbtotal, hw_desc_t *hw_desc, cat_params_t pa
         if(params.show_progress) print_progress(100);
     }
 
+    /* Benchmark VIII - GPU FLOPs*/
+    if( params.bench_type & BENCH_GPU_FLOPS )
+    {
+        if(params.show_progress) printf("GPU FLOPs Benchmarks: ");
+
+        for(i = low; i < cap; ++i)
+        {
+            if(params.show_progress) print_progress((100*i)/cmbtotal);
+
+            if( allevts[i] != NULL )
+                gpu_flops_driver(allevts[i], hw_desc, params.outputdir);
+        }
+        if(params.show_progress) print_progress(100);
+    }
+
     return;
 }
 
@@ -1078,6 +1093,10 @@ int parseArgs(int argc, char **argv, cat_params_t *params){
             params->bench_type |= BENCH_INSTR;
             continue;
         }
+        if( !strcmp(argv[0],"-gpu_flops") ){
+            params->bench_type |= BENCH_GPU_FLOPS;
+            continue;
+        }
 
         print_usage(name);
         return -1;
@@ -1166,6 +1185,7 @@ void print_usage(char* name)
     fprintf(stdout, "  -ic               Instruction cache kernels.\n");
     fprintf(stdout, "  -vec              Vector FLOPs kernels.\n");
     fprintf(stdout, "  -instr            Instructions kernels.\n");
+    fprintf(stdout, "  -gpu_flops        GPU FLOPs kernels.\n");
 
     fprintf(stdout, "\n");
     fprintf(stdout, "EXAMPLE: %s -in event_list.txt -out OUTPUT_DIRECTORY -branch -dcw\n", name);

@@ -7,6 +7,7 @@
 #include "instr.h"
 #include "hw_desc.h"
 #include "params.h"
+#include "gpu_flops.h"
 
 #define USE_ALL_EVENTS 0x0
 #define READ_FROM_FILE 0x1
@@ -18,6 +19,7 @@
 #define BENCH_ICACHE_READ  0x10
 #define BENCH_VEC          0x20
 #define BENCH_INSTR        0x40
+#define BENCH_GPU_FLOPS    0x80
 
 int parseArgs(int argc, char **argv, cat_params_t *params);
 int setup_evts(char* inputfile, char*** basenames, int** cards);

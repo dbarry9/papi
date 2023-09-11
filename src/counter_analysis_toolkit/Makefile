@@ -1,14 +1,16 @@
-ARCH?=X86
+CPU_ARCH?=X86
 PAPIDIR?=${PAPI_DIR}
+ROCMDIR?=${HOME}/usr
 USEMPI?=false
-LDFLAGS=-L$(PAPIDIR)/lib -lpapi -lm -lpthread -ldl -lrt
-INCFLAGS=-I$(PAPIDIR)/include
+LDFLAGS=-L$(PAPIDIR)/lib -L$(ROCMDIR)/rocblas/lib -lpapi -lrocblas -lm -lpthread -ldl -lrt
+INCFLAGS=-I$(PAPIDIR)/include -I$(ROCMDIR)/rocblas/include
 CFLAGS+=-g -Wall -Wextra
 OPT0=-O0
 OPT1=-O1
 OPT2=-O2
 OPT3=-O3
 CC=gcc
+GPUCC?=nvcc
 
 ## Check to see if MPI is used.
 ifeq ($(USEMPI),true)
@@ -17,7 +19,7 @@ ifeq ($(USEMPI),true)
 endif
 
 ## Architecture determines vector instruction set.
-ifeq ($(ARCH),X86)
+ifeq ($(CPU_ARCH),X86)
     FLOP+=-mfma -DX86
     VECSRC=vec_fma_hp vec_fma_sp vec_fma_dp vec_nonfma_hp vec_nonfma_sp vec_nonfma_dp
     VEC_META=-DAVX128_AVAIL -DAVX256_AVAIL -DAVX512_AVAIL
@@ -32,14 +34,14 @@ ifeq ($(ARCH),X86)
     VEC_ALL=$(VEC) $(VEC_FMA) -O0 -DX86
     INSTR=-mavx512vl
 endif
-ifeq ($(ARCH),POWER)
+ifeq ($(CPU_ARCH),POWER)
     FLOP+=-maltivec -DPOWER
     VECSRC=vec_fma_hp.o vec_fma_sp.o vec_fma_dp.o vec_nonfma_hp.o vec_nonfma_sp.o vec_nonfma_dp.o
     VEC=-maltivec -O0 -DPOWER
     VEC_FMA=-maltivec -O0 -DPOWER
     VEC_ALL=$(VEC) -O0 -DPOWER
 endif
-ifeq ($(ARCH),ARM)
+ifeq ($(CPU_ARCH),ARM)
     FLOP+=-march=armv8.2-a+fp16 -DARM
     VECSRC=vec_fma_hp.o vec_fma_sp.o vec_fma_dp.o vec_nonfma_hp.o vec_nonfma_sp.o vec_nonfma_dp.o
     VEC=-march=armv8.2-a+fp16 -O0 -DARM
@@ -47,8 +49,15 @@ ifeq ($(ARCH),ARM)
     VEC_ALL=$(VEC) -O0 -DARM
 endif
 
-all: branch.o d_cache eventstock.o flops i_cache instr vector
-	make cat_collect PAPIDIR=$(PAPIDIR)
+ifeq ($(GPU_ARCH),AMD)
+    GPUCC=hipcc
+    INCFLAGS+=-I$(ROCMDIR)/include
+    LDFLAGS+=-L$(ROCMDIR)/lib -lamdhip64
+    GPU_FLAGS+=$(INCFLAGS) -DGPU_AMD
+endif
+
+all: branch.o d_cache eventstock.o flops i_cache instr vector gpu_flops main
+	make cat_collect PAPIDIR=$(PAPIDIR) ROCMDIR=$(ROCMDIR)
 
 d_cache: timing_kernels.o prepareArray.o compar.o dcache.o
 
@@ -95,7 +104,7 @@ weak_symbols.o: weak_symbols.c vec.h
 	-$(CC) -c $(CFLAGS) weak_symbols.c
 
 vec.o: vec.c vec.h
-	-$(CC) -c $(CFLAGS) $(INCFLAGS) -D$(ARCH) $(VEC_META) vec.c
+	-$(CC) -c $(CFLAGS) $(INCFLAGS) -D$(CPU_ARCH) $(VEC_META) vec.c
 
 vec_scalar_verify.o: vec_scalar_verify.c vec_scalar_verify.h cat_arch.h
 	-$(CC) -c $(CFLAGS) $(INCFLAGS) $(VEC_ALL) vec_scalar_verify.c
@@ -148,12 +157,20 @@ vec_nonfma_dp: vec_nonfma_dp.c vec_scalar_verify.h
 	-$(CC) -c $(CFLAGS) $(INCFLAGS) $(VEC256) vec_nonfma_dp.c -o vec_nonfma_dp-256B.o
 	-$(CC) -c $(CFLAGS) $(INCFLAGS) $(VEC512) vec_nonfma_dp.c -o vec_nonfma_dp-512B.o
 
-cat_collect: main.c
-	$(CC) $(CFLAGS) -fopenmp $(INCFLAGS) main.c $(wildcard *.o) -o cat_collect $(LDFLAGS)
+gpu_flops: gpu_flops.c gpu_flops_kernels.cpp gpu_flops.h gpu_flops_kernels.h
+	$(GPUCC) $(GPU_FLAGS) -DCAT_GPU_PREC_DP -c gpu_flops_kernels.cpp -o gpu_flops_kernels-DP.o
+	$(GPUCC) $(GPU_FLAGS) -DCAT_GPU_PREC_SP -c gpu_flops_kernels.cpp -o gpu_flops_kernels-SP.o
+	$(GPUCC) $(GPU_FLAGS) -DCAT_GPU_PREC_HP -c gpu_flops_kernels.cpp -o gpu_flops_kernels-HP.o
+	$(CC)    $(GPU_FLAGS) -c gpu_flops.c
+
+main: main.c
+	$(CC) $(CFLAGS) -fopenmp $(INCFLAGS) -c main.c
+
+cat_collect:
+	$(CC) $(CFLAGS) -fopenmp $(INCFLAGS) $(wildcard *.o) -o cat_collect $(LDFLAGS)
 
 clean:
 	rm -f *.o
 
 realclean:
 	rm -f cat_collect *.o *.so icache_seq.c icache_seq.h icache_seq_kernel.c
-
