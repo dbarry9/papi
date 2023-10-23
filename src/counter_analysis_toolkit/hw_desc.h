@@ -17,6 +17,7 @@ typedef struct _hw_desc{
   long long icache_line_size[_MAX_SUPPORTED_CACHE_LEVELS];
   long long icache_size[_MAX_SUPPORTED_CACHE_LEVELS];
   int icache_assoc[_MAX_SUPPORTED_CACHE_LEVELS];
+  int warp_size;
 } hw_desc_t;
 
 #endif

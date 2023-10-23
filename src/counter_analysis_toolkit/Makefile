@@ -56,7 +56,7 @@ ifeq ($(GPU_ARCH),AMD)
     GPU_FLAGS+=$(INCFLAGS) -DGPU_AMD
 endif
 
-all: branch.o d_cache eventstock.o flops i_cache instr vector gpu_flops main
+all: branch.o d_cache eventstock.o flops i_cache instr vector gpu_flops gpu_mem main
 	make cat_collect PAPIDIR=$(PAPIDIR) ROCMDIR=$(ROCMDIR)
 
 d_cache: timing_kernels.o prepareArray.o compar.o dcache.o
@@ -162,6 +162,10 @@ gpu_flops: gpu_flops.c gpu_flops_kernels.cpp gpu_flops.h gpu_flops_kernels.h
 	$(GPUCC) $(GPU_FLAGS) -DCAT_GPU_PREC_SP -c gpu_flops_kernels.cpp -o gpu_flops_kernels-SP.o
 	$(GPUCC) $(GPU_FLAGS) -DCAT_GPU_PREC_HP -c gpu_flops_kernels.cpp -o gpu_flops_kernels-HP.o
 	$(CC)    $(GPU_FLAGS) -c gpu_flops.c
+
+gpu_mem: gpu_flops.c gpu_flops_kernels.cpp gpu_flops.h gpu_flops_kernels.h
+	$(GPUCC) $(GPU_FLAGS) -c gpu_mem_kernels.cpp
+	$(CC)    $(GPU_FLAGS) -c gpu_mem.c
 
 main: main.c
 	$(CC) $(CFLAGS) -fopenmp $(INCFLAGS) -c main.c

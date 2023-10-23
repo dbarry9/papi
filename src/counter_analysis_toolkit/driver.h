@@ -8,18 +8,20 @@
 #include "hw_desc.h"
 #include "params.h"
 #include "gpu_flops.h"
+#include "gpu_mem.h"
 
 #define USE_ALL_EVENTS 0x0
 #define READ_FROM_FILE 0x1
 
-#define BENCH_FLOPS        0x01
-#define BENCH_BRANCH       0x02
-#define BENCH_DCACHE_READ  0x04
-#define BENCH_DCACHE_WRITE 0x08
-#define BENCH_ICACHE_READ  0x10
-#define BENCH_VEC          0x20
-#define BENCH_INSTR        0x40
-#define BENCH_GPU_FLOPS    0x80
+#define BENCH_FLOPS        0x001
+#define BENCH_BRANCH       0x002
+#define BENCH_DCACHE_READ  0x004
+#define BENCH_DCACHE_WRITE 0x008
+#define BENCH_ICACHE_READ  0x010
+#define BENCH_VEC          0x020
+#define BENCH_INSTR        0x040
+#define BENCH_GPU_FLOPS    0x080
+#define BENCH_GPU_MEM      0x100
 
 int parseArgs(int argc, char **argv, cat_params_t *params);
 int setup_evts(char* inputfile, char*** basenames, int** cards);

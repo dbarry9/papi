@@ -324,6 +324,7 @@ static hw_desc_t *obtain_hardware_description(char *conf_file_name){
     hw_desc->mmsplit = 1;
     hw_desc->pts_per_mm = 3;
     hw_desc->maxPPB = 512;
+    hw_desc->warp_size = 1;
 
     // Obtain hardware values through PAPI_get_hardware_info().
     meminfo = PAPI_get_hardware_info();
@@ -487,6 +488,9 @@ static void read_conf_file(char *conf_file_name, hw_desc_t *hw_desc){
             hw_desc->pts_per_mm = value;
         }else if( !strcmp(key, "MAX_PPB") ){
             hw_desc->maxPPB = value;
+        // GPU attributes
+        }else if( !strcmp(key, "WARP_SIZE") ){
+            hw_desc->warp_size = value;
         }
 
         free(key);
@@ -997,6 +1001,21 @@ void testbench(char** allevts, int cmbtotal, hw_desc_t *hw_desc, cat_params_t pa
         if(params.show_progress) print_progress(100);
     }
 
+    /* Benchmark IX - GPU Memory*/
+    if( params.bench_type & BENCH_GPU_MEM )
+    {
+        if(params.show_progress) printf("GPU Memory Benchmarks: ");
+
+        for(i = low; i < cap; ++i)
+        {
+            if(params.show_progress) print_progress((100*i)/cmbtotal);
+
+            if( allevts[i] != NULL )
+                gpu_mem_driver(allevts[i], hw_desc, params.outputdir);
+        }
+        if(params.show_progress) print_progress(100);
+    }
+
     return;
 }
 
@@ -1097,6 +1116,10 @@ int parseArgs(int argc, char **argv, cat_params_t *params){
             params->bench_type |= BENCH_GPU_FLOPS;
             continue;
         }
+        if( !strcmp(argv[0],"-gpu_mem") ){
+            params->bench_type |= BENCH_GPU_MEM;
+            continue;
+        }
 
         print_usage(name);
         return -1;
@@ -1186,6 +1209,7 @@ void print_usage(char* name)
     fprintf(stdout, "  -vec              Vector FLOPs kernels.\n");
     fprintf(stdout, "  -instr            Instructions kernels.\n");
     fprintf(stdout, "  -gpu_flops        GPU FLOPs kernels.\n");
+    fprintf(stdout, "  -gpu_mem          GPU memory kernels.\n");
 
     fprintf(stdout, "\n");
     fprintf(stdout, "EXAMPLE: %s -in event_list.txt -out OUTPUT_DIRECTORY -branch -dcw\n", name);
