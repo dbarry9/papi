@@ -12,18 +12,18 @@ half test_hp_scalar_VEC_24( uint64 iterations );
 half test_hp_scalar_VEC_48( uint64 iterations );
 half test_hp_scalar_VEC_96( uint64 iterations );
 #else
-float test_hp_scalar_VEC_24( uint64 iterations );
-float test_hp_scalar_VEC_48( uint64 iterations );
-float test_hp_scalar_VEC_96( uint64 iterations );
+float test_hp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp );
+float test_hp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp );
+float test_hp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp );
 #endif
 
-float test_sp_scalar_VEC_24( uint64 iterations );
-float test_sp_scalar_VEC_48( uint64 iterations );
-float test_sp_scalar_VEC_96( uint64 iterations );
+float test_sp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp );
+float test_sp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp );
+float test_sp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp );
 
-double test_dp_scalar_VEC_24( uint64 iterations );
-double test_dp_scalar_VEC_48( uint64 iterations );
-double test_dp_scalar_VEC_96( uint64 iterations );
+double test_dp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp );
+double test_dp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp );
+double test_dp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp );
 
 // Functions to emulate FMA.
 #if defined(ARM)
@@ -31,16 +31,16 @@ half test_hp_scalar_VEC_FMA_12( uint64 iterations );
 half test_hp_scalar_VEC_FMA_24( uint64 iterations );
 half test_hp_scalar_VEC_FMA_48( uint64 iterations );
 #else
-float test_hp_scalar_VEC_FMA_12( uint64 iterations );
-float test_hp_scalar_VEC_FMA_24( uint64 iterations );
-float test_hp_scalar_VEC_FMA_48( uint64 iterations );
+float test_hp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp );
+float test_hp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp );
+float test_hp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp );
 #endif
 
-float test_sp_scalar_VEC_FMA_12( uint64 iterations );
-float test_sp_scalar_VEC_FMA_24( uint64 iterations );
-float test_sp_scalar_VEC_FMA_48( uint64 iterations );
+float test_sp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp );
+float test_sp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp );
+float test_sp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp );
 
-double test_dp_scalar_VEC_FMA_12( uint64 iterations );
-double test_dp_scalar_VEC_FMA_24( uint64 iterations );
-double test_dp_scalar_VEC_FMA_48( uint64 iterations );
+double test_dp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp );
+double test_dp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp );
+double test_dp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp );
 

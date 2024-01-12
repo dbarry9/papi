@@ -5,6 +5,7 @@
 #include <papi.h>
 #include "vec.h"
 #include "cat_arch.h"
+#include "vec_scalar_verify.h"
 
 void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
 {
@@ -43,21 +44,29 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
 #if defined(AVX128_AVAIL)
 
     // Non-FMA instruction trials.
+    /*test_hp_scalar_VEC_24( 1000, EventSet, ofp_papi );
+    test_hp_scalar_VEC_48( 1000, EventSet, ofp_papi );
+    test_hp_scalar_VEC_96( 1000, EventSet, ofp_papi );
+
     test_hp_x86_128B_VEC( 24, 1000, EventSet, ofp_papi );
     test_hp_x86_128B_VEC( 48, 1000, EventSet, ofp_papi );
-    test_hp_x86_128B_VEC( 96, 1000, EventSet, ofp_papi );
+    test_hp_x86_128B_VEC( 96, 1000, EventSet, ofp_papi );*/
 
 #if defined(AVX256_AVAIL)
-    test_hp_x86_256B_VEC( 24, 1000, EventSet, ofp_papi );
+    /*test_hp_x86_256B_VEC( 24, 1000, EventSet, ofp_papi );
     test_hp_x86_256B_VEC( 48, 1000, EventSet, ofp_papi );
-    test_hp_x86_256B_VEC( 96, 1000, EventSet, ofp_papi );
+    test_hp_x86_256B_VEC( 96, 1000, EventSet, ofp_papi );*/
 
 #if defined(AVX512_AVAIL)
-    test_hp_x86_512B_VEC( 24, 1000, EventSet, ofp_papi );
+    /*test_hp_x86_512B_VEC( 24, 1000, EventSet, ofp_papi );
     test_hp_x86_512B_VEC( 48, 1000, EventSet, ofp_papi );
-    test_hp_x86_512B_VEC( 96, 1000, EventSet, ofp_papi );
+    test_hp_x86_512B_VEC( 96, 1000, EventSet, ofp_papi );*/
 #endif
 #endif
+
+    test_sp_scalar_VEC_24( 1000, EventSet, ofp_papi );
+    test_sp_scalar_VEC_48( 1000, EventSet, ofp_papi );
+    test_sp_scalar_VEC_96( 1000, EventSet, ofp_papi );
 
     test_sp_x86_128B_VEC( 24, 1000, EventSet, ofp_papi );
     test_sp_x86_128B_VEC( 48, 1000, EventSet, ofp_papi );
@@ -74,6 +83,10 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     test_sp_x86_512B_VEC( 96, 1000, EventSet, ofp_papi );
 #endif
 #endif
+
+    test_dp_scalar_VEC_24( 1000, EventSet, ofp_papi );
+    test_dp_scalar_VEC_48( 1000, EventSet, ofp_papi );
+    test_dp_scalar_VEC_96( 1000, EventSet, ofp_papi );
 
     test_dp_x86_128B_VEC( 24, 1000, EventSet, ofp_papi );
     test_dp_x86_128B_VEC( 48, 1000, EventSet, ofp_papi );
@@ -92,21 +105,29 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
 #endif
 
     // FMA instruction trials.
+    /*test_hp_scalar_VEC_FMA_12( 1000, EventSet, ofp_papi );
+    test_hp_scalar_VEC_FMA_24( 1000, EventSet, ofp_papi );
+    test_hp_scalar_VEC_FMA_48( 1000, EventSet, ofp_papi );
+
     test_hp_x86_128B_VEC_FMA( 12, 1000, EventSet, ofp_papi );
     test_hp_x86_128B_VEC_FMA( 24, 1000, EventSet, ofp_papi );
-    test_hp_x86_128B_VEC_FMA( 48, 1000, EventSet, ofp_papi );
+    test_hp_x86_128B_VEC_FMA( 48, 1000, EventSet, ofp_papi );*/
 
 #if defined(AVX256_AVAIL)
-    test_hp_x86_256B_VEC_FMA( 12, 1000, EventSet, ofp_papi );
+    /*test_hp_x86_256B_VEC_FMA( 12, 1000, EventSet, ofp_papi );
     test_hp_x86_256B_VEC_FMA( 24, 1000, EventSet, ofp_papi );
-    test_hp_x86_256B_VEC_FMA( 48, 1000, EventSet, ofp_papi );
+    test_hp_x86_256B_VEC_FMA( 48, 1000, EventSet, ofp_papi );*/
 
 #if defined(AVX512_AVAIL)
-    test_hp_x86_512B_VEC_FMA( 12, 1000, EventSet, ofp_papi );
+    /*test_hp_x86_512B_VEC_FMA( 12, 1000, EventSet, ofp_papi );
     test_hp_x86_512B_VEC_FMA( 24, 1000, EventSet, ofp_papi );
-    test_hp_x86_512B_VEC_FMA( 48, 1000, EventSet, ofp_papi );
+    test_hp_x86_512B_VEC_FMA( 48, 1000, EventSet, ofp_papi );*/
 #endif
 #endif
+
+    test_sp_scalar_VEC_FMA_12( 1000, EventSet, ofp_papi );
+    test_sp_scalar_VEC_FMA_24( 1000, EventSet, ofp_papi );
+    test_sp_scalar_VEC_FMA_48( 1000, EventSet, ofp_papi );
 
     test_sp_x86_128B_VEC_FMA( 12, 1000, EventSet, ofp_papi );
     test_sp_x86_128B_VEC_FMA( 24, 1000, EventSet, ofp_papi );
@@ -123,6 +144,10 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     test_sp_x86_512B_VEC_FMA( 48, 1000, EventSet, ofp_papi );
 #endif
 #endif
+
+    test_dp_scalar_VEC_FMA_12( 1000, EventSet, ofp_papi );
+    test_dp_scalar_VEC_FMA_24( 1000, EventSet, ofp_papi );
+    test_dp_scalar_VEC_FMA_48( 1000, EventSet, ofp_papi );
 
     test_dp_x86_128B_VEC_FMA( 12, 1000, EventSet, ofp_papi );
     test_dp_x86_128B_VEC_FMA( 24, 1000, EventSet, ofp_papi );

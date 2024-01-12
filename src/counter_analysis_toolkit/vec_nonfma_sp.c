@@ -425,15 +425,15 @@ void test_sp_VEC( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp 
 
     if ( instr_per_loop == 24 ) {
         sum += test_sp_mac_VEC_24( iterations, EventSet, fp );
-        scalar_sum += test_sp_scalar_VEC_24( iterations );
+        scalar_sum += test_sp_scalar_VEC_24( iterations, EventSet, NULL );
     }
     else if ( instr_per_loop == 48 ) {
         sum += test_sp_mac_VEC_48( iterations, EventSet, fp );
-        scalar_sum += test_sp_scalar_VEC_48( iterations );
+        scalar_sum += test_sp_scalar_VEC_48( iterations, EventSet, NULL );
     }
     else if ( instr_per_loop == 96 ) {
         sum += test_sp_mac_VEC_96( iterations, EventSet, fp );
-        scalar_sum += test_sp_scalar_VEC_96( iterations );
+        scalar_sum += test_sp_scalar_VEC_96( iterations, EventSet, NULL );
     }
 
     if( sum/4.0 != scalar_sum ) {

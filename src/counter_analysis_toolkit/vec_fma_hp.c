@@ -388,15 +388,15 @@ void test_hp_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, FILE 
 
     if ( instr_per_loop == 12 ) {
         sum += test_hp_mac_VEC_FMA_12( iterations, EventSet, fp );
-        scalar_sum += test_hp_scalar_VEC_FMA_12( iterations );
+        scalar_sum += test_hp_scalar_VEC_FMA_12( iterations, EventSet, NULL );
     }
     else if ( instr_per_loop == 24 ) {
         sum += test_hp_mac_VEC_FMA_24( iterations, EventSet, fp );
-        scalar_sum += test_hp_scalar_VEC_FMA_24( iterations );
+        scalar_sum += test_hp_scalar_VEC_FMA_24( iterations, EventSet, NULL );
     }
     else if ( instr_per_loop == 48 ) {
         sum += test_hp_mac_VEC_FMA_48( iterations, EventSet, fp );
-        scalar_sum += test_hp_scalar_VEC_FMA_48( iterations );
+        scalar_sum += test_hp_scalar_VEC_FMA_48( iterations, EventSet, NULL );
     }
 
     if( sum/4.0 != scalar_sum ) {
