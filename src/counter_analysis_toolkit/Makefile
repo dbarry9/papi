@@ -1,16 +1,15 @@
 CPU_ARCH?=X86
 PAPIDIR?=${PAPI_DIR}
-ROCMDIR?=${HOME}/usr
 USEMPI?=false
-LDFLAGS=-L$(PAPIDIR)/lib -L$(ROCMDIR)/rocblas/lib -lpapi -lrocblas -lm -lpthread -ldl -lrt
-INCFLAGS=-I$(PAPIDIR)/include -I$(ROCMDIR)/rocblas/include
+LDFLAGS=-L$(PAPIDIR)/lib -lpapi -lm -lpthread -ldl -lrt
+INCFLAGS=-I$(PAPIDIR)/include
 CFLAGS+=-g -Wall -Wextra
 OPT0=-O0
 OPT1=-O1
 OPT2=-O2
 OPT3=-O3
 CC=gcc
-GPUCC?=nvcc
+GPUCC=gcc
 
 ## Check to see if MPI is used.
 ifeq ($(USEMPI),true)
@@ -50,10 +49,18 @@ ifeq ($(CPU_ARCH),ARM)
 endif
 
 ifeq ($(GPU_ARCH),AMD)
+    ROCMDIR?=${HOME}/usr
     GPUCC=hipcc
-    INCFLAGS+=-I$(ROCMDIR)/include
-    LDFLAGS+=-L$(ROCMDIR)/lib -lamdhip64
-    GPU_FLAGS+=$(INCFLAGS) -DGPU_AMD
+    INCFLAGS+=-I$(ROCMDIR)/include -I$(ROCMDIR)/rocblas/include
+    LDFLAGS+=-L$(ROCMDIR)/lib -L$(ROCMDIR)/rocblas/lib -lamdhip64 -lrocblas
+    GPU_FLAGS+=-DGPU_AMD
+endif
+ifeq ($(GPU_ARCH),NVIDIA)
+    CUDADIR?=${HOME}/usr
+    GPUCC=gcc
+    INCFLAGS+=-I$(CUDADIR)/include
+    LDFLAGS+=-L$(CUDADIR)/lib64 -lcudart
+    GPU_FLAGS+=-DGPU_NVIDIA
 endif
 
 all: branch.o d_cache eventstock.o flops i_cache instr vector gpu_flops gpu_mem main
@@ -158,14 +165,14 @@ vec_nonfma_dp: vec_nonfma_dp.c vec_scalar_verify.h
 	-$(CC) -c $(CFLAGS) $(INCFLAGS) $(VEC512) vec_nonfma_dp.c -o vec_nonfma_dp-512B.o
 
 gpu_flops: gpu_flops.c gpu_flops_kernels.cpp gpu_flops.h gpu_flops_kernels.h
-	$(GPUCC) $(GPU_FLAGS) -DCAT_GPU_PREC_DP -c gpu_flops_kernels.cpp -o gpu_flops_kernels-DP.o
-	$(GPUCC) $(GPU_FLAGS) -DCAT_GPU_PREC_SP -c gpu_flops_kernels.cpp -o gpu_flops_kernels-SP.o
-	$(GPUCC) $(GPU_FLAGS) -DCAT_GPU_PREC_HP -c gpu_flops_kernels.cpp -o gpu_flops_kernels-HP.o
-	$(CC)    $(GPU_FLAGS) -c gpu_flops.c
+	-$(GPUCC) $(GPU_FLAGS) $(INCFLAGS) -DCAT_GPU_PREC_DP -c gpu_flops_kernels.cpp -o gpu_flops_kernels-DP.o
+	-$(GPUCC) $(GPU_FLAGS) $(INCFLAGS) -DCAT_GPU_PREC_SP -c gpu_flops_kernels.cpp -o gpu_flops_kernels-SP.o
+	-$(GPUCC) $(GPU_FLAGS) $(INCFLAGS) -DCAT_GPU_PREC_HP -c gpu_flops_kernels.cpp -o gpu_flops_kernels-HP.o
+	$(CC)     $(GPU_FLAGS) $(INCFLAGS) -c gpu_flops.c
 
 gpu_mem: gpu_flops.c gpu_flops_kernels.cpp gpu_flops.h gpu_flops_kernels.h
-	$(GPUCC) $(GPU_FLAGS) -c gpu_mem_kernels.cpp
-	$(CC)    $(GPU_FLAGS) -c gpu_mem.c
+	-$(GPUCC) $(GPU_FLAGS) $(INCFLAGS) -c gpu_mem_kernels.cpp
+	$(CC)     $(GPU_FLAGS) $(INCFLAGS) -c gpu_mem.c
 
 main: main.c
 	$(CC) $(CFLAGS) -fopenmp $(INCFLAGS) -c main.c

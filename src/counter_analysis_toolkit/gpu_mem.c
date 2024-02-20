@@ -3,6 +3,7 @@
 #include <string.h>
 #include <papi.h>
 #include "gpu_mem.h"
+#include "gpu_mem_kernels.h"
 
 extern void gpu_mem(int EventSet, FILE *ofp_papi, unsigned int N, int tpb);
 
@@ -39,6 +40,7 @@ void gpu_mem_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir) {
         goto error1;
     }
 
+#if defined(GPU_AMD)
     /* Invoke the memory kernels. */
     for( sz = 256; sz < 4*1024*1024; sz *= 2 ) {
         gpu_mem(EventSet, ofp_papi, 1.00*sz, hw_desc->warp_size);
@@ -46,6 +48,9 @@ void gpu_mem_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir) {
         gpu_mem(EventSet, ofp_papi, 1.50*sz, hw_desc->warp_size);
         gpu_mem(EventSet, ofp_papi, 1.75*sz, hw_desc->warp_size);
     }
+#else
+    fprintf(stderr, "GPU Memory benchmark is not supported on this machine!\n");
+#endif
 
     /* Clean-up. */
     retval = PAPI_cleanup_eventset( EventSet );

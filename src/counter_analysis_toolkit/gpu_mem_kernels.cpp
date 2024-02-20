@@ -1,13 +1,22 @@
-#include <hip/hip_runtime.h>
-#include <rocblas/rocblas.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <papi.h>
+#include "gpu_mem_kernels.h"
 
 #define REPS 1024*1024
 
-__global__ void chase(unsigned long* dst, unsigned long *src, unsigned long N, unsigned int stride, int print_chain);
+#pragma weak gpu_mem
+void __attribute__((weak)) gpu_mem(int EventSet, FILE *ofp_papi, unsigned int N, int tpb) {
 
+    fprintf(stderr, "Fell back onto weak symbols for GPU Memory benchmark because it is \
+                     not supported on this architecture!\n");
+}
+
+#if defined(GPU_AMD) || defined(GPU_NVIDIA)
+__global__ void chase(unsigned long* dst, unsigned long *src, unsigned long N, unsigned int stride, int print_chain);
+#endif
+
+#if defined(GPU_AMD)
 extern "C" void gpu_mem(int EventSet, FILE *ofp_papi, unsigned int N, int tpb) {
 
     int retval, print_chain = 0;
@@ -208,3 +217,5 @@ __global__ void chase(unsigned long* dst, unsigned long *src, unsigned long N, u
     dst[1+tid] = start_time;
     dst[1+tpb+tid] = end_time;
 }
+
+#endif // End of GPU_AMD

@@ -44,6 +44,7 @@ void gpu_flops_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir) {
         goto error1;
     }
 
+#if defined(GPU_AMD)
     /* Invoke the addition kernels. */
     gpu_matrix_flop_hp(EventSet, 16, ofp_papi, ADD);
     gpu_matrix_flop_hp(EventSet, 32, ofp_papi, ADD);
@@ -123,11 +124,16 @@ void gpu_flops_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir) {
     gpu_matrix_flop_dp(EventSet, 64, ofp_papi, FMA);
 
     /* Invoke the MFMA kernels. */
-    gpu_matrix_flop_sp(EventSet, 16,  ofp_papi, MFMA1);
-    gpu_matrix_flop_dp(EventSet, 16,  ofp_papi, MFMA1);
-    gpu_matrix_flop_sp(EventSet, 16,  ofp_papi, MFMA2);
+    //gpu_matrix_flop_sp(EventSet, 16,  ofp_papi, MFMA1);
+    //gpu_matrix_flop_dp(EventSet, 16,  ofp_papi, MFMA1);
+    //gpu_matrix_flop_sp(EventSet, 16,  ofp_papi, MFMA2);
     //gpu_matrix_flop_sp(EventSet, 16,  ofp_papi, MFMA3);
     //gpu_matrix_flop_hp(EventSet, 16,  ofp_papi, MFMA4);
+
+#elif defined(GPU_NVIDIA)
+#else
+    fprintf(stderr, "GPU FLOPs benchmark is not supported on this machine!\n");
+#endif
 
     /* Clean-up. */
     retval = PAPI_cleanup_eventset( EventSet );
