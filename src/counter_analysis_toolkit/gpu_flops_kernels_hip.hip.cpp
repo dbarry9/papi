@@ -1,16 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include <papi.h>
 #include "gpu_flops_kernels.h"
+#include "gpu_flops.h"
 
-void gpu_matrix_flop(int EventSet, int N, FILE *ofp_papi, int type);
+#if defined(GPU_AMD)
 
-#pragma weak gpu_matrix_flop
-void __attribute__((weak)) gpu_matrix_flop(int EventSet, int N, FILE *ofp_papi, int type) {
-
-    fprintf(stderr, "Fell back onto weak symbols for GPU Memory benchmark because it is \
-                     not supported on this architecture!\n");
-}
+static void gpu_matrix_flop(int EventSet, int N, FILE *ofp_papi, int type);
 
 /* Wrapper functions of different precisions. */
 #if defined(CAT_GPU_PREC_DP)
@@ -21,29 +18,13 @@ void __attribute__((weak)) gpu_matrix_flop(int EventSet, int N, FILE *ofp_papi, 
     extern "C" void gpu_matrix_flop_sp(int EventSet, int N, FILE *ofp_papi, int type) {
         gpu_matrix_flop(EventSet, N, ofp_papi, type);
     }
-#else
+#elif defined(CAT_GPU_PREC_HP)
     extern "C" void gpu_matrix_flop_hp(int EventSet, int N, FILE *ofp_papi, int type) {
         gpu_matrix_flop(EventSet, N, ofp_papi, type);
     }
 #endif
 
-/* GPU kernel prototypes. */
-#if defined(GPU_AMD) || defined(GPU_NVIDIA)
-__global__ void matrix_add(CAT_GPU_PREC *A, CAT_GPU_PREC *B, CAT_GPU_PREC *C, int N);
-__global__ void matrix_sub(CAT_GPU_PREC *A, CAT_GPU_PREC *B, CAT_GPU_PREC *C, int N);
-__global__ void matrix_mul(CAT_GPU_PREC *A, CAT_GPU_PREC *B, CAT_GPU_PREC *C, int N);
-__global__ void matrix_div(CAT_GPU_PREC *A, CAT_GPU_PREC *B, CAT_GPU_PREC *C, int N);
-__global__ void matrix_sqrt(CAT_GPU_PREC *A, CAT_GPU_PREC *B, CAT_GPU_PREC *C, int N);
-__global__ void matrix_fma(CAT_GPU_PREC *A, CAT_GPU_PREC *B, CAT_GPU_PREC *C, int N);
-//__global__ void matrix_mfma1(CAT_GPU_PREC *A, CAT_GPU_PREC *B, CAT_GPU_PREC *C, CAT_GPU_PREC *D, int X, int Y);
-//__global__ void matrix_mfma2(CAT_GPU_PREC *A, CAT_GPU_PREC *B, CAT_GPU_PREC *C, CAT_GPU_PREC *D, int X, int Y);
-//__global__ void matrix_mfma3(CAT_GPU_PREC *A, CAT_GPU_PREC *B, CAT_GPU_PREC *C, CAT_GPU_PREC *D, int X, int Y);
-//__global__ void matrix_mfma4(CAT_GPU_PREC *A, CAT_GPU_PREC *B, CAT_GPU_PREC *C, CAT_GPU_PREC *D, int X, int Y);
-//__host__   void matrix_gemm(CAT_GPU_PREC *A, CAT_GPU_PREC *B, CAT_GPU_PREC *C, CAT_GPU_PREC *D, int X, int Y);
-#endif
-
-#if defined(GPU_AMD)
-void gpu_matrix_flop(int EventSet, int N, FILE *ofp_papi, int type) {
+static void gpu_matrix_flop(int EventSet, int N, FILE *ofp_papi, int type) {
 
     int i, j, X, Y, retval;
     CAT_GPU_PREC junk = 0.0;
@@ -369,7 +350,7 @@ void gpu_matrix_flop(int EventSet, int N, FILE *ofp_papi, int type) {
         fprintf(stderr, "Could not free host matrix D.\n");
         return;
     }
-    
+
     return;
 }
 

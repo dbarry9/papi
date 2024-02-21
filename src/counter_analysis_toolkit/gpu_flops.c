@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <papi.h>
+#include "cat_gpu_arch.h"
 #include "gpu_flops.h"
-#include "gpu_flops_kernels.h"
 
 extern void gpu_matrix_flop_dp(int EventSet, int N, FILE *ofp_papi, int type);
 extern void gpu_matrix_flop_sp(int EventSet, int N, FILE *ofp_papi, int type);
@@ -131,6 +131,83 @@ void gpu_flops_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir) {
     //gpu_matrix_flop_hp(EventSet, 16,  ofp_papi, MFMA4);
 
 #elif defined(GPU_NVIDIA)
+    /* Invoke the addition kernels. */
+    gpu_matrix_flop_hp(EventSet, 16, ofp_papi, ADD);
+    gpu_matrix_flop_hp(EventSet, 32, ofp_papi, ADD);
+    gpu_matrix_flop_hp(EventSet, 64, ofp_papi, ADD);
+
+    gpu_matrix_flop_sp(EventSet, 16, ofp_papi, ADD);
+    gpu_matrix_flop_sp(EventSet, 32, ofp_papi, ADD);
+    gpu_matrix_flop_sp(EventSet, 64, ofp_papi, ADD);
+
+    gpu_matrix_flop_dp(EventSet, 16, ofp_papi, ADD);
+    gpu_matrix_flop_dp(EventSet, 32, ofp_papi, ADD);
+    gpu_matrix_flop_dp(EventSet, 64, ofp_papi, ADD);
+
+    /* Invoke the subtraction kernels. */
+    gpu_matrix_flop_hp(EventSet, 16, ofp_papi, SUB);
+    gpu_matrix_flop_hp(EventSet, 32, ofp_papi, SUB);
+    gpu_matrix_flop_hp(EventSet, 64, ofp_papi, SUB);
+
+    gpu_matrix_flop_sp(EventSet, 16, ofp_papi, SUB);
+    gpu_matrix_flop_sp(EventSet, 32, ofp_papi, SUB);
+    gpu_matrix_flop_sp(EventSet, 64, ofp_papi, SUB);
+
+    gpu_matrix_flop_dp(EventSet, 16, ofp_papi, SUB);
+    gpu_matrix_flop_dp(EventSet, 32, ofp_papi, SUB);
+    gpu_matrix_flop_dp(EventSet, 64, ofp_papi, SUB);
+
+    /* Invoke the multiplication kernels. */
+    gpu_matrix_flop_hp(EventSet, 16, ofp_papi, MUL);
+    gpu_matrix_flop_hp(EventSet, 32, ofp_papi, MUL);
+    gpu_matrix_flop_hp(EventSet, 64, ofp_papi, MUL);
+
+    gpu_matrix_flop_sp(EventSet, 16, ofp_papi, MUL);
+    gpu_matrix_flop_sp(EventSet, 32, ofp_papi, MUL);
+    gpu_matrix_flop_sp(EventSet, 64, ofp_papi, MUL);
+
+    gpu_matrix_flop_dp(EventSet, 16, ofp_papi, MUL);
+    gpu_matrix_flop_dp(EventSet, 32, ofp_papi, MUL);
+    gpu_matrix_flop_dp(EventSet, 64, ofp_papi, MUL);
+
+    /* Invoke the division kernels. */
+    gpu_matrix_flop_hp(EventSet, 16, ofp_papi, DIV);
+    gpu_matrix_flop_hp(EventSet, 32, ofp_papi, DIV);
+    gpu_matrix_flop_hp(EventSet, 64, ofp_papi, DIV);
+
+    gpu_matrix_flop_sp(EventSet, 16, ofp_papi, DIV);
+    gpu_matrix_flop_sp(EventSet, 32, ofp_papi, DIV);
+    gpu_matrix_flop_sp(EventSet, 64, ofp_papi, DIV);
+
+    gpu_matrix_flop_dp(EventSet, 16, ofp_papi, DIV);
+    gpu_matrix_flop_dp(EventSet, 32, ofp_papi, DIV);
+    gpu_matrix_flop_dp(EventSet, 64, ofp_papi, DIV);
+
+    /* Invoke the SQRT kernels. */
+    gpu_matrix_flop_hp(EventSet, 16, ofp_papi, SQRT);
+    gpu_matrix_flop_hp(EventSet, 32, ofp_papi, SQRT);
+    gpu_matrix_flop_hp(EventSet, 64, ofp_papi, SQRT);
+
+    gpu_matrix_flop_sp(EventSet, 16, ofp_papi, SQRT);
+    gpu_matrix_flop_sp(EventSet, 32, ofp_papi, SQRT);
+    gpu_matrix_flop_sp(EventSet, 64, ofp_papi, SQRT);
+
+    gpu_matrix_flop_dp(EventSet, 16, ofp_papi, SQRT);
+    gpu_matrix_flop_dp(EventSet, 32, ofp_papi, SQRT);
+    gpu_matrix_flop_dp(EventSet, 64, ofp_papi, SQRT);
+
+    /* Invoke the FMA kernels. */
+    gpu_matrix_flop_hp(EventSet, 16, ofp_papi, FMA);
+    gpu_matrix_flop_hp(EventSet, 32, ofp_papi, FMA);
+    gpu_matrix_flop_hp(EventSet, 64, ofp_papi, FMA);
+
+    gpu_matrix_flop_sp(EventSet, 16, ofp_papi, FMA);
+    gpu_matrix_flop_sp(EventSet, 32, ofp_papi, FMA);
+    gpu_matrix_flop_sp(EventSet, 64, ofp_papi, FMA);
+
+    gpu_matrix_flop_dp(EventSet, 16, ofp_papi, FMA);
+    gpu_matrix_flop_dp(EventSet, 32, ofp_papi, FMA);
+    gpu_matrix_flop_dp(EventSet, 64, ofp_papi, FMA);
 #else
     fprintf(stderr, "GPU FLOPs benchmark is not supported on this machine!\n");
 #endif

@@ -1002,7 +1002,7 @@ void testbench(char** allevts, int cmbtotal, hw_desc_t *hw_desc, cat_params_t pa
     }
 
     /* Benchmark IX - GPU Memory*/
-    if( params.bench_type & BENCH_GPU_MEM )
+    /*if( params.bench_type & BENCH_GPU_MEM )
     {
         if(params.show_progress) printf("GPU Memory Benchmarks: ");
 
@@ -1014,7 +1014,7 @@ void testbench(char** allevts, int cmbtotal, hw_desc_t *hw_desc, cat_params_t pa
                 gpu_mem_driver(allevts[i], hw_desc, params.outputdir);
         }
         if(params.show_progress) print_progress(100);
-    }
+    }*/
 
     return;
 }
