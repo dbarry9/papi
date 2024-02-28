@@ -1,8 +1,8 @@
 #define ADD 0
-#define SUB 1
-#define MUL 2
-#define DIV 3
-#define SQRT 4
+#define MUL 1
+#define DIV 2
+#define SQRT 3
+#define SUB 4
 #define FMA 5
 #define MFMA1 6
 #define MFMA2 7
