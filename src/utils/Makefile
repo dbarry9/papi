@@ -53,7 +53,7 @@ papi_hardware_avail: papi_hardware_avail.o $(PAPILIB) print_header.o
 	$(CC) -o papi_hardware_avail papi_hardware_avail.o $(PAPILIB) print_header.o $(LDFLAGS)
 
 papi_native_avail: papi_native_avail.c $(PAPILIB) print_header.o
-	$(CC) $(CFLAGS) $(OPTFLAGS) $(INCLUDE) -o papi_native_avail papi_native_avail.c $(PAPILIB) print_header.o $(LDFLAGS) $(LIBSDEFLAGS)
+	$(MPICC) $(CFLAGS) $(OPTFLAGS) $(INCLUDE) -o papi_native_avail papi_native_avail.c $(PAPILIB) print_header.o $(LDFLAGS) $(LIBSDEFLAGS)
 
 papi_version: papi_version.o $(PAPILIB)
 	$(CC) -o papi_version papi_version.o $(PAPILIB) $(LDFLAGS)

@@ -50,6 +50,8 @@
 #include <unistd.h>
 #include <dlfcn.h>
 
+#include <mpi.h>
+
 #include "papi.h"
 #include "print_header.h"
 #if SDE
@@ -417,6 +419,13 @@ main( int argc, char **argv )
 	int enum_modifier;
 	int numcmp, cid;
 
+    int nprocs = 1, myid = 0;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+
+    if( 0 == myid ) {
+
 	/* Initialize before parsing the input arguments */
 	retval = PAPI_library_init( PAPI_VER_CURRENT );
 	if ( retval != PAPI_VER_CURRENT ) {
@@ -711,6 +720,10 @@ no_sdes:
 		printf("\n");
 	}
 
+    } // End of main rank.
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Finalize();
 
 	return 0;
 }
