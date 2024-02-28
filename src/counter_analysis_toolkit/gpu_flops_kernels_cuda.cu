@@ -43,34 +43,34 @@ static void gpu_matrix_flop(int EventSet, int N, FILE *ofp_papi, int type) {
     smallProbSize = X*Y*sizeof(CAT_GPU_PREC);
 
     /* Allocate host arrays. */
-    status = cudaMallocHost((void**)&hostA, sizeof(CAT_GPU_PREC)*smallProbSize);
+    status = cudaMallocHost((void**)&hostA, smallProbSize);
     if( cudaSuccess != status ) {
         fprintf(stderr, "Could not allocate host matrix A.\n");
         return;
     }
-    status = cudaMallocHost((void**)&hostB, sizeof(CAT_GPU_PREC)*smallProbSize);
+    status = cudaMallocHost((void**)&hostB, smallProbSize);
     if( cudaSuccess != status ) {
         fprintf(stderr, "Could not allocate host matrix B.\n");
         return;
     }
-    status = cudaMallocHost((void**)&hostC, sizeof(CAT_GPU_PREC)*smallProbSize);
+    status = cudaMallocHost((void**)&hostC, smallProbSize);
     if( cudaSuccess != status ) {
         fprintf(stderr, "Could not allocate host matrix C.\n");
         return;
     }
 
     /* Allocate device arrays. */
-    status = cudaMalloc((void**)&devA, sizeof(CAT_GPU_PREC)*smallProbSize);
+    status = cudaMalloc((void**)&devA, smallProbSize);
     if( cudaSuccess != status ) {
         fprintf(stderr, "Could not allocate device matrix A.\n");
         return;
     }
-    status = cudaMalloc((void**)&devB, sizeof(CAT_GPU_PREC)*smallProbSize);
+    status = cudaMalloc((void**)&devB, smallProbSize);
     if( cudaSuccess != status ) {
         fprintf(stderr, "Could not allocate device matrix B.\n");
         return;
     }
-    status = cudaMalloc((void**)&devC, sizeof(CAT_GPU_PREC)*smallProbSize);
+    status = cudaMalloc((void**)&devC, smallProbSize);
     if( cudaSuccess != status ) {
         fprintf(stderr, "Could not allocate device matrix C.\n");
         return;
@@ -93,17 +93,17 @@ static void gpu_matrix_flop(int EventSet, int N, FILE *ofp_papi, int type) {
     }
 
     /* Copy host data to device. */
-    status = cudaMemcpy(devA, hostA, sizeof(CAT_GPU_PREC)*smallProbSize, cudaMemcpyHostToDevice);
+    status = cudaMemcpy(devA, hostA, smallProbSize, cudaMemcpyHostToDevice);
     if( cudaSuccess != status ) {
         fprintf(stderr, "Could not copy matrix A to device.\n");
         return;
     }
-    status = cudaMemcpy(devB, hostB, sizeof(CAT_GPU_PREC)*smallProbSize, cudaMemcpyHostToDevice);
+    status = cudaMemcpy(devB, hostB, smallProbSize, cudaMemcpyHostToDevice);
     if( cudaSuccess != status ) {
         fprintf(stderr, "Could not copy matrix B to device.\n");
         return;
     }
-    status = cudaMemcpy(devC, hostC, sizeof(CAT_GPU_PREC)*smallProbSize, cudaMemcpyHostToDevice);
+    status = cudaMemcpy(devC, hostC, smallProbSize, cudaMemcpyHostToDevice);
     if( cudaSuccess != status ) {
         fprintf(stderr, "Could not copy matrix C to device.\n");
         return;
@@ -159,7 +159,7 @@ static void gpu_matrix_flop(int EventSet, int N, FILE *ofp_papi, int type) {
     fprintf(ofp_papi, "%lld\n", values);
 
     /* Copy device data to host. */
-    status = cudaMemcpy(hostC, devC, sizeof(CAT_GPU_PREC)*smallProbSize, cudaMemcpyDeviceToHost);
+    status = cudaMemcpy(hostC, devC, smallProbSize, cudaMemcpyDeviceToHost);
     if( cudaSuccess != status ) {
         fprintf(stderr, "Could not copy matrix C from device.\n");
         return;
