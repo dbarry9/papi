@@ -127,7 +127,8 @@ static void gpu_matrix_flop(int EventSet, FILE *ofp_papi) {
             int type = types[typeIdx];
 
             /* Device configuration. */
-            dim3 threads_per_block( 1, 1, 1 );
+            //dim3 threads_per_block( 1, 1, 1 );
+            dim3 threads_per_block( N, N, 1 );
             dim3 blocks_in_grid( ceil( float(N) / threads_per_block.x ), ceil( float(N) / threads_per_block.y ), 1 );
 
             /* Start PAPI counters. */
