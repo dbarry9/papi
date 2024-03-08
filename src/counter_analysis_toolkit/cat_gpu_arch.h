@@ -63,14 +63,24 @@
 
 #if defined(CAT_GPU_PREC_DP)
     typedef double CAT_GPU_PREC;
-    #define ADD_INTRIN(_I_, _J_) __hadd(_I_, _J_)
-    #define SUB_INTRIN(_I_, _J_) __hsub(_I_, _J_)
-    #define MUL_INTRIN(_I_, _J_) __hmul(_I_, _J_)
-    #define DIV_INTRIN(_I_, _J_) __hdiv(_I_, _J_)
-    #define SQRT_INTRIN(_I_) hsqrt(_I_)
-    #define FMA_INTRIN(_I_, _J_, _K_) __hfma(_I_, _J_, _K_)
+    #define ADD_ASM "add.rn.f64 %0, %1, %2 ;"
+    #define SUB_ASM "sub.rn.f64 %0, %1, %2 ;"
+    #define MUL_ASM "mul.rn.f64 %0, %1, %2 ;"
+    #define FMA_ASM "fma.rn.f64 %0, %1, %2 ;"
+    #define CONST "d"
+    #define EQ_CONST "=d"
+    #define ADD_INTRIN(_I_, _J_) __dadd_rn(_I_, _J_)
+    #define SUB_INTRIN(_I_, _J_) __dsub_rn(_I_, _J_)
+    #define MUL_INTRIN(_I_, _J_) __dmul_rn(_I_, _J_)
+    #define DIV_INTRIN(_I_, _J_) __ddiv_rn(_I_, _J_)
+    #define SQRT_INTRIN(_I_) __dsqrt_rn(_I_)
+    #define FMA_INTRIN(_I_, _J_, _K_) __fma_rn(_I_, _J_, _K_)
 #elif defined(CAT_GPU_PREC_SP)
     typedef float CAT_GPU_PREC;
+    #define ADD_ASM "add.rn.f32 %0, %1, %2 ;"
+    #define SUB_ASM "sub.rn.f32 %0, %1, %2 ;"
+    #define CONST "f"
+    #define EQ_CONST "=f"
     #define ADD_INTRIN(_I_, _J_) __fadd_rn(_I_, _J_)
     #define SUB_INTRIN(_I_, _J_) __fsub_rn(_I_, _J_)
     #define MUL_INTRIN(_I_, _J_) __fmul_rn(_I_, _J_)
@@ -79,11 +89,15 @@
     #define FMA_INTRIN(_I_, _J_, _K_) __fmaf_rn(_I_, _J_, _K_)
 #elif defined(CAT_GPU_PREC_HP)
     typedef half CAT_GPU_PREC;
-    #define ADD_INTRIN(_I_, _J_) __dadd_rn(_I_, _J_)
-    #define SUB_INTRIN(_I_, _J_) __dsub_rn(_I_, _J_)
-    #define MUL_INTRIN(_I_, _J_) __dmul_rn(_I_, _J_)
-    #define DIV_INTRIN(_I_, _J_) __ddiv_rn(_I_, _J_)
-    #define SQRT_INTRIN(_I_) __dsqrt_rn(_I_)
-    #define FMA_INTRIN(_I_, _J_, _K_) __fma_rn(_I_, _J_, _K_)
+    #define ADD_ASM "add.rn.f16 %0, %1, %2 ;"
+    #define SUB_ASM "sub.rn.f16 %0, %1, %2 ;"
+    #define CONST "h"
+    #define EQ_CONST "=h"
+    #define ADD_INTRIN(_I_, _J_) __hadd(_I_, _J_)
+    #define SUB_INTRIN(_I_, _J_) __hsub(_I_, _J_)
+    #define MUL_INTRIN(_I_, _J_) __hmul(_I_, _J_)
+    #define DIV_INTRIN(_I_, _J_) __hdiv(_I_, _J_)
+    #define SQRT_INTRIN(_I_) hsqrt(_I_)
+    #define FMA_INTRIN(_I_, _J_, _K_) __hfma(_I_, _J_, _K_)
 #endif
 #endif // End of GPU_NVIDIA

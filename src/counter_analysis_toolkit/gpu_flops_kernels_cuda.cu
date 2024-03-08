@@ -8,7 +8,8 @@
 #if defined(GPU_NVIDIA)
 
 #define NUM_SIZES 3
-#define NUM_TYPES 6
+//#define NUM_TYPES 6
+#define NUM_TYPES 4
 #define MAX_SIZE  64
 
 static void gpu_matrix_flop(int EventSet, FILE *ofp_papi);
@@ -34,23 +35,27 @@ static void gpu_matrix_flop(int EventSet, FILE *ofp_papi) {
     CAT_GPU_PREC junk = 0.0;
     long long values = 0;
     size_t maxSize;
-    size_t sizes[NUM_SIZES];
     int sizeIdx, typeIdx;
-    int types[NUM_TYPES];
     cudaError_t status;
 
     CAT_GPU_PREC  *hostA,  *hostB,  *hostC;
     CAT_GPU_PREC   *devA,   *devB,   *devC;
 
     /* Create a list of types. */
+    int types[NUM_TYPES];
     types[0] = ADD;
     types[1] = MUL;
+    types[2] = SUB;
+    types[3] = FMA;
+    /*
     types[2] = DIV;
     types[3] = SQRT;
     types[4] = SUB;
     types[5] = FMA;
+    */
 
     /* Create a list of sizes. */
+    size_t sizes[NUM_SIZES];
     sizes[0] = 16;
     sizes[1] = 32;
     sizes[2] = 64;
@@ -118,24 +123,35 @@ static void gpu_matrix_flop(int EventSet, FILE *ofp_papi) {
         return;
     }
 
-    /* Loop through the kernels. */
-    for(typeIdx = 0; typeIdx < NUM_TYPES; ++typeIdx) {
-
-        for(sizeIdx = 0; sizeIdx < NUM_SIZES; ++sizeIdx) {
-
-            size_t N = sizes[sizeIdx];
-            int type = types[typeIdx];
-
-            /* Device configuration. */
-            //dim3 threads_per_block( 1, 1, 1 );
-            dim3 threads_per_block( N, N, 1 );
-            dim3 blocks_in_grid( ceil( float(N) / threads_per_block.x ), ceil( float(N) / threads_per_block.y ), 1 );
-
             /* Start PAPI counters. */
             if( (retval = PAPI_start( EventSet )) != PAPI_OK ) {
                 fprintf(stderr, "GPU FLOPs Benchmark: PAPI_start() returned error code %d\n", retval);
                 return;
             }
+
+    /* Loop through the kernels. */
+    for(typeIdx = 0; typeIdx < NUM_TYPES; ++typeIdx) {
+
+        for(sizeIdx = 0; sizeIdx < 1/*NUM_SIZES*/; ++sizeIdx) {
+
+            size_t N = sizes[sizeIdx];
+            int type = types[typeIdx];
+
+            /* Device configuration. */
+            dim3 threads_per_block( 1, 1, 1 );
+            //dim3 threads_per_block( N, N, 1 );
+            dim3 blocks_in_grid( ceil( float(N) / threads_per_block.x ), ceil( float(N) / threads_per_block.y ), 1 );
+
+            /* Reset PAPI counters. */
+            if( (retval = PAPI_reset( EventSet )) != PAPI_OK ) {
+                fprintf(stderr, "GPU FLOPs Benchmark: PAPI_reset() returned error code %d\n", retval);
+                return;
+            }
+            /* Start PAPI counters. */
+            /*if( (retval = PAPI_start( EventSet )) != PAPI_OK ) {
+                fprintf(stderr, "GPU FLOPs Benchmark: PAPI_start() returned error code %d\n", retval);
+                return;
+            }*/
 
             /* Various floating-point operation kernels. */
             switch(type) {
@@ -145,12 +161,12 @@ static void gpu_matrix_flop(int EventSet, FILE *ofp_papi) {
               case MUL:
                 matrix_mul<<<blocks_in_grid, threads_per_block>>>(devA, devB, devC, N);
                 break;
-              case DIV:
-                matrix_div<<<blocks_in_grid, threads_per_block>>>(devA, devB, devC, N);
-                break;
-              case SQRT:
-                matrix_sqrt<<<blocks_in_grid, threads_per_block>>>(devA, devB, devC, N);
-                break;
+              //case DIV:
+              //  matrix_div<<<blocks_in_grid, threads_per_block>>>(devA, devB, devC, N);
+              //  break;
+              //case SQRT:
+              //  matrix_sqrt<<<blocks_in_grid, threads_per_block>>>(devA, devB, devC, N);
+              //  break;
               case SUB:
                 matrix_sub<<<blocks_in_grid, threads_per_block>>>(devA, devB, devC, N);
                 break;
@@ -164,24 +180,35 @@ static void gpu_matrix_flop(int EventSet, FILE *ofp_papi) {
             /* Error checking -- consider calling cudaGetLastError() after PAPI_stop(). */
             /*status = cudaGetLastError();
             if( cudaSuccess != status ) {
-                fprintf(stderr, "Error 1.\n");
+                fprintf(stderr, "Error launching kernel.\n");
                 return;
             }*/
-            status = cudaDeviceSynchronize();
+            /*status = cudaDeviceSynchronize();
             if( cudaSuccess != status ) {
-                fprintf(stderr, "Error 2.\n");
+                fprintf(stderr, "Error synchronizing.\n");
+                return;
+            }*/
+
+            /* Read PAPI counters. */
+            if( (retval = PAPI_read(EventSet, &values)) != PAPI_OK ) {
+                fprintf(stderr, "GPU FLOPs Benchmark: PAPI_read() returned error code %d\n", retval);
                 return;
             }
+            /* Stop PAPI counters. */
+            /*if( (retval = PAPI_stop(EventSet, &values)) != PAPI_OK ) {
+                fprintf(stderr, "GPU FLOPs Benchmark: PAPI_stop() returned error code %d\n", retval);
+                return;
+            }*/
+            fprintf(ofp_papi, "%lld\n", values);
+
+        }
+    }
 
             /* Stop PAPI counters. */
             if( (retval = PAPI_stop(EventSet, &values)) != PAPI_OK ) {
                 fprintf(stderr, "GPU FLOPs Benchmark: PAPI_stop() returned error code %d\n", retval);
                 return;
             }
-            fprintf(ofp_papi, "%lld\n", values);
-
-        }
-    }
 
     /* Copy device data to host. */
     status = cudaMemcpy(hostC, devC, maxSize, cudaMemcpyDeviceToHost);
@@ -193,7 +220,7 @@ static void gpu_matrix_flop(int EventSet, FILE *ofp_papi) {
     /* Use the result from the kernels to prevent compiler optimizing it away. */
     junk = ((CAT_GPU_PREC)1.23+hostC[MAX_SIZE*MAX_SIZE/2])/((CAT_GPU_PREC)1.45+hostC[4*MAX_SIZE*MAX_SIZE/5]*hostC[MAX_SIZE*MAX_SIZE-1]);
     if( junk > (CAT_GPU_PREC)1.23 && junk < (CAT_GPU_PREC)1.2345 )
-        fprintf(stdout, "Benchmark artifact (%f) -- ignore.\n", (float)junk);
+        fprintf(stderr, "Benchmark artifact (%f) -- ignore.\n", (float)junk);
 
     /* Free device memory. */
     status = cudaFree(devA);

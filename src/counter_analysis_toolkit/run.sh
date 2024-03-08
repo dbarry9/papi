@@ -17,6 +17,9 @@ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${PAPIDIR}/lib
 OUTPUT=${HOME}/src/papi/src/counter_analysis_toolkit/output
 mkdir -p ${OUTPUT}
 
+#${PAPIDIR}/bin/papi_command_line "cuda:::ctc__rx_bytes_data_user:device=0"
+#exit
+
 #./cat_collect -in ./arm_flops.txt -out ${OUTPUT}/ -vec -flops
 #for iter in {1..5}
 #do
@@ -25,5 +28,12 @@ mkdir -p ${OUTPUT}
 #    ./cat_collect -in ./wholelist.txt -out ${MYDIR}/ -branch
 #done
 
-mkdir -p ${OUTPUT}/cat
-./cat_collect -in cuda.txt -out ${OUTPUT}/cat/ -gpu_flops
+#for rep in {1..1}
+#for rep in {2..2}
+#for rep in {3..3}
+#for rep in {4..4}
+for rep in {5..5}
+do
+    mkdir -p ${OUTPUT}/cat/${rep}
+    ./cat_collect -in cuda.txt -out ${OUTPUT}/cat/${rep}/ -gpu_flops
+done
