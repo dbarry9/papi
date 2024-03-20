@@ -2265,6 +2265,7 @@ PRESET,PAPI_TLB_DM,NOT_DERIVED,L2D_TLB_REFILL
 #########################
 CPU,arm_v2
 #
+PRESET,PAPI_GPU_HP_FMA,NOT_DERIVED,cuda:::sm__sass_thread_inst_executed_op_hfma_pred_on.sum:device=0
 PRESET,PAPI_TOT_INS,NOT_DERIVED,INST_RETIRED
 PRESET,PAPI_INT_INS,NOT_DERIVED,DP_SPEC
 #NOT_IMPLEMENTED,PAPI_TOT_IIS,Instructions issued

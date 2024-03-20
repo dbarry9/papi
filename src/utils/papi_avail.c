@@ -284,6 +284,7 @@ int is_preset_event_available(char *name) {
       if ( info.count ) {
 	if ( (check_counter && checkCounter (event_code)) || !check_counter) {
 	  if (strcmp(info.symbol, name) == 0)
+        fprintf(stderr, "Error for %s\n", name);
 	    return 1;
 	}
       }
@@ -395,6 +396,7 @@ main( int argc, char **argv )
       if ( print_event_info ) {
 
 	 if ( PAPI_event_name_to_code( name, &event_code ) == PAPI_OK ) {
+        fprintf(stderr, "Succeeded converting event % to code.\n", name);
 	    if ( PAPI_get_event_info( event_code, &info ) == PAPI_OK ) {
 
 	       if ( event_code & PAPI_PRESET_MASK ) {
@@ -531,7 +533,7 @@ main( int argc, char **argv )
 			printf( "%-13s%#x  %-6s%-4s %s",
 				info.symbol,
 				info.event_code,
-				( info.count ? "Yes" : "No" ),
+				( info.count ? "Yes" : "No" ), // this is the flag
 				is_derived( &info ), info.long_descr );
 			if ( info.note[0] ) {
 			   printf( " (%s)", info.note );

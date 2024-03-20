@@ -32,6 +32,7 @@ typedef struct hwi_presets {
    unsigned int code[PAPI_MAX_INFO_TERMS];
    char *name[PAPI_MAX_INFO_TERMS];
    char *note;
+   int compIdx;
 } hwi_presets_t;
 
 

@@ -524,11 +524,15 @@ _papi_hwi_component_index( int event_code ) {
 
   int cidx;
   int event_index;
+  unsigned int preset_index = ( event_code & PAPI_PRESET_AND_MASK );
+
 
   /* currently assume presets are for component 0 only */
   if (IS_PRESET(event_code)) {
+     //fprintf(stderr, "EXIT: Event %#x is a PRESET, assigning component %d\n", event_code,0);
+     fprintf(stderr, "INFO: Event %#x is a PRESET, assigning true component %d\n", event_code, _papi_hwi_presets[preset_index].compIdx);
      INTDBG("EXIT: Event %#x is a PRESET, assigning component %d\n", event_code,0);
-     return 0;
+     return _papi_hwi_presets[preset_index].compIdx;
   }
 
   /* user defined events are treated like preset events (component 0 only) */
@@ -2315,6 +2319,8 @@ _papi_hwi_get_preset_event_info( int EventCode, PAPI_event_info_t * info )
 
 	   info->event_type = _papi_hwi_presets[i].event_type;
 	   info->count = _papi_hwi_presets[i].count;
+       fprintf(stderr, "symbol = %s has count = %d\n", _papi_hwi_presets[i].symbol, (int)_papi_hwi_presets[i].count);
+
 
 	   _papi_hwi_derived_string( _papi_hwi_presets[i].derived_int,
 				     info->derived,  sizeof ( info->derived )-1 );

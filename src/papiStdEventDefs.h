@@ -164,6 +164,7 @@ enum
 	PAPI_VEC_SP_idx,		 /* Single precision vector/SIMD instructions */
 	PAPI_VEC_DP_idx,		 /* Double precision vector/SIMD instructions */
 	PAPI_REF_CYC_idx,		 /* Reference clock cycles */
+    PAPI_GPU_HP_FMA_idx,     /* GPU HP FMAs */
 	PAPI_END_idx			 /*This should always be last! */
 };
 
@@ -275,6 +276,7 @@ enum
 #define PAPI_VEC_SP  (PAPI_VEC_SP_idx  | PAPI_PRESET_MASK)	/* Single precision vector/SIMD instructions */
 #define PAPI_VEC_DP  (PAPI_VEC_DP_idx  | PAPI_PRESET_MASK)	/* Double precision vector/SIMD instructions */
 #define PAPI_REF_CYC (PAPI_REF_CYC_idx  | PAPI_PRESET_MASK)	/* Reference clock cycles */
+#define PAPI_GPU_HP_FMA (PAPI_GPU_HP_FMA_idx  | PAPI_PRESET_MASK)	/* HP GPU FMAs */
 
 #define PAPI_END     (PAPI_END_idx  | PAPI_PRESET_MASK)	/*This should always be last! */
 

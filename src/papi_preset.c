@@ -55,6 +55,7 @@ _papi_hwi_setup_all_presets( hwi_search_t * findem, int cidx )
 			  ( findem[pnum].event_code != 0 ); pnum++ ) {
 	   /* find the index for the event to be initialized */
 	   preset_index = ( findem[pnum].event_code & PAPI_PRESET_AND_MASK );
+        fprintf(stderr, "\n", preset_index);
 	   /* count and set the number of native terms in this event, 
               these items are contiguous.
 
@@ -71,6 +72,8 @@ _papi_hwi_setup_all_presets( hwi_search_t * findem, int cidx )
 	      By definition, this value can never == PAPI_NULL.
 	      - dkt */
 
+	   fprintf(stderr, "Counting number of terms for preset index %d, "
+                   "search map index %d.\n", preset_index, pnum );
 	   INTDBG( "Counting number of terms for preset index %d, "
                    "search map index %d.\n", preset_index, pnum );
 	   i = 0;
@@ -86,7 +89,12 @@ _papi_hwi_setup_all_presets( hwi_search_t * findem, int cidx )
 	   }
 
 	   INTDBG( "This preset has %d terms.\n", j );
+	   fprintf(stderr, "This preset %#x has %d terms.\n", findem[pnum].event_code, j );
 	   _papi_hwi_presets[preset_index].count = j;
+
+       // Set the component index to that of the first native event used to define it.
+       // Make sure we later check that all native events in a preset come from same comp.
+	   _papi_hwi_presets[preset_index].compIdx = _papi_hwi_component_index(findem[pnum].native[0]);
  
            _papi_hwi_presets[preset_index].derived_int = findem[pnum].derived;
 	   for(k=0;k<j;k++) {
@@ -720,10 +728,11 @@ check_native_events(char *target, hwi_presets_t* results)
 
 	// if this native event is not for component 0, return to show it can not be used in derived events
 	// it should be possible to create derived events for other components as long as all events in the derived event are associated with the same component
-	if ( _papi_hwi_component_index(results->code[results->count]) != 0 ) {
+	/*if ( _papi_hwi_component_index(results->code[results->count]) != 0 ) {
+		fprintf(stderr, "EXIT: returned: 0, new event not associated with component 0 (current limitation with derived events)\n");
 		INTDBG( "EXIT: returned: 0, new event not associated with component 0 (current limitation with derived events)\n");
 		return 0;
-	}
+	}*/
 
 	//	  found = 1;
 	INTDBG("\tFound a native event %s\n", target);
@@ -946,6 +955,7 @@ infix_to_postfix( char *infix ) {
 static int
 papi_load_derived_events (char *pmu_str, int pmu_type, int cidx, int preset_flag) {
 	SUBDBG( "ENTER: pmu_str: %s, pmu_type: %d, cidx: %d, preset_flag: %d\n", pmu_str, pmu_type, cidx, preset_flag);
+	fprintf(stderr, "ENTER: pmu_str: %s, pmu_type: %d, cidx: %d, preset_flag: %d\n", pmu_str, pmu_type, cidx, preset_flag);
 
 	char pmu_name[PAPI_MIN_STR_LEN];
 	char line[LINE_MAX];
@@ -1106,6 +1116,9 @@ papi_load_derived_events (char *pmu_str, int pmu_type, int cidx, int preset_flag
 			(void) preset;
 
 			SUBDBG( "Use event code: %#x for %s\n", preset, t);
+			fprintf(stderr, "Use event code: %#x for %s\n", preset, t);
+            unsigned int preset_index = ( preset & PAPI_PRESET_AND_MASK );
+	        _papi_hwi_presets[preset_index].compIdx = cidx;
 
 			t = trim_string(strtok_r(NULL, ",", &tok_save_ptr));
 			if ((t == NULL) || (strlen(t) == 0)) {

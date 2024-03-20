@@ -1295,6 +1295,8 @@ _pe_libpfm4_init(papi_vector_t *component, int cidx,
 	if ((cidx==0) && (found_default)) {
 		retval = _papi_load_preset_table( (char *)event_table->default_pmu.name,
 				event_table->default_pmu.pmu, cidx );
+		retval += _papi_load_preset_table( (char *)event_table->default_pmu.name,
+				event_table->default_pmu.pmu, 2 );
 		if ( retval!=PAPI_OK ) {
 			return PAPI_ENOEVNT;
 		}
