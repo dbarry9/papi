@@ -61,6 +61,7 @@ void d_cache_driver(char* papi_event_name, cat_params_t params, hw_desc_t *hw_de
 
     // Print meta-data about this run in the first few lines of the output file.
     print_header(ofp_papi, hw_desc);
+    print_header(stderr, hw_desc);
 
     // Go through each parameter variant.
     for(pattern = 3; pattern <= 4; ++pattern)
