@@ -1,0 +1,4 @@
+amd64_fam1ah_zen5_l3::UNC_L3_REQUESTS:L3_MISS:cpu=0 0
+amd64_fam1ah_zen5_l3::UNC_L3_REQUESTS:L3_HIT:cpu=0 0
+amd64_fam1ah_zen5_l3::UNC_L3_REQUESTS:ALL:cpu=0 0
+amd64_fam1ah_zen5_l3::UNC_L3_REQUESTS:cpu=0 0

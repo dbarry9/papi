@@ -6,7 +6,7 @@
 #include "hw_desc.h"
 #include "params.h"
 
-#define FACTOR 12LL
+#define FACTOR 16LL
 
 int varyBufferSizes(long long *values, double **rslts, double **counter, cat_params_t params, hw_desc_t *hw_desc, long long line_size_in_bytes, float pages_per_block, int pattern, int latency_only, int mode, int ONT);
 int get_thread_count();
