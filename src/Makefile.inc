@@ -292,7 +292,7 @@ clobber distclean: clean native_clobber
 	$(MAKE) -C utils distclean
 	$(MAKE) -C validation_tests distclean
 	$(MAKE) -C components -f Makefile_comp_tests distclean
-	rm -f $(LIBRARY) $(SHLIB) $(EXTRALIBS) Makefile config.h libpapi.so sde_lib/libsde.so* sde_lib/libsde.a libsde.so libsde.a papi.pc components_config.h $(PAPI_EVENTS_TABLE)
+	rm -f $(LIBRARY) $(SHLIB) $(EXTRALIBS) Makefile config.h libpapi.so sde_lib/libsde.so* sde_lib/libsde.a libsde.so libsde.a papi.pc components_config.h papiStdEventDefs.h $(PAPI_EVENTS_TABLE)
 	rm -f config.log config.status f77papi.h f90papi.h fpapi.h
 
 null:
