@@ -135,12 +135,11 @@ int main(int argc, char*argv[])
     hw_desc_t *hw_desc = obtain_hardware_description(conf_file_name);
 
     /* Set the default number of threads to the OMP_NUM_THREADS environment
-     * variable if it is defined. Otherwise, set it to the number of CPUs
-     * in a single socket. */
-    int numSetThreads = 1;
+     * variable if it is defined. Otherwise, set it to 1. */
+    int numSetThreads = 0;
     char* envVarDefined = getenv("OMP_NUM_THREADS");
     if (NULL == envVarDefined) {
-        omp_set_num_threads(hw_desc->numcpus);
+        omp_set_num_threads(1);
 
         #pragma omp parallel default(shared)
         {
@@ -149,8 +148,8 @@ int main(int argc, char*argv[])
             }
         }
 
-        if (numSetThreads != hw_desc->numcpus) {
-            fprintf(stderr, "Warning! Failed to set default number of threads to number of CPUs in a single socket.\n");
+        if (numSetThreads != 1) {
+            fprintf(stderr, "Warning! Failed to set default number of threads to 1.\n");
         }
     }
 

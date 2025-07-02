@@ -61,6 +61,7 @@ void d_cache_driver(char* papi_event_name, cat_params_t params, hw_desc_t *hw_de
 
     // Print meta-data about this run in the first few lines of the output file.
     print_header(ofp_papi, hw_desc);
+    print_header(stderr, hw_desc);
 
     // Go through each parameter variant.
     for(pattern = 3; pattern <= 4; ++pattern)
@@ -353,7 +354,7 @@ int varyBufferSizes(long long *values, double **rslts, double **counter, cat_par
              * All other upper bounds are set to the capacity of the cache, as observed per core.
              */
             if( llc_idx+1 == j ) {
-                nextCacheSize = 16LL*(hw_desc->dcache_size[llc_idx])/hw_desc->mmsplit;
+                nextCacheSize = 12LL*(hw_desc->dcache_size[llc_idx])/hw_desc->mmsplit;
                 ptsToNextCache = hw_desc->pts_per_mm+1;
             } else {
                 nextCacheSize = hw_desc->dcache_size[j]/hw_desc->split[j];
