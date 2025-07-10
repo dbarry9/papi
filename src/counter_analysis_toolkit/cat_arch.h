@@ -29,8 +29,20 @@ void test_dp_x86_512B_VEC_FMA( int instr_per_loop, uint64 iterations, int EventS
 
 #include <immintrin.h>
 
-typedef __m128  SP_SCALAR_TYPE;
-typedef __m128d DP_SCALAR_TYPE;
+typedef __m128bh BF16_SCALAR_TYPE;
+typedef __m128h  HP16_SCALAR_TYPE;
+typedef __m128   SP_SCALAR_TYPE;
+typedef __m128d  DP_SCALAR_TYPE;
+
+#define SET_VEC_SBF16(_I_)         _mm_set_sbh( _I_ );
+#define ADD_VEC_SBF16(_I_,_J_)     _mm_add_sbh( _I_ , _J_ );
+#define MUL_VEC_SBF16(_I_,_J_)     _mm_mul_sbh( _I_ , _J_ );
+#define FMA_VEC_SBF16(_out_,_I_,_J_,_K_) { _out_ = _mm_fmadd_sbh( _I_ , _J_ , _K_ ); }
+
+#define SET_VEC_SFP16(_I_)         _mm_set_sh( _I_ );
+#define ADD_VEC_SFP16(_I_,_J_)     _mm_add_sh( _I_ , _J_ );
+#define MUL_VEC_SFP16(_I_,_J_)     _mm_mul_sh( _I_ , _J_ );
+#define FMA_VEC_SFP16(_out_,_I_,_J_,_K_) { _out_ = _mm_fmadd_sh( _I_ , _J_ , _K_ ); }
 
 #define SET_VEC_SS(_I_)         _mm_set_ss( _I_ );
 #define ADD_VEC_SS(_I_,_J_)     _mm_add_ss( _I_ , _J_ );
@@ -43,8 +55,20 @@ typedef __m128d DP_SCALAR_TYPE;
 #define FMA_VEC_SD(_out_,_I_,_J_,_K_) { _out_ = _mm_fmadd_sd( _I_ , _J_ , _K_ ); }
 
 #if defined(X86_VEC_WIDTH_128B)
-typedef __m128  SP_VEC_TYPE;
-typedef __m128d DP_VEC_TYPE;
+typedef __m128bh BF16_VEC_TYPE;
+typedef __m128h  HP16_VEC_TYPE;
+typedef __m128     SP_VEC_TYPE;
+typedef __m128d    DP_VEC_TYPE;
+
+#define SET_VEC_PBF16(_I_)         _mm_set1_pbh( _I_ );
+#define ADD_VEC_PBF16(_I_,_J_)     _mm_add_pbh( _I_ , _J_ );
+#define MUL_VEC_PBF16(_I_,_J_)     _mm_mul_pbh( _I_ , _J_ );
+#define FMA_VEC_PBF16(_out_,_I_,_J_,_K_) { _out_ = _mm_fmadd_pbh( _I_ , _J_ , _K_ ); }
+
+#define SET_VEC_PFP16(_I_)         _mm_set1_ph( _I_ );
+#define ADD_VEC_PFP16(_I_,_J_)     _mm_add_ph( _I_ , _J_ );
+#define MUL_VEC_PFP16(_I_,_J_)     _mm_mul_ph( _I_ , _J_ );
+#define FMA_VEC_PFP16(_out_,_I_,_J_,_K_) { _out_ = _mm_fmadd_ph( _I_ , _J_ , _K_ ); }
 
 #define SET_VEC_PS(_I_)         _mm_set1_ps( _I_ );
 #define ADD_VEC_PS(_I_,_J_)     _mm_add_ps( _I_ , _J_ );
@@ -57,8 +81,20 @@ typedef __m128d DP_VEC_TYPE;
 #define FMA_VEC_PD(_I_,_J_,_K_) _mm_fmadd_pd( _I_ , _J_ , _K_ );
 
 #elif defined(X86_VEC_WIDTH_512B)
-typedef __m512  SP_VEC_TYPE;
-typedef __m512d DP_VEC_TYPE;
+typedef __m512bh BF16_VEC_TYPE;
+typedef __m512h  HP16_VEC_TYPE;
+typedef __m512     SP_VEC_TYPE;
+typedef __m512d    DP_VEC_TYPE;
+
+#define SET_VEC_PBF16(_I_)         _mm512_set1_pbh( _I_ );
+#define ADD_VEC_PBF16(_I_,_J_)     _mm512_add_pbh( _I_ , _J_ );
+#define MUL_VEC_PBF16(_I_,_J_)     _mm512_mul_pbh( _I_ , _J_ );
+#define FMA_VEC_PBF16(_out_,_I_,_J_,_K_) { _out_ = _mm512_fmadd_pbh( _I_ , _J_ , _K_ ); }
+
+#define SET_VEC_PFP16(_I_)         _mm512_set1_ph( _I_ );
+#define ADD_VEC_PFP16(_I_,_J_)     _mm512_add_ph( _I_ , _J_ );
+#define MUL_VEC_PFP16(_I_,_J_)     _mm512_mul_ph( _I_ , _J_ );
+#define FMA_VEC_PFP16(_out_,_I_,_J_,_K_) { _out_ = _mm512_fmadd_ph( _I_ , _J_ , _K_ ); }
 
 #define SET_VEC_PS(_I_)         _mm512_set1_ps( _I_ );
 #define ADD_VEC_PS(_I_,_J_)     _mm512_add_ps( _I_ , _J_ );
@@ -71,8 +107,20 @@ typedef __m512d DP_VEC_TYPE;
 #define FMA_VEC_PD(_I_,_J_,_K_) _mm512_fmadd_pd( _I_ , _J_ , _K_ );
 
 #else
-typedef __m256  SP_VEC_TYPE;
-typedef __m256d DP_VEC_TYPE;
+typedef __m256bh BF16_VEC_TYPE;
+typedef __m256h  HP16_VEC_TYPE;
+typedef __m256     SP_VEC_TYPE;
+typedef __m256d    DP_VEC_TYPE;
+
+#define SET_VEC_PBF16(_I_)         _mm256_set1_pbh( _I_ );
+#define ADD_VEC_PBF16(_I_,_J_)     _mm256_add_pbh( _I_ , _J_ );
+#define MUL_VEC_PBF16(_I_,_J_)     _mm256_mul_pbh( _I_ , _J_ );
+#define FMA_VEC_PBF16(_out_,_I_,_J_,_K_) { _out_ = _mm256_fmadd_pbh( _I_ , _J_ , _K_ ); }
+
+#define SET_VEC_PFP16(_I_)         _mm256_set1_ph( _I_ );
+#define ADD_VEC_PFP16(_I_,_J_)     _mm256_add_ph( _I_ , _J_ );
+#define MUL_VEC_PFP16(_I_,_J_)     _mm256_mul_ph( _I_ , _J_ );
+#define FMA_VEC_PFP16(_out_,_I_,_J_,_K_) { _out_ = _mm256_fmadd_ph( _I_ , _J_ , _K_ ); }
 
 #define SET_VEC_PS(_I_)         _mm256_set1_ps( _I_ );
 #define ADD_VEC_PS(_I_,_J_)     _mm256_add_ps( _I_ , _J_ );
@@ -95,35 +143,46 @@ void  test_dp_arm_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, 
 
 #include <arm_neon.h>
 
-typedef __fp16 half;
+typedef __bf16 bf16_half;
+typedef __fp16 fp16_half;
 typedef float  SP_SCALAR_TYPE;
 typedef double DP_SCALAR_TYPE;
-typedef float16x8_t HP_VEC_TYPE;
-typedef float32x4_t SP_VEC_TYPE;
-typedef float64x2_t DP_VEC_TYPE;
+typedef bfloat16x8_t BF16_VEC_TYPE;
+typedef float16x8_t  FP16_VEC_TYPE;
+typedef float32x4_t    SP_VEC_TYPE;
+typedef float64x2_t    DP_VEC_TYPE;
 
-#define SET_VEC_PH(_I_) (HP_VEC_TYPE)vdupq_n_f16( _I_ );
-#define SET_VEC_PS(_I_) (SP_VEC_TYPE)vdupq_n_f32( _I_ );
-#define SET_VEC_PD(_I_) (DP_VEC_TYPE)vdupq_n_f64( _I_ );
+#define SET_VEC_PBF16(_I_) (BF16_VEC_TYPE)vdupq_n_bf16( _I_ );
+#define SET_VEC_PFP16(_I_) (FP16_VEC_TYPE)vdupq_n_f16( _I_ );
+#define SET_VEC_PS(_I_)      (SP_VEC_TYPE)vdupq_n_f32( _I_ );
+#define SET_VEC_PD(_I_)      (DP_VEC_TYPE)vdupq_n_f64( _I_ );
 
-#define ADD_VEC_PH(_I_,_J_) (HP_VEC_TYPE)vaddq_f16( _I_ , _J_ );
-#define ADD_VEC_PS(_I_,_J_) (SP_VEC_TYPE)vaddq_f32( _I_ , _J_ );
-#define ADD_VEC_PD(_I_,_J_) (DP_VEC_TYPE)vaddq_f64( _I_ , _J_ );
+#define ADD_VEC_PBF16(_I_,_J_) (BF16_VEC_TYPE)vaddq_bf16( _I_ , _J_ );
+#define ADD_VEC_PFP16(_I_,_J_) (FP16_VEC_TYPE)vaddq_f16( _I_ , _J_ );
+#define ADD_VEC_PS(_I_,_J_)      (SP_VEC_TYPE)vaddq_f32( _I_ , _J_ );
+#define ADD_VEC_PD(_I_,_J_)      (DP_VEC_TYPE)vaddq_f64( _I_ , _J_ );
 
-#define MUL_VEC_PH(_I_,_J_) (HP_VEC_TYPE)vmulq_f16( _I_ , _J_ );
-#define MUL_VEC_PS(_I_,_J_) (SP_VEC_TYPE)vmulq_f32( _I_ , _J_ );
-#define MUL_VEC_PD(_I_,_J_) (DP_VEC_TYPE)vmulq_f64( _I_ , _J_ );
+#define MUL_VEC_PBF16(_I_,_J_) (BF16_VEC_TYPE)vmulq_bf16( _I_ , _J_ );
+#define MUL_VEC_PFP16(_I_,_J_) (FP16_VEC_TYPE)vmulq_f16( _I_ , _J_ );
+#define MUL_VEC_PS(_I_,_J_)      (SP_VEC_TYPE)vmulq_f32( _I_ , _J_ );
+#define MUL_VEC_PD(_I_,_J_)      (DP_VEC_TYPE)vmulq_f64( _I_ , _J_ );
 
-#define FMA_VEC_PH(_I_,_J_,_K_) (HP_VEC_TYPE)vfmaq_f16( _K_ , _J_ , _I_ );
-#define FMA_VEC_PS(_I_,_J_,_K_) (SP_VEC_TYPE)vfmaq_f32( _K_ , _J_ , _I_ );
-#define FMA_VEC_PD(_I_,_J_,_K_) (DP_VEC_TYPE)vfmaq_f64( _K_ , _J_ , _I_ );
+#define FMA_VEC_PBF16(_I_,_J_,_K_) (BF16_VEC_TYPE)vfmaq_bf16( _K_ , _J_ , _I_ );
+#define FMA_VEC_PFP16(_I_,_J_,_K_) (FP16_VEC_TYPE)vfmaq_f16( _K_ , _J_ , _I_ );
+#define FMA_VEC_PS(_I_,_J_,_K_)      (SP_VEC_TYPE)vfmaq_f32( _K_ , _J_ , _I_ );
+#define FMA_VEC_PD(_I_,_J_,_K_)      (DP_VEC_TYPE)vfmaq_f64( _K_ , _J_ , _I_ );
 
 /* There is no scalar FMA intrinsic available on this architecture. */
-#define SET_VEC_SH(_I_)         _I_ ;
-#define ADD_VEC_SH(_I_,_J_)     vaddh_f16( _I_ , _J_ );
-#define MUL_VEC_SH(_I_,_J_)     vmulh_f16( _I_ , _J_ );
-#define SQRT_VEC_SH(_I_)        vsqrth_f16( _I_ );
-#define FMA_VEC_SH(_out_,_I_,_J_,_K_) _out_ = _I_ * _J_ + _K_;
+#define SET_VEC_SBF16(_I_)         _I_ ;
+#define ADD_VEC_SBF16(_I_,_J_)     _I_ + _J_;
+#define MUL_VEC_SBF16(_I_,_J_)     _I_ * _J_ ;
+#define FMA_VEC_SBF16(_out_,_I_,_J_,_K_) _out_ = _I_ * _J_ + _K_;
+
+#define SET_VEC_SFP16(_I_)         _I_ ;
+#define ADD_VEC_SFP16(_I_,_J_)     vaddh_f16( _I_ , _J_ );
+#define MUL_VEC_SFP16(_I_,_J_)     vmulh_f16( _I_ , _J_ );
+#define SQRT_VEC_SFP16(_I_)        vsqrth_f16( _I_ );
+#define FMA_VEC_SFP16(_out_,_I_,_J_,_K_) _out_ = _I_ * _J_ + _K_;
 
 #define SET_VEC_SS(_I_)         _I_ ;
 #define ADD_VEC_SS(_I_,_J_)     _I_ + _J_ ;
