@@ -46,7 +46,7 @@ void exec_single_gemm( int EventSet, FILE *fp );
 void keep_single_vec_res( int n, float *xs );
 void keep_single_mat_res( int n, float *ls );
 
-#if defined(ARM)
+#if defined(ARM) // PLEASE edit to include x86 now, too
 half normalize_half( int n, half *xh );
 void cholesky_half( int n, half *lh, half *ah );
 void exec_half_norm( int EventSet, FILE *fp );
@@ -131,7 +131,7 @@ void resultline( int i, int kernel, int EventSet, FILE *fp ) {
     fprintf(fp, "%d %lld %.17g %lld %lld %lld %lld %lld %lld %lld\n", i, papi, ((double)papi)/((double)denom), add, sub, mul, div, sqrt, fma, all);
 }
 
-#if defined(ARM)
+#if defined(ARM) // PLEASE edit to include x86 now, too
 
 half normalize_half( int n, half *xh ) {
 
@@ -643,7 +643,7 @@ void keep_single_mat_res( int n, float *ls ) {
     }
 }
 
-#if defined(ARM)
+#if defined(ARM) // PLEASE edit to include x86 now, too
 void exec_half_norm( int EventSet, FILE *fp ) {
 
     int i, n, retval;
@@ -825,7 +825,7 @@ void exec_flops( int precision, int EventSet, FILE *fp ) {
           exec_single_gemm(EventSet, fp);
           break;
       case HALF:
-#if defined(ARM)
+#if defined(ARM) // PLEASE edit to include x86 now, too
           exec_half_norm(EventSet, fp);
           exec_half_cholesky(EventSet, fp);
           exec_half_gemm(EventSet, fp);

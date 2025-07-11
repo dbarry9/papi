@@ -18,32 +18,33 @@ void papi_stop_and_print(long long theory, int EventSet, FILE *fp)
     fprintf(fp, "%lld %lld\n", theory, flpins);
 }
 
-#if defined(ARM)
-half test_hp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
-    register half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+#if defined(ARM) || defined(X86)
+FP16_SCALAR_TYPE test_hp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
+    register FP16_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
-    r0 = SET_VEC_SH(0.01);
-    r1 = SET_VEC_SH(0.02);
-    r2 = SET_VEC_SH(0.03);
-    r3 = SET_VEC_SH(0.04);
-    r4 = SET_VEC_SH(0.05);
-    r5 = SET_VEC_SH(0.06);
-    r6 = SET_VEC_SH(0.07);
-    r7 = SET_VEC_SH(0.08);
-    r8 = SET_VEC_SH(0.09);
-    r9 = SET_VEC_SH(0.10);
-    rA = SET_VEC_SH(0.11);
-    rB = SET_VEC_SH(0.12);
-    rC = SET_VEC_SH(0.13);
-    rD = SET_VEC_SH(0.14);
-    rE = SET_VEC_SH(0.15);
-    rF = SET_VEC_SH(0.16);
+    r0 = SET_VEC_SFP16(0.01);
+    r1 = SET_VEC_SFP16(0.02);
+    r2 = SET_VEC_SFP16(0.03);
+    r3 = SET_VEC_SFP16(0.04);
+    r4 = SET_VEC_SFP16(0.05);
+    r5 = SET_VEC_SFP16(0.06);
+    r6 = SET_VEC_SFP16(0.07);
+    r7 = SET_VEC_SFP16(0.08);
+    r8 = SET_VEC_SFP16(0.09);
+    r9 = SET_VEC_SFP16(0.10);
+    rA = SET_VEC_SFP16(0.11);
+    rB = SET_VEC_SFP16(0.12);
+    rC = SET_VEC_SFP16(0.13);
+    rD = SET_VEC_SFP16(0.14);
+    rE = SET_VEC_SFP16(0.15);
+    rF = SET_VEC_SFP16(0.16);
 
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -53,31 +54,31 @@ half test_hp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
         while (i < ITER){
 
             /* The performance critical part */
-            r0 = MUL_VEC_SH(r0,rC);
-            r1 = ADD_VEC_SH(r1,rD);
-            r2 = MUL_VEC_SH(r2,rE);
-            r3 = ADD_VEC_SH(r3,rF);
-            r4 = MUL_VEC_SH(r4,rC);
-            r5 = ADD_VEC_SH(r5,rD);
-            r6 = MUL_VEC_SH(r6,rE);
-            r7 = ADD_VEC_SH(r7,rF);
-            r8 = MUL_VEC_SH(r8,rC);
-            r9 = ADD_VEC_SH(r9,rD);
-            rA = MUL_VEC_SH(rA,rE);
-            rB = ADD_VEC_SH(rB,rF);
+            r0 = MUL_VEC_SFP16(r0,rC);
+            r1 = ADD_VEC_SFP16(r1,rD);
+            r2 = MUL_VEC_SFP16(r2,rE);
+            r3 = ADD_VEC_SFP16(r3,rF);
+            r4 = MUL_VEC_SFP16(r4,rC);
+            r5 = ADD_VEC_SFP16(r5,rD);
+            r6 = MUL_VEC_SFP16(r6,rE);
+            r7 = ADD_VEC_SFP16(r7,rF);
+            r8 = MUL_VEC_SFP16(r8,rC);
+            r9 = ADD_VEC_SFP16(r9,rD);
+            rA = MUL_VEC_SFP16(rA,rE);
+            rB = ADD_VEC_SFP16(rB,rF);
 
-            r0 = ADD_VEC_SH(r0,rF);
-            r1 = MUL_VEC_SH(r1,rE);
-            r2 = ADD_VEC_SH(r2,rD);
-            r3 = MUL_VEC_SH(r3,rC);
-            r4 = ADD_VEC_SH(r4,rF);
-            r5 = MUL_VEC_SH(r5,rE);
-            r6 = ADD_VEC_SH(r6,rD);
-            r7 = MUL_VEC_SH(r7,rC);
-            r8 = ADD_VEC_SH(r8,rF);
-            r9 = MUL_VEC_SH(r9,rE);
-            rA = ADD_VEC_SH(rA,rD);
-            rB = MUL_VEC_SH(rB,rC);
+            r0 = ADD_VEC_SFP16(r0,rF);
+            r1 = MUL_VEC_SFP16(r1,rE);
+            r2 = ADD_VEC_SFP16(r2,rD);
+            r3 = MUL_VEC_SFP16(r3,rC);
+            r4 = ADD_VEC_SFP16(r4,rF);
+            r5 = MUL_VEC_SFP16(r5,rE);
+            r6 = ADD_VEC_SFP16(r6,rD);
+            r7 = MUL_VEC_SFP16(r7,rC);
+            r8 = ADD_VEC_SFP16(r8,rF);
+            r9 = MUL_VEC_SFP16(r9,rE);
+            rA = ADD_VEC_SFP16(rA,rD);
+            rB = MUL_VEC_SFP16(rB,rC);
 
             i++;
         }
@@ -90,52 +91,53 @@ half test_hp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
     }
 
     /* Use data so that compiler does not eliminate it when using -O2 */
-    r0 = ADD_VEC_SH(r0,r1);
-    r2 = ADD_VEC_SH(r2,r3);
-    r4 = ADD_VEC_SH(r4,r5);
-    r6 = ADD_VEC_SH(r6,r7);
-    r8 = ADD_VEC_SH(r8,r9);
-    rA = ADD_VEC_SH(rA,rB);
+    r0 = ADD_VEC_SFP16(r0,r1);
+    r2 = ADD_VEC_SFP16(r2,r3);
+    r4 = ADD_VEC_SFP16(r4,r5);
+    r6 = ADD_VEC_SFP16(r6,r7);
+    r8 = ADD_VEC_SFP16(r8,r9);
+    rA = ADD_VEC_SFP16(rA,rB);
 
-    r0 = ADD_VEC_SH(r0,r2);
-    r4 = ADD_VEC_SH(r4,r6);
-    r8 = ADD_VEC_SH(r8,rA);
+    r0 = ADD_VEC_SFP16(r0,r2);
+    r4 = ADD_VEC_SFP16(r4,r6);
+    r8 = ADD_VEC_SFP16(r8,rA);
 
-    r0 = ADD_VEC_SH(r0,r4);
-    r0 = ADD_VEC_SH(r0,r8);
+    r0 = ADD_VEC_SFP16(r0,r4);
+    r0 = ADD_VEC_SFP16(r0,r8);
 
-    half out = 0;
-    half temp = r0;
-    out = ADD_VEC_SH(out,temp);
+    FP16_SCALAR_TYPE out = SET_VEC_SFP16(0);
+    FP16_SCALAR_TYPE temp = r0;
+    out = ADD_VEC_SFP16(out,temp);
 
     return out;
 }
 
-half test_hp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
-    register half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+FP16_SCALAR_TYPE test_hp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
+    register FP16_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
-    r0 = SET_VEC_SH(0.01);
-    r1 = SET_VEC_SH(0.02);
-    r2 = SET_VEC_SH(0.03);
-    r3 = SET_VEC_SH(0.04);
-    r4 = SET_VEC_SH(0.05);
-    r5 = SET_VEC_SH(0.06);
-    r6 = SET_VEC_SH(0.07);
-    r7 = SET_VEC_SH(0.08);
-    r8 = SET_VEC_SH(0.09);
-    r9 = SET_VEC_SH(0.10);
-    rA = SET_VEC_SH(0.11);
-    rB = SET_VEC_SH(0.12);
-    rC = SET_VEC_SH(0.13);
-    rD = SET_VEC_SH(0.14);
-    rE = SET_VEC_SH(0.15);
-    rF = SET_VEC_SH(0.16);
+    r0 = SET_VEC_SFP16(0.01);
+    r1 = SET_VEC_SFP16(0.02);
+    r2 = SET_VEC_SFP16(0.03);
+    r3 = SET_VEC_SFP16(0.04);
+    r4 = SET_VEC_SFP16(0.05);
+    r5 = SET_VEC_SFP16(0.06);
+    r6 = SET_VEC_SFP16(0.07);
+    r7 = SET_VEC_SFP16(0.08);
+    r8 = SET_VEC_SFP16(0.09);
+    r9 = SET_VEC_SFP16(0.10);
+    rA = SET_VEC_SFP16(0.11);
+    rB = SET_VEC_SFP16(0.12);
+    rC = SET_VEC_SFP16(0.13);
+    rD = SET_VEC_SFP16(0.14);
+    rE = SET_VEC_SFP16(0.15);
+    rF = SET_VEC_SFP16(0.16);
 
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -145,57 +147,57 @@ half test_hp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
         while (i < ITER){
 
             /* The performance critical part */
-            r0 = MUL_VEC_SH(r0,rC);
-            r1 = ADD_VEC_SH(r1,rD);
-            r2 = MUL_VEC_SH(r2,rE);
-            r3 = ADD_VEC_SH(r3,rF);
-            r4 = MUL_VEC_SH(r4,rC);
-            r5 = ADD_VEC_SH(r5,rD);
-            r6 = MUL_VEC_SH(r6,rE);
-            r7 = ADD_VEC_SH(r7,rF);
-            r8 = MUL_VEC_SH(r8,rC);
-            r9 = ADD_VEC_SH(r9,rD);
-            rA = MUL_VEC_SH(rA,rE);
-            rB = ADD_VEC_SH(rB,rF);
+            r0 = MUL_VEC_SFP16(r0,rC);
+            r1 = ADD_VEC_SFP16(r1,rD);
+            r2 = MUL_VEC_SFP16(r2,rE);
+            r3 = ADD_VEC_SFP16(r3,rF);
+            r4 = MUL_VEC_SFP16(r4,rC);
+            r5 = ADD_VEC_SFP16(r5,rD);
+            r6 = MUL_VEC_SFP16(r6,rE);
+            r7 = ADD_VEC_SFP16(r7,rF);
+            r8 = MUL_VEC_SFP16(r8,rC);
+            r9 = ADD_VEC_SFP16(r9,rD);
+            rA = MUL_VEC_SFP16(rA,rE);
+            rB = ADD_VEC_SFP16(rB,rF);
 
-            r0 = ADD_VEC_SH(r0,rF);
-            r1 = MUL_VEC_SH(r1,rE);
-            r2 = ADD_VEC_SH(r2,rD);
-            r3 = MUL_VEC_SH(r3,rC);
-            r4 = ADD_VEC_SH(r4,rF);
-            r5 = MUL_VEC_SH(r5,rE);
-            r6 = ADD_VEC_SH(r6,rD);
-            r7 = MUL_VEC_SH(r7,rC);
-            r8 = ADD_VEC_SH(r8,rF);
-            r9 = MUL_VEC_SH(r9,rE);
-            rA = ADD_VEC_SH(rA,rD);
-            rB = MUL_VEC_SH(rB,rC);
+            r0 = ADD_VEC_SFP16(r0,rF);
+            r1 = MUL_VEC_SFP16(r1,rE);
+            r2 = ADD_VEC_SFP16(r2,rD);
+            r3 = MUL_VEC_SFP16(r3,rC);
+            r4 = ADD_VEC_SFP16(r4,rF);
+            r5 = MUL_VEC_SFP16(r5,rE);
+            r6 = ADD_VEC_SFP16(r6,rD);
+            r7 = MUL_VEC_SFP16(r7,rC);
+            r8 = ADD_VEC_SFP16(r8,rF);
+            r9 = MUL_VEC_SFP16(r9,rE);
+            rA = ADD_VEC_SFP16(rA,rD);
+            rB = MUL_VEC_SFP16(rB,rC);
 
-            r0 = MUL_VEC_SH(r0,rC);
-            r1 = ADD_VEC_SH(r1,rD);
-            r2 = MUL_VEC_SH(r2,rE);
-            r3 = ADD_VEC_SH(r3,rF);
-            r4 = MUL_VEC_SH(r4,rC);
-            r5 = ADD_VEC_SH(r5,rD);
-            r6 = MUL_VEC_SH(r6,rE);
-            r7 = ADD_VEC_SH(r7,rF);
-            r8 = MUL_VEC_SH(r8,rC);
-            r9 = ADD_VEC_SH(r9,rD);
-            rA = MUL_VEC_SH(rA,rE);
-            rB = ADD_VEC_SH(rB,rF);
+            r0 = MUL_VEC_SFP16(r0,rC);
+            r1 = ADD_VEC_SFP16(r1,rD);
+            r2 = MUL_VEC_SFP16(r2,rE);
+            r3 = ADD_VEC_SFP16(r3,rF);
+            r4 = MUL_VEC_SFP16(r4,rC);
+            r5 = ADD_VEC_SFP16(r5,rD);
+            r6 = MUL_VEC_SFP16(r6,rE);
+            r7 = ADD_VEC_SFP16(r7,rF);
+            r8 = MUL_VEC_SFP16(r8,rC);
+            r9 = ADD_VEC_SFP16(r9,rD);
+            rA = MUL_VEC_SFP16(rA,rE);
+            rB = ADD_VEC_SFP16(rB,rF);
 
-            r0 = ADD_VEC_SH(r0,rF);
-            r1 = MUL_VEC_SH(r1,rE);
-            r2 = ADD_VEC_SH(r2,rD);
-            r3 = MUL_VEC_SH(r3,rC);
-            r4 = ADD_VEC_SH(r4,rF);
-            r5 = MUL_VEC_SH(r5,rE);
-            r6 = ADD_VEC_SH(r6,rD);
-            r7 = MUL_VEC_SH(r7,rC);
-            r8 = ADD_VEC_SH(r8,rF);
-            r9 = MUL_VEC_SH(r9,rE);
-            rA = ADD_VEC_SH(rA,rD);
-            rB = MUL_VEC_SH(rB,rC);
+            r0 = ADD_VEC_SFP16(r0,rF);
+            r1 = MUL_VEC_SFP16(r1,rE);
+            r2 = ADD_VEC_SFP16(r2,rD);
+            r3 = MUL_VEC_SFP16(r3,rC);
+            r4 = ADD_VEC_SFP16(r4,rF);
+            r5 = MUL_VEC_SFP16(r5,rE);
+            r6 = ADD_VEC_SFP16(r6,rD);
+            r7 = MUL_VEC_SFP16(r7,rC);
+            r8 = ADD_VEC_SFP16(r8,rF);
+            r9 = MUL_VEC_SFP16(r9,rE);
+            rA = ADD_VEC_SFP16(rA,rD);
+            rB = MUL_VEC_SFP16(rB,rC);
 
             i++;
         }
@@ -208,52 +210,53 @@ half test_hp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
     }
 
     /* Use data so that compiler does not eliminate it when using -O2 */
-    r0 = ADD_VEC_SH(r0,r1);
-    r2 = ADD_VEC_SH(r2,r3);
-    r4 = ADD_VEC_SH(r4,r5);
-    r6 = ADD_VEC_SH(r6,r7);
-    r8 = ADD_VEC_SH(r8,r9);
-    rA = ADD_VEC_SH(rA,rB);
+    r0 = ADD_VEC_SFP16(r0,r1);
+    r2 = ADD_VEC_SFP16(r2,r3);
+    r4 = ADD_VEC_SFP16(r4,r5);
+    r6 = ADD_VEC_SFP16(r6,r7);
+    r8 = ADD_VEC_SFP16(r8,r9);
+    rA = ADD_VEC_SFP16(rA,rB);
 
-    r0 = ADD_VEC_SH(r0,r2);
-    r4 = ADD_VEC_SH(r4,r6);
-    r8 = ADD_VEC_SH(r8,rA);
+    r0 = ADD_VEC_SFP16(r0,r2);
+    r4 = ADD_VEC_SFP16(r4,r6);
+    r8 = ADD_VEC_SFP16(r8,rA);
 
-    r0 = ADD_VEC_SH(r0,r4);
-    r0 = ADD_VEC_SH(r0,r8);
+    r0 = ADD_VEC_SFP16(r0,r4);
+    r0 = ADD_VEC_SFP16(r0,r8);
 
-    half out = 0;
-    half temp = r0;
-    out = ADD_VEC_SH(out,temp);
+    FP16_SCALAR_TYPE out = SET_VEC_SFP16(0);
+    FP16_SCALAR_TYPE temp = r0;
+    out = ADD_VEC_SFP16(out,temp);
 
     return out;
 }
 
-half test_hp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
-    register half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+FP16_SCALAR_TYPE test_hp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
+    register FP16_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
-    r0 = SET_VEC_SH(0.01);
-    r1 = SET_VEC_SH(0.02);
-    r2 = SET_VEC_SH(0.03);
-    r3 = SET_VEC_SH(0.04);
-    r4 = SET_VEC_SH(0.05);
-    r5 = SET_VEC_SH(0.06);
-    r6 = SET_VEC_SH(0.07);
-    r7 = SET_VEC_SH(0.08);
-    r8 = SET_VEC_SH(0.09);
-    r9 = SET_VEC_SH(0.10);
-    rA = SET_VEC_SH(0.11);
-    rB = SET_VEC_SH(0.12);
-    rC = SET_VEC_SH(0.13);
-    rD = SET_VEC_SH(0.14);
-    rE = SET_VEC_SH(0.15);
-    rF = SET_VEC_SH(0.16);
+    r0 = SET_VEC_SFP16(0.01);
+    r1 = SET_VEC_SFP16(0.02);
+    r2 = SET_VEC_SFP16(0.03);
+    r3 = SET_VEC_SFP16(0.04);
+    r4 = SET_VEC_SFP16(0.05);
+    r5 = SET_VEC_SFP16(0.06);
+    r6 = SET_VEC_SFP16(0.07);
+    r7 = SET_VEC_SFP16(0.08);
+    r8 = SET_VEC_SFP16(0.09);
+    r9 = SET_VEC_SFP16(0.10);
+    rA = SET_VEC_SFP16(0.11);
+    rB = SET_VEC_SFP16(0.12);
+    rC = SET_VEC_SFP16(0.13);
+    rD = SET_VEC_SFP16(0.14);
+    rE = SET_VEC_SFP16(0.15);
+    rF = SET_VEC_SFP16(0.16);
 
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -263,109 +266,109 @@ half test_hp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
         while (i < ITER){
 
             /* The performance critical part */
-            r0 = MUL_VEC_SH(r0,rC);
-            r1 = ADD_VEC_SH(r1,rD);
-            r2 = MUL_VEC_SH(r2,rE);
-            r3 = ADD_VEC_SH(r3,rF);
-            r4 = MUL_VEC_SH(r4,rC);
-            r5 = ADD_VEC_SH(r5,rD);
-            r6 = MUL_VEC_SH(r6,rE);
-            r7 = ADD_VEC_SH(r7,rF);
-            r8 = MUL_VEC_SH(r8,rC);
-            r9 = ADD_VEC_SH(r9,rD);
-            rA = MUL_VEC_SH(rA,rE);
-            rB = ADD_VEC_SH(rB,rF);
+            r0 = MUL_VEC_SFP16(r0,rC);
+            r1 = ADD_VEC_SFP16(r1,rD);
+            r2 = MUL_VEC_SFP16(r2,rE);
+            r3 = ADD_VEC_SFP16(r3,rF);
+            r4 = MUL_VEC_SFP16(r4,rC);
+            r5 = ADD_VEC_SFP16(r5,rD);
+            r6 = MUL_VEC_SFP16(r6,rE);
+            r7 = ADD_VEC_SFP16(r7,rF);
+            r8 = MUL_VEC_SFP16(r8,rC);
+            r9 = ADD_VEC_SFP16(r9,rD);
+            rA = MUL_VEC_SFP16(rA,rE);
+            rB = ADD_VEC_SFP16(rB,rF);
 
-            r0 = ADD_VEC_SH(r0,rF);
-            r1 = MUL_VEC_SH(r1,rE);
-            r2 = ADD_VEC_SH(r2,rD);
-            r3 = MUL_VEC_SH(r3,rC);
-            r4 = ADD_VEC_SH(r4,rF);
-            r5 = MUL_VEC_SH(r5,rE);
-            r6 = ADD_VEC_SH(r6,rD);
-            r7 = MUL_VEC_SH(r7,rC);
-            r8 = ADD_VEC_SH(r8,rF);
-            r9 = MUL_VEC_SH(r9,rE);
-            rA = ADD_VEC_SH(rA,rD);
-            rB = MUL_VEC_SH(rB,rC);
+            r0 = ADD_VEC_SFP16(r0,rF);
+            r1 = MUL_VEC_SFP16(r1,rE);
+            r2 = ADD_VEC_SFP16(r2,rD);
+            r3 = MUL_VEC_SFP16(r3,rC);
+            r4 = ADD_VEC_SFP16(r4,rF);
+            r5 = MUL_VEC_SFP16(r5,rE);
+            r6 = ADD_VEC_SFP16(r6,rD);
+            r7 = MUL_VEC_SFP16(r7,rC);
+            r8 = ADD_VEC_SFP16(r8,rF);
+            r9 = MUL_VEC_SFP16(r9,rE);
+            rA = ADD_VEC_SFP16(rA,rD);
+            rB = MUL_VEC_SFP16(rB,rC);
 
-            r0 = MUL_VEC_SH(r0,rC);
-            r1 = ADD_VEC_SH(r1,rD);
-            r2 = MUL_VEC_SH(r2,rE);
-            r3 = ADD_VEC_SH(r3,rF);
-            r4 = MUL_VEC_SH(r4,rC);
-            r5 = ADD_VEC_SH(r5,rD);
-            r6 = MUL_VEC_SH(r6,rE);
-            r7 = ADD_VEC_SH(r7,rF);
-            r8 = MUL_VEC_SH(r8,rC);
-            r9 = ADD_VEC_SH(r9,rD);
-            rA = MUL_VEC_SH(rA,rE);
-            rB = ADD_VEC_SH(rB,rF);
+            r0 = MUL_VEC_SFP16(r0,rC);
+            r1 = ADD_VEC_SFP16(r1,rD);
+            r2 = MUL_VEC_SFP16(r2,rE);
+            r3 = ADD_VEC_SFP16(r3,rF);
+            r4 = MUL_VEC_SFP16(r4,rC);
+            r5 = ADD_VEC_SFP16(r5,rD);
+            r6 = MUL_VEC_SFP16(r6,rE);
+            r7 = ADD_VEC_SFP16(r7,rF);
+            r8 = MUL_VEC_SFP16(r8,rC);
+            r9 = ADD_VEC_SFP16(r9,rD);
+            rA = MUL_VEC_SFP16(rA,rE);
+            rB = ADD_VEC_SFP16(rB,rF);
 
-            r0 = ADD_VEC_SH(r0,rF);
-            r1 = MUL_VEC_SH(r1,rE);
-            r2 = ADD_VEC_SH(r2,rD);
-            r3 = MUL_VEC_SH(r3,rC);
-            r4 = ADD_VEC_SH(r4,rF);
-            r5 = MUL_VEC_SH(r5,rE);
-            r6 = ADD_VEC_SH(r6,rD);
-            r7 = MUL_VEC_SH(r7,rC);
-            r8 = ADD_VEC_SH(r8,rF);
-            r9 = MUL_VEC_SH(r9,rE);
-            rA = ADD_VEC_SH(rA,rD);
-            rB = MUL_VEC_SH(rB,rC);
+            r0 = ADD_VEC_SFP16(r0,rF);
+            r1 = MUL_VEC_SFP16(r1,rE);
+            r2 = ADD_VEC_SFP16(r2,rD);
+            r3 = MUL_VEC_SFP16(r3,rC);
+            r4 = ADD_VEC_SFP16(r4,rF);
+            r5 = MUL_VEC_SFP16(r5,rE);
+            r6 = ADD_VEC_SFP16(r6,rD);
+            r7 = MUL_VEC_SFP16(r7,rC);
+            r8 = ADD_VEC_SFP16(r8,rF);
+            r9 = MUL_VEC_SFP16(r9,rE);
+            rA = ADD_VEC_SFP16(rA,rD);
+            rB = MUL_VEC_SFP16(rB,rC);
 
-            r0 = MUL_VEC_SH(r0,rC);
-            r1 = ADD_VEC_SH(r1,rD);
-            r2 = MUL_VEC_SH(r2,rE);
-            r3 = ADD_VEC_SH(r3,rF);
-            r4 = MUL_VEC_SH(r4,rC);
-            r5 = ADD_VEC_SH(r5,rD);
-            r6 = MUL_VEC_SH(r6,rE);
-            r7 = ADD_VEC_SH(r7,rF);
-            r8 = MUL_VEC_SH(r8,rC);
-            r9 = ADD_VEC_SH(r9,rD);
-            rA = MUL_VEC_SH(rA,rE);
-            rB = ADD_VEC_SH(rB,rF);
+            r0 = MUL_VEC_SFP16(r0,rC);
+            r1 = ADD_VEC_SFP16(r1,rD);
+            r2 = MUL_VEC_SFP16(r2,rE);
+            r3 = ADD_VEC_SFP16(r3,rF);
+            r4 = MUL_VEC_SFP16(r4,rC);
+            r5 = ADD_VEC_SFP16(r5,rD);
+            r6 = MUL_VEC_SFP16(r6,rE);
+            r7 = ADD_VEC_SFP16(r7,rF);
+            r8 = MUL_VEC_SFP16(r8,rC);
+            r9 = ADD_VEC_SFP16(r9,rD);
+            rA = MUL_VEC_SFP16(rA,rE);
+            rB = ADD_VEC_SFP16(rB,rF);
 
-            r0 = ADD_VEC_SH(r0,rF);
-            r1 = MUL_VEC_SH(r1,rE);
-            r2 = ADD_VEC_SH(r2,rD);
-            r3 = MUL_VEC_SH(r3,rC);
-            r4 = ADD_VEC_SH(r4,rF);
-            r5 = MUL_VEC_SH(r5,rE);
-            r6 = ADD_VEC_SH(r6,rD);
-            r7 = MUL_VEC_SH(r7,rC);
-            r8 = ADD_VEC_SH(r8,rF);
-            r9 = MUL_VEC_SH(r9,rE);
-            rA = ADD_VEC_SH(rA,rD);
-            rB = MUL_VEC_SH(rB,rC);
+            r0 = ADD_VEC_SFP16(r0,rF);
+            r1 = MUL_VEC_SFP16(r1,rE);
+            r2 = ADD_VEC_SFP16(r2,rD);
+            r3 = MUL_VEC_SFP16(r3,rC);
+            r4 = ADD_VEC_SFP16(r4,rF);
+            r5 = MUL_VEC_SFP16(r5,rE);
+            r6 = ADD_VEC_SFP16(r6,rD);
+            r7 = MUL_VEC_SFP16(r7,rC);
+            r8 = ADD_VEC_SFP16(r8,rF);
+            r9 = MUL_VEC_SFP16(r9,rE);
+            rA = ADD_VEC_SFP16(rA,rD);
+            rB = MUL_VEC_SFP16(rB,rC);
 
-            r0 = MUL_VEC_SH(r0,rC);
-            r1 = ADD_VEC_SH(r1,rD);
-            r2 = MUL_VEC_SH(r2,rE);
-            r3 = ADD_VEC_SH(r3,rF);
-            r4 = MUL_VEC_SH(r4,rC);
-            r5 = ADD_VEC_SH(r5,rD);
-            r6 = MUL_VEC_SH(r6,rE);
-            r7 = ADD_VEC_SH(r7,rF);
-            r8 = MUL_VEC_SH(r8,rC);
-            r9 = ADD_VEC_SH(r9,rD);
-            rA = MUL_VEC_SH(rA,rE);
-            rB = ADD_VEC_SH(rB,rF);
+            r0 = MUL_VEC_SFP16(r0,rC);
+            r1 = ADD_VEC_SFP16(r1,rD);
+            r2 = MUL_VEC_SFP16(r2,rE);
+            r3 = ADD_VEC_SFP16(r3,rF);
+            r4 = MUL_VEC_SFP16(r4,rC);
+            r5 = ADD_VEC_SFP16(r5,rD);
+            r6 = MUL_VEC_SFP16(r6,rE);
+            r7 = ADD_VEC_SFP16(r7,rF);
+            r8 = MUL_VEC_SFP16(r8,rC);
+            r9 = ADD_VEC_SFP16(r9,rD);
+            rA = MUL_VEC_SFP16(rA,rE);
+            rB = ADD_VEC_SFP16(rB,rF);
 
-            r0 = ADD_VEC_SH(r0,rF);
-            r1 = MUL_VEC_SH(r1,rE);
-            r2 = ADD_VEC_SH(r2,rD);
-            r3 = MUL_VEC_SH(r3,rC);
-            r4 = ADD_VEC_SH(r4,rF);
-            r5 = MUL_VEC_SH(r5,rE);
-            r6 = ADD_VEC_SH(r6,rD);
-            r7 = MUL_VEC_SH(r7,rC);
-            r8 = ADD_VEC_SH(r8,rF);
-            r9 = MUL_VEC_SH(r9,rE);
-            rA = ADD_VEC_SH(rA,rD);
-            rB = MUL_VEC_SH(rB,rC);
+            r0 = ADD_VEC_SFP16(r0,rF);
+            r1 = MUL_VEC_SFP16(r1,rE);
+            r2 = ADD_VEC_SFP16(r2,rD);
+            r3 = MUL_VEC_SFP16(r3,rC);
+            r4 = ADD_VEC_SFP16(r4,rF);
+            r5 = MUL_VEC_SFP16(r5,rE);
+            r6 = ADD_VEC_SFP16(r6,rD);
+            r7 = MUL_VEC_SFP16(r7,rC);
+            r8 = ADD_VEC_SFP16(r8,rF);
+            r9 = MUL_VEC_SFP16(r9,rE);
+            rA = ADD_VEC_SFP16(rA,rD);
+            rB = MUL_VEC_SFP16(rB,rC);
 
             i++;
         }
@@ -378,23 +381,23 @@ half test_hp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
     }
 
     /* Use data so that compiler does not eliminate it when using -O2 */
-    r0 = ADD_VEC_SH(r0,r1);
-    r2 = ADD_VEC_SH(r2,r3);
-    r4 = ADD_VEC_SH(r4,r5);
-    r6 = ADD_VEC_SH(r6,r7);
-    r8 = ADD_VEC_SH(r8,r9);
-    rA = ADD_VEC_SH(rA,rB);
+    r0 = ADD_VEC_SFP16(r0,r1);
+    r2 = ADD_VEC_SFP16(r2,r3);
+    r4 = ADD_VEC_SFP16(r4,r5);
+    r6 = ADD_VEC_SFP16(r6,r7);
+    r8 = ADD_VEC_SFP16(r8,r9);
+    rA = ADD_VEC_SFP16(rA,rB);
 
-    r0 = ADD_VEC_SH(r0,r2);
-    r4 = ADD_VEC_SH(r4,r6);
-    r8 = ADD_VEC_SH(r8,rA);
+    r0 = ADD_VEC_SFP16(r0,r2);
+    r4 = ADD_VEC_SFP16(r4,r6);
+    r8 = ADD_VEC_SFP16(r8,rA);
 
-    r0 = ADD_VEC_SH(r0,r4);
-    r0 = ADD_VEC_SH(r0,r8);
+    r0 = ADD_VEC_SFP16(r0,r4);
+    r0 = ADD_VEC_SFP16(r0,r8);
 
-    half out = 0;
-    half temp = r0;
-    out = ADD_VEC_SH(out,temp);
+    FP16_SCALAR_TYPE out = SET_VEC_SFP16(0);
+    FP16_SCALAR_TYPE temp = r0;
+    out = ADD_VEC_SFP16(out,temp);
 
     return out;
 }
@@ -464,7 +467,8 @@ float test_sp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -559,7 +563,8 @@ float test_sp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -680,7 +685,8 @@ float test_sp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -853,7 +859,8 @@ double test_dp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -948,7 +955,8 @@ double test_dp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -1069,7 +1077,8 @@ double test_dp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -1215,32 +1224,33 @@ double test_dp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
     return out;
 }
 
-#if defined(ARM)
-half test_hp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
-    register half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+#if defined(ARM) || defined(X86)
+FP16_SCALAR_TYPE test_hp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
+    register FP16_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
-    r0 = SET_VEC_SH(0.01);
-    r1 = SET_VEC_SH(0.02);
-    r2 = SET_VEC_SH(0.03);
-    r3 = SET_VEC_SH(0.04);
-    r4 = SET_VEC_SH(0.05);
-    r5 = SET_VEC_SH(0.06);
-    r6 = SET_VEC_SH(0.07);
-    r7 = SET_VEC_SH(0.08);
-    r8 = SET_VEC_SH(0.09);
-    r9 = SET_VEC_SH(0.10);
-    rA = SET_VEC_SH(0.11);
-    rB = SET_VEC_SH(0.12);
-    rC = SET_VEC_SH(0.13);
-    rD = SET_VEC_SH(0.14);
-    rE = SET_VEC_SH(0.15);
-    rF = SET_VEC_SH(0.16);
+    r0 = SET_VEC_SFP16(0.01);
+    r1 = SET_VEC_SFP16(0.02);
+    r2 = SET_VEC_SFP16(0.03);
+    r3 = SET_VEC_SFP16(0.04);
+    r4 = SET_VEC_SFP16(0.05);
+    r5 = SET_VEC_SFP16(0.06);
+    r6 = SET_VEC_SFP16(0.07);
+    r7 = SET_VEC_SFP16(0.08);
+    r8 = SET_VEC_SFP16(0.09);
+    r9 = SET_VEC_SFP16(0.10);
+    rA = SET_VEC_SFP16(0.11);
+    rB = SET_VEC_SFP16(0.12);
+    rC = SET_VEC_SFP16(0.13);
+    rD = SET_VEC_SFP16(0.14);
+    rE = SET_VEC_SFP16(0.15);
+    rF = SET_VEC_SFP16(0.16);
 
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -1250,19 +1260,19 @@ half test_hp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
         while (i < ITER){
 
             /* The performance critical part */
-            FMA_VEC_SH(r0,r0,r7,r9);
-            FMA_VEC_SH(r1,r1,r8,rA);
-            FMA_VEC_SH(r2,r2,r9,rB);
-            FMA_VEC_SH(r3,r3,rA,rC);
-            FMA_VEC_SH(r4,r4,rB,rD);
-            FMA_VEC_SH(r5,r5,rC,rE);
+            FMA_VEC_SFP16(r0,r0,r7,r9);
+            FMA_VEC_SFP16(r1,r1,r8,rA);
+            FMA_VEC_SFP16(r2,r2,r9,rB);
+            FMA_VEC_SFP16(r3,r3,rA,rC);
+            FMA_VEC_SFP16(r4,r4,rB,rD);
+            FMA_VEC_SFP16(r5,r5,rC,rE);
 
-            FMA_VEC_SH(r0,r0,rD,rF);
-            FMA_VEC_SH(r1,r1,rC,rE);
-            FMA_VEC_SH(r2,r2,rB,rD);
-            FMA_VEC_SH(r3,r3,rA,rC);
-            FMA_VEC_SH(r4,r4,r9,rB);
-            FMA_VEC_SH(r5,r5,r8,rA);
+            FMA_VEC_SFP16(r0,r0,rD,rF);
+            FMA_VEC_SFP16(r1,r1,rC,rE);
+            FMA_VEC_SFP16(r2,r2,rB,rD);
+            FMA_VEC_SFP16(r3,r3,rA,rC);
+            FMA_VEC_SFP16(r4,r4,r9,rB);
+            FMA_VEC_SFP16(r5,r5,r8,rA);
 
             i++;
         }
@@ -1275,47 +1285,48 @@ half test_hp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
     }
 
     /* Use data so that compiler does not eliminate it when using -O2 */
-    r0 = ADD_VEC_SH(r0,r1);
-    r2 = ADD_VEC_SH(r2,r3);
-    r4 = ADD_VEC_SH(r4,r5);
+    r0 = ADD_VEC_SFP16(r0,r1);
+    r2 = ADD_VEC_SFP16(r2,r3);
+    r4 = ADD_VEC_SFP16(r4,r5);
 
-    r0 = ADD_VEC_SH(r0,r6);
-    r2 = ADD_VEC_SH(r2,r4);
+    r0 = ADD_VEC_SFP16(r0,r6);
+    r2 = ADD_VEC_SFP16(r2,r4);
 
-    r0 = ADD_VEC_SH(r0,r2);
+    r0 = ADD_VEC_SFP16(r0,r2);
 
-    half out = 0;
-    half temp = r0;
-    out = ADD_VEC_SH(out,temp);
+    FP16_SCALAR_TYPE out = SET_VEC_SFP16(0);
+    FP16_SCALAR_TYPE temp = r0;
+    out = ADD_VEC_SFP16(out,temp);
 
     return out;
 }
 
-half test_hp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
-    register half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+FP16_SCALAR_TYPE test_hp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
+    register FP16_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
-    r0 = SET_VEC_SH(0.01);
-    r1 = SET_VEC_SH(0.02);
-    r2 = SET_VEC_SH(0.03);
-    r3 = SET_VEC_SH(0.04);
-    r4 = SET_VEC_SH(0.05);
-    r5 = SET_VEC_SH(0.06);
-    r6 = SET_VEC_SH(0.07);
-    r7 = SET_VEC_SH(0.08);
-    r8 = SET_VEC_SH(0.09);
-    r9 = SET_VEC_SH(0.10);
-    rA = SET_VEC_SH(0.11);
-    rB = SET_VEC_SH(0.12);
-    rC = SET_VEC_SH(0.13);
-    rD = SET_VEC_SH(0.14);
-    rE = SET_VEC_SH(0.15);
-    rF = SET_VEC_SH(0.16);
+    r0 = SET_VEC_SFP16(0.01);
+    r1 = SET_VEC_SFP16(0.02);
+    r2 = SET_VEC_SFP16(0.03);
+    r3 = SET_VEC_SFP16(0.04);
+    r4 = SET_VEC_SFP16(0.05);
+    r5 = SET_VEC_SFP16(0.06);
+    r6 = SET_VEC_SFP16(0.07);
+    r7 = SET_VEC_SFP16(0.08);
+    r8 = SET_VEC_SFP16(0.09);
+    r9 = SET_VEC_SFP16(0.10);
+    rA = SET_VEC_SFP16(0.11);
+    rB = SET_VEC_SFP16(0.12);
+    rC = SET_VEC_SFP16(0.13);
+    rD = SET_VEC_SFP16(0.14);
+    rE = SET_VEC_SFP16(0.15);
+    rF = SET_VEC_SFP16(0.16);
 
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -1325,33 +1336,33 @@ half test_hp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
         while (i < ITER){
 
             /* The performance critical part */
-            FMA_VEC_SH(r0,r0,r7,r9);
-            FMA_VEC_SH(r1,r1,r8,rA);
-            FMA_VEC_SH(r2,r2,r9,rB);
-            FMA_VEC_SH(r3,r3,rA,rC);
-            FMA_VEC_SH(r4,r4,rB,rD);
-            FMA_VEC_SH(r5,r5,rC,rE);
+            FMA_VEC_SFP16(r0,r0,r7,r9);
+            FMA_VEC_SFP16(r1,r1,r8,rA);
+            FMA_VEC_SFP16(r2,r2,r9,rB);
+            FMA_VEC_SFP16(r3,r3,rA,rC);
+            FMA_VEC_SFP16(r4,r4,rB,rD);
+            FMA_VEC_SFP16(r5,r5,rC,rE);
 
-            FMA_VEC_SH(r0,r0,rD,rF);
-            FMA_VEC_SH(r1,r1,rC,rE);
-            FMA_VEC_SH(r2,r2,rB,rD);
-            FMA_VEC_SH(r3,r3,rA,rC);
-            FMA_VEC_SH(r4,r4,r9,rB);
-            FMA_VEC_SH(r5,r5,r8,rA);
+            FMA_VEC_SFP16(r0,r0,rD,rF);
+            FMA_VEC_SFP16(r1,r1,rC,rE);
+            FMA_VEC_SFP16(r2,r2,rB,rD);
+            FMA_VEC_SFP16(r3,r3,rA,rC);
+            FMA_VEC_SFP16(r4,r4,r9,rB);
+            FMA_VEC_SFP16(r5,r5,r8,rA);
 
-            FMA_VEC_SH(r0,r0,r7,r9);
-            FMA_VEC_SH(r1,r1,r8,rA);
-            FMA_VEC_SH(r2,r2,r9,rB);
-            FMA_VEC_SH(r3,r3,rA,rC);
-            FMA_VEC_SH(r4,r4,rB,rD);
-            FMA_VEC_SH(r5,r5,rC,rE);
+            FMA_VEC_SFP16(r0,r0,r7,r9);
+            FMA_VEC_SFP16(r1,r1,r8,rA);
+            FMA_VEC_SFP16(r2,r2,r9,rB);
+            FMA_VEC_SFP16(r3,r3,rA,rC);
+            FMA_VEC_SFP16(r4,r4,rB,rD);
+            FMA_VEC_SFP16(r5,r5,rC,rE);
 
-            FMA_VEC_SH(r0,r0,rD,rF);
-            FMA_VEC_SH(r1,r1,rC,rE);
-            FMA_VEC_SH(r2,r2,rB,rD);
-            FMA_VEC_SH(r3,r3,rA,rC);
-            FMA_VEC_SH(r4,r4,r9,rB);
-            FMA_VEC_SH(r5,r5,r8,rA);
+            FMA_VEC_SFP16(r0,r0,rD,rF);
+            FMA_VEC_SFP16(r1,r1,rC,rE);
+            FMA_VEC_SFP16(r2,r2,rB,rD);
+            FMA_VEC_SFP16(r3,r3,rA,rC);
+            FMA_VEC_SFP16(r4,r4,r9,rB);
+            FMA_VEC_SFP16(r5,r5,r8,rA);
 
             i++;
         }
@@ -1364,47 +1375,48 @@ half test_hp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
     }
 
     /* Use data so that compiler does not eliminate it when using -O2 */
-    r0 = ADD_VEC_SH(r0,r1);
-    r2 = ADD_VEC_SH(r2,r3);
-    r4 = ADD_VEC_SH(r4,r5);
+    r0 = ADD_VEC_SFP16(r0,r1);
+    r2 = ADD_VEC_SFP16(r2,r3);
+    r4 = ADD_VEC_SFP16(r4,r5);
 
-    r0 = ADD_VEC_SH(r0,r6);
-    r2 = ADD_VEC_SH(r2,r4);
+    r0 = ADD_VEC_SFP16(r0,r6);
+    r2 = ADD_VEC_SFP16(r2,r4);
 
-    r0 = ADD_VEC_SH(r0,r2);
+    r0 = ADD_VEC_SFP16(r0,r2);
 
-    half out = 0;
-    half temp = r0;
-    out = ADD_VEC_SH(out,temp);
+    FP16_SCALAR_TYPE out = SET_VEC_SFP16(0);
+    FP16_SCALAR_TYPE temp = r0;
+    out = ADD_VEC_SFP16(out,temp);
 
     return out;
 }
 
-half test_hp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
-    register half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+FP16_SCALAR_TYPE test_hp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
+    register FP16_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
-    r0 = SET_VEC_SH(0.01);
-    r1 = SET_VEC_SH(0.02);
-    r2 = SET_VEC_SH(0.03);
-    r3 = SET_VEC_SH(0.04);
-    r4 = SET_VEC_SH(0.05);
-    r5 = SET_VEC_SH(0.06);
-    r6 = SET_VEC_SH(0.07);
-    r7 = SET_VEC_SH(0.08);
-    r8 = SET_VEC_SH(0.09);
-    r9 = SET_VEC_SH(0.10);
-    rA = SET_VEC_SH(0.11);
-    rB = SET_VEC_SH(0.12);
-    rC = SET_VEC_SH(0.13);
-    rD = SET_VEC_SH(0.14);
-    rE = SET_VEC_SH(0.15);
-    rF = SET_VEC_SH(0.16);
+    r0 = SET_VEC_SFP16(0.01);
+    r1 = SET_VEC_SFP16(0.02);
+    r2 = SET_VEC_SFP16(0.03);
+    r3 = SET_VEC_SFP16(0.04);
+    r4 = SET_VEC_SFP16(0.05);
+    r5 = SET_VEC_SFP16(0.06);
+    r6 = SET_VEC_SFP16(0.07);
+    r7 = SET_VEC_SFP16(0.08);
+    r8 = SET_VEC_SFP16(0.09);
+    r9 = SET_VEC_SFP16(0.10);
+    rA = SET_VEC_SFP16(0.11);
+    rB = SET_VEC_SFP16(0.12);
+    rC = SET_VEC_SFP16(0.13);
+    rD = SET_VEC_SFP16(0.14);
+    rE = SET_VEC_SFP16(0.15);
+    rF = SET_VEC_SFP16(0.16);
 
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -1414,61 +1426,61 @@ half test_hp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
         while (i < ITER){
 
             /* The performance critical part */
-            FMA_VEC_SH(r0,r0,r7,r9);
-            FMA_VEC_SH(r1,r1,r8,rA);
-            FMA_VEC_SH(r2,r2,r9,rB);
-            FMA_VEC_SH(r3,r3,rA,rC);
-            FMA_VEC_SH(r4,r4,rB,rD);
-            FMA_VEC_SH(r5,r5,rC,rE);
+            FMA_VEC_SFP16(r0,r0,r7,r9);
+            FMA_VEC_SFP16(r1,r1,r8,rA);
+            FMA_VEC_SFP16(r2,r2,r9,rB);
+            FMA_VEC_SFP16(r3,r3,rA,rC);
+            FMA_VEC_SFP16(r4,r4,rB,rD);
+            FMA_VEC_SFP16(r5,r5,rC,rE);
 
-            FMA_VEC_SH(r0,r0,rD,rF);
-            FMA_VEC_SH(r1,r1,rC,rE);
-            FMA_VEC_SH(r2,r2,rB,rD);
-            FMA_VEC_SH(r3,r3,rA,rC);
-            FMA_VEC_SH(r4,r4,r9,rB);
-            FMA_VEC_SH(r5,r5,r8,rA);
+            FMA_VEC_SFP16(r0,r0,rD,rF);
+            FMA_VEC_SFP16(r1,r1,rC,rE);
+            FMA_VEC_SFP16(r2,r2,rB,rD);
+            FMA_VEC_SFP16(r3,r3,rA,rC);
+            FMA_VEC_SFP16(r4,r4,r9,rB);
+            FMA_VEC_SFP16(r5,r5,r8,rA);
 
-            FMA_VEC_SH(r0,r0,r7,r9);
-            FMA_VEC_SH(r1,r1,r8,rA);
-            FMA_VEC_SH(r2,r2,r9,rB);
-            FMA_VEC_SH(r3,r3,rA,rC);
-            FMA_VEC_SH(r4,r4,rB,rD);
-            FMA_VEC_SH(r5,r5,rC,rE);
+            FMA_VEC_SFP16(r0,r0,r7,r9);
+            FMA_VEC_SFP16(r1,r1,r8,rA);
+            FMA_VEC_SFP16(r2,r2,r9,rB);
+            FMA_VEC_SFP16(r3,r3,rA,rC);
+            FMA_VEC_SFP16(r4,r4,rB,rD);
+            FMA_VEC_SFP16(r5,r5,rC,rE);
 
-            FMA_VEC_SH(r0,r0,rD,rF);
-            FMA_VEC_SH(r1,r1,rC,rE);
-            FMA_VEC_SH(r2,r2,rB,rD);
-            FMA_VEC_SH(r3,r3,rA,rC);
-            FMA_VEC_SH(r4,r4,r9,rB);
-            FMA_VEC_SH(r5,r5,r8,rA);
+            FMA_VEC_SFP16(r0,r0,rD,rF);
+            FMA_VEC_SFP16(r1,r1,rC,rE);
+            FMA_VEC_SFP16(r2,r2,rB,rD);
+            FMA_VEC_SFP16(r3,r3,rA,rC);
+            FMA_VEC_SFP16(r4,r4,r9,rB);
+            FMA_VEC_SFP16(r5,r5,r8,rA);
 
-            FMA_VEC_SH(r0,r0,r7,r9);
-            FMA_VEC_SH(r1,r1,r8,rA);
-            FMA_VEC_SH(r2,r2,r9,rB);
-            FMA_VEC_SH(r3,r3,rA,rC);
-            FMA_VEC_SH(r4,r4,rB,rD);
-            FMA_VEC_SH(r5,r5,rC,rE);
+            FMA_VEC_SFP16(r0,r0,r7,r9);
+            FMA_VEC_SFP16(r1,r1,r8,rA);
+            FMA_VEC_SFP16(r2,r2,r9,rB);
+            FMA_VEC_SFP16(r3,r3,rA,rC);
+            FMA_VEC_SFP16(r4,r4,rB,rD);
+            FMA_VEC_SFP16(r5,r5,rC,rE);
 
-            FMA_VEC_SH(r0,r0,rD,rF);
-            FMA_VEC_SH(r1,r1,rC,rE);
-            FMA_VEC_SH(r2,r2,rB,rD);
-            FMA_VEC_SH(r3,r3,rA,rC);
-            FMA_VEC_SH(r4,r4,r9,rB);
-            FMA_VEC_SH(r5,r5,r8,rA);
+            FMA_VEC_SFP16(r0,r0,rD,rF);
+            FMA_VEC_SFP16(r1,r1,rC,rE);
+            FMA_VEC_SFP16(r2,r2,rB,rD);
+            FMA_VEC_SFP16(r3,r3,rA,rC);
+            FMA_VEC_SFP16(r4,r4,r9,rB);
+            FMA_VEC_SFP16(r5,r5,r8,rA);
 
-            FMA_VEC_SH(r0,r0,r7,r9);
-            FMA_VEC_SH(r1,r1,r8,rA);
-            FMA_VEC_SH(r2,r2,r9,rB);
-            FMA_VEC_SH(r3,r3,rA,rC);
-            FMA_VEC_SH(r4,r4,rB,rD);
-            FMA_VEC_SH(r5,r5,rC,rE);
+            FMA_VEC_SFP16(r0,r0,r7,r9);
+            FMA_VEC_SFP16(r1,r1,r8,rA);
+            FMA_VEC_SFP16(r2,r2,r9,rB);
+            FMA_VEC_SFP16(r3,r3,rA,rC);
+            FMA_VEC_SFP16(r4,r4,rB,rD);
+            FMA_VEC_SFP16(r5,r5,rC,rE);
 
-            FMA_VEC_SH(r0,r0,rD,rF);
-            FMA_VEC_SH(r1,r1,rC,rE);
-            FMA_VEC_SH(r2,r2,rB,rD);
-            FMA_VEC_SH(r3,r3,rA,rC);
-            FMA_VEC_SH(r4,r4,r9,rB);
-            FMA_VEC_SH(r5,r5,r8,rA);
+            FMA_VEC_SFP16(r0,r0,rD,rF);
+            FMA_VEC_SFP16(r1,r1,rC,rE);
+            FMA_VEC_SFP16(r2,r2,rB,rD);
+            FMA_VEC_SFP16(r3,r3,rA,rC);
+            FMA_VEC_SFP16(r4,r4,r9,rB);
+            FMA_VEC_SFP16(r5,r5,r8,rA);
 
             i++;
         }
@@ -1481,18 +1493,18 @@ half test_hp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
     }
 
     /* Use data so that compiler does not eliminate it when using -O2 */
-    r0 = ADD_VEC_SH(r0,r1);
-    r2 = ADD_VEC_SH(r2,r3);
-    r4 = ADD_VEC_SH(r4,r5);
+    r0 = ADD_VEC_SFP16(r0,r1);
+    r2 = ADD_VEC_SFP16(r2,r3);
+    r4 = ADD_VEC_SFP16(r4,r5);
 
-    r0 = ADD_VEC_SH(r0,r6);
-    r2 = ADD_VEC_SH(r2,r4);
+    r0 = ADD_VEC_SFP16(r0,r6);
+    r2 = ADD_VEC_SFP16(r2,r4);
 
-    r0 = ADD_VEC_SH(r0,r2);
+    r0 = ADD_VEC_SFP16(r0,r2);
 
-    half out = 0;
-    half temp = r0;
-    out = ADD_VEC_SH(out,temp);
+    FP16_SCALAR_TYPE out = SET_VEC_SFP16(0);
+    FP16_SCALAR_TYPE temp = r0;
+    out = ADD_VEC_SFP16(out,temp);
 
     return out;
 }
@@ -1563,7 +1575,8 @@ float test_sp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -1641,7 +1654,8 @@ float test_sp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -1733,7 +1747,8 @@ float test_sp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -1853,7 +1868,8 @@ double test_dp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -1931,7 +1947,8 @@ double test_dp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
@@ -2023,7 +2040,8 @@ double test_dp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
     /* Start PAPI counters */
     if ( NULL != fp ) {
       if ( PAPI_start( EventSet ) != PAPI_OK ) {
-        return -1;
+	fprintf(stderr, "PAPI failed to start, but skipping return for dev purposes.\n");
+        //return -1;
       }
     }
 
