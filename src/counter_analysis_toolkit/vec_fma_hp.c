@@ -104,12 +104,9 @@ FP16_SCALAR_TYPE test_hp_mac_VEC_FMA_12( uint64 iterations, int EventSet, FILE *
 
     r0 = ADD_VEC_PFP16(r0,r2);
 
-    FP16_SCALAR_TYPE out = 0;
+    FP16_SCALAR_TYPE out = SET_VEC_SFP16(0);
     FP16_VEC_TYPE temp = r0;
     out = ADD_VEC_SFP16(out,((FP16_SCALAR_TYPE*)&temp)[0]);
-    out = ADD_VEC_SFP16(out,((FP16_SCALAR_TYPE*)&temp)[1]);
-    out = ADD_VEC_SFP16(out,((FP16_SCALAR_TYPE*)&temp)[2]);
-    out = ADD_VEC_SFP16(out,((FP16_SCALAR_TYPE*)&temp)[3]);
 
     return out;
 }
@@ -197,12 +194,9 @@ FP16_SCALAR_TYPE test_hp_mac_VEC_FMA_24( uint64 iterations, int EventSet, FILE *
 
     r0 = ADD_VEC_PFP16(r0,r2);
 
-    FP16_SCALAR_TYPE out = 0;
+    FP16_SCALAR_TYPE out = SET_VEC_SFP16(0);
     FP16_VEC_TYPE temp = r0;
     out = ADD_VEC_SFP16(out,((FP16_SCALAR_TYPE*)&temp)[0]);
-    out = ADD_VEC_SFP16(out,((FP16_SCALAR_TYPE*)&temp)[1]);
-    out = ADD_VEC_SFP16(out,((FP16_SCALAR_TYPE*)&temp)[2]);
-    out = ADD_VEC_SFP16(out,((FP16_SCALAR_TYPE*)&temp)[3]);
 
     return out;
 }
@@ -318,12 +312,9 @@ FP16_SCALAR_TYPE test_hp_mac_VEC_FMA_48( uint64 iterations, int EventSet, FILE *
 
     r0 = ADD_VEC_PFP16(r0,r2);
 
-    FP16_SCALAR_TYPE out = 0;
+    FP16_SCALAR_TYPE out = SET_VEC_SFP16(0);
     FP16_VEC_TYPE temp = r0;
-    out = ADD_VEC_SFP16(out,((FP16_SCALAR_TYPE*)&temp)[0]);
-    out = ADD_VEC_SFP16(out,((FP16_SCALAR_TYPE*)&temp)[1]);
-    out = ADD_VEC_SFP16(out,((FP16_SCALAR_TYPE*)&temp)[2]);
-    out = ADD_VEC_SFP16(out,((FP16_SCALAR_TYPE*)&temp)[3]);
+    out = ADD_VEC_SFP16(out,((FP16_SCALAR_TYPE*)&temp)[0]); // this is redundant -- needlessly complex
 
     return out;
 }
@@ -331,8 +322,8 @@ FP16_SCALAR_TYPE test_hp_mac_VEC_FMA_48( uint64 iterations, int EventSet, FILE *
 static
 void test_hp_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp )
 {
-    FP16_SCALAR_TYPE sum = 0.0;
-    FP16_SCALAR_TYPE scalar_sum = 0.0;
+    FP16_SCALAR_TYPE sum = SET_VEC_SFP16(0.0);
+    FP16_SCALAR_TYPE scalar_sum = SET_VEC_SFP16(0.0);
 
     if ( instr_per_loop == 12 ) {
         sum = ADD_VEC_SFP16(sum,test_hp_mac_VEC_FMA_12( iterations, EventSet, fp ));
@@ -347,7 +338,7 @@ void test_hp_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, FILE 
         scalar_sum = ADD_VEC_SFP16(scalar_sum,test_hp_scalar_VEC_FMA_48( iterations, EventSet, NULL ));
     }
 
-    if( DIV_VEC_SFP16(sum,4.0) != scalar_sum ) {
+    if( ((TEMP_TYPE*)&sum)[0] != ((TEMP_TYPE*)&scalar_sum)[0] ) {
         fprintf(stderr, "FMA: Inconsistent FLOP results detected!\n");
     }
 }
@@ -411,7 +402,7 @@ void test_hp_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, FILE 
         scalar_sum += test_hp_scalar_VEC_FMA_48( iterations, EventSet, NULL );
     }
 
-    if( sum/4.0 != scalar_sum ) {
+    if( sum != scalar_sum ) {
         fprintf(stderr, "FMA: Inconsistent FLOP results detected!\n");
     }
 }

@@ -31,18 +31,19 @@ ifndef ARCH
 endif
 
 ## Architecture determines vector instruction set.
+# Note, we can't use -mavx512fp16 -mavx512bf16 for ANY AVX unless AVX512 is avail.
 ifeq ($(ARCH),X86)
     FLOP+=-mfma -DX86
     VECSRC=vec_fma_hp vec_fma_sp vec_fma_dp vec_nonfma_hp vec_nonfma_sp vec_nonfma_dp
     VEC_META=-DAVX128_AVAIL -DAVX256_AVAIL -DAVX512_AVAIL
-    VEC128=-mavx -O0 -DX86 $(VEC_META) -DX86_VEC_WIDTH_128B
-    VEC256=-mavx -O0 -DX86 $(VEC_META) -DX86_VEC_WIDTH_256B
-    VEC512=-mavx512f -O0 -DX86 $(VEC_META) -DX86_VEC_WIDTH_512B
-    VEC128_FMA=-mfma4 -mfma -O0 -DX86 $(VEC_META) -DX86_VEC_WIDTH_128B
-    VEC256_FMA=-mfma4 -mfma -O0 -DX86 $(VEC_META) -DX86_VEC_WIDTH_256B
-    VEC512_FMA=-mfma4 -mfma -mavx512f -O0 -DX86 $(VEC_META) -DX86_VEC_WIDTH_512B
-    VEC=-mavx -O0 -DX86
-    VEC_FMA=-mfma4 -mfma -O0 -DX86
+    VEC128=-mavx -mavx512vl -mavx512fp16 -mavx512bf16 -O0 -DX86 $(VEC_META) -DX86_VEC_WIDTH_128B
+    VEC256=-mavx -mavx512vl -mavx512fp16 -mavx512bf16 -O0 -DX86 $(VEC_META) -DX86_VEC_WIDTH_256B
+    VEC512=-mavx -mavx512vl -mavx512fp16 -mavx512bf16 -O0 -DX86 $(VEC_META) -DX86_VEC_WIDTH_512B
+    VEC128_FMA=-mfma4 -mfma -mavx512vl -mavx512fp16 -mavx512bf16 -O0 -DX86 $(VEC_META) -DX86_VEC_WIDTH_128B
+    VEC256_FMA=-mfma4 -mfma -mavx512vl -mavx512fp16 -mavx512bf16 -O0 -DX86 $(VEC_META) -DX86_VEC_WIDTH_256B
+    VEC512_FMA=-mfma4 -mfma -mavx512vl -mavx512fp16 -mavx512bf16 -O0 -DX86 $(VEC_META) -DX86_VEC_WIDTH_512B
+    VEC=-mavx -mavx512fp16 -mavx512bf16 -O0 -DX86
+    VEC_FMA=-mfma4 -mfma -mavx512f -mavx512fp16 -mavx512bf16 -O0 -DX86
     VEC_ALL=$(VEC) $(VEC_FMA) -O0 -DX86
     INSTR=-mavx512vl
 endif

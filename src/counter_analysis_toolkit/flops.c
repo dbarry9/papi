@@ -190,7 +190,7 @@ void gemm_half( int n, half *ch, half *ah, half *bh ) {
         for (j = 0; j < n; j++) {
             sum = 0.0;
             for (k = 0; k < n; k++) {
-                FMA_VEC_SH(sum, ah[i * n + k], bh[k * n + j], sum);
+                sum = FMA_VEC_SH(ah[i * n + k], bh[k * n + j], sum);
             }
             ch[i * n + j] = sum;
         }
@@ -248,7 +248,7 @@ void gemm_single( int n, float *cs, float *as, float *bs ) {
             for (k = 0; k < n; k++) {
                 argI = SET_VEC_SS(as[i * n + k]);
                 argJ = SET_VEC_SS(bs[k * n + j]);
-                FMA_VEC_SS(argK, argI, argJ, argK);
+                argK = FMA_VEC_SS(argI, argJ, argK);
             }
             cs[i * n + j] = ((float*)&argK)[0];
         }
@@ -306,7 +306,7 @@ void gemm_double( int n, double *cd, double *ad, double *bd ) {
             for (k = 0; k < n; k++) {
                 argI = SET_VEC_SD(ad[i * n + k]);
                 argJ = SET_VEC_SD(bd[k * n + j]);
-                FMA_VEC_SD(argK, argI, argJ, argK);
+                argK = FMA_VEC_SD(argI, argJ, argK);
             }
             cd[i * n + j] = ((double*)&argK)[0];
         }
