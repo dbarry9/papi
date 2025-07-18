@@ -306,7 +306,7 @@ int check_cards(cat_params_t params, int** indexmemo, char** basenames, int* car
 static hw_desc_t *obtain_hardware_description(char *conf_file_name){
     int i,j;
     hw_desc_t *hw_desc;
-	PAPI_mh_level_t *L;
+    PAPI_mh_level_t *L;
     const PAPI_hw_info_t *meminfo;
 
     // Allocate some space.
@@ -329,7 +329,7 @@ static hw_desc_t *obtain_hardware_description(char *conf_file_name){
     if( NULL != meminfo ) {
         hw_desc->numcpus = meminfo->ncpu;
         hw_desc->cache_levels = meminfo->mem_hierarchy.levels;
-	    L = ( PAPI_mh_level_t * ) & ( meminfo->mem_hierarchy.level[0] );
+        L = ( PAPI_mh_level_t * ) & ( meminfo->mem_hierarchy.level[0] );
         for ( i = 0; i < meminfo->mem_hierarchy.levels && i<_MAX_SUPPORTED_CACHE_LEVELS; i++ ) {
             for ( j = 0; j < 2; j++ ) {
                 if ( (PAPI_MH_TYPE_DATA == PAPI_MH_CACHE_TYPE(L[i].cache[j].type)) ||

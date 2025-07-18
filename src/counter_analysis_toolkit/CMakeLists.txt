@@ -6,6 +6,12 @@ project(
     LANGUAGES C
 )
 
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    message( STATUS "GCC is active.")
+else()
+    message( FATAL_ERROR "GCC is required. Please set -DCMAKE_C_COMPILER=/path/to/gcc" )
+endif()
+
 include(CheckCCompilerFlag)
 
 #-------------------------------------------------------------------------------
@@ -20,6 +26,9 @@ if(NOT DEFINED ARCH)
     # Determine the architecture.
     execute_process(COMMAND uname -m OUTPUT_VARIABLE UNAME_M OUTPUT_STRIP_TRAILING_WHITESPACE)
     message(STATUS "uname -m : ${UNAME_M}")
+    set(FLOP    "")
+    set(INSTR   "")
+    set(VEC_ALL "")
     if(UNAME_M STREQUAL "x86_64")
         set(ARCH X86)
         set(FLOP -D${ARCH})
@@ -31,8 +40,6 @@ if(NOT DEFINED ARCH)
         set(VEC128_FMA -O0 -D${ARCH})
         set(VEC256_FMA -O0 -D${ARCH})
         set(VEC512_FMA -O0 -D${ARCH})
-        set(VEC     -O0 -D${ARCH})
-        set(VEC_FMA -O0 -D${ARCH})
         set(VEC_ALL -O0 -D${ARCH})
 
         # Check to see what the hardware supports.
@@ -78,7 +85,7 @@ if(NOT DEFINED ARCH)
                 list(APPEND VEC_META   -DAVX128_AVAIL)
                 list(APPEND VEC128     -mavx -DX86_VEC_WIDTH_128B)
                 list(APPEND VEC128_FMA -mavx -DX86_VEC_WIDTH_128B)
-                list(APPEND VEC        -mavx)
+                list(APPEND VEC_ALL    -mavx)
             else()
                 message(STATUS "Hardware does not support AVX128!")
             endif()
@@ -94,6 +101,7 @@ if(NOT DEFINED ARCH)
                 list(APPEND VEC_META   -DAVX256_AVAIL)
                 list(APPEND VEC256     -mavx2 -DX86_VEC_WIDTH_256B)
                 list(APPEND VEC256_FMA -mavx2 -DX86_VEC_WIDTH_256B)
+                list(APPEND VEC_ALL    -mavx2)
             else()
                 message(STATUS "Hardware does not support AVX256!")
             endif()
@@ -109,6 +117,7 @@ if(NOT DEFINED ARCH)
                 list(APPEND VEC_META   -DAVX512_AVAIL)
                 list(APPEND VEC512     -mavx512f -DX86_VEC_WIDTH_512B)
                 list(APPEND VEC512_FMA -mavx512f -DX86_VEC_WIDTH_512B)
+                list(APPEND VEC_ALL    -mavx512f)
             else()
                 message(STATUS "Hardware does not support AVX512!")
             endif()
@@ -118,7 +127,55 @@ if(NOT DEFINED ARCH)
                 message(STATUS "Compiler supports AVX512VL")
                 if(AVX512VL_AVAIL)
                     message(STATUS "Hardware supports AVX512VL")
-                    list(APPEND INSTR  -mavx512vl)
+                    list(APPEND INSTR      -mavx512vl)
+                    list(APPEND VEC128     -mavx512vl)
+                    list(APPEND VEC128_FMA -mavx512vl)
+                    list(APPEND VEC256     -mavx512vl)
+                    list(APPEND VEC256_FMA -mavx512vl)
+                    list(APPEND VEC512     -mavx512vl)
+                    list(APPEND VEC512_FMA -mavx512vl)
+                    list(APPEND VEC_ALL    -mavx512vl)
+
+                    # Check for FP16.
+                    if(AVX512_FP16_CC_AVAIL)
+                        message(STATUS "Compiler supports AVX512_FP16")
+                        if(AVX512_FP16_AVAIL)
+                            message(STATUS "Hardware supports AVX512_FP16")
+                            list(APPEND VEC_META   -DAVX512_FP16_AVAIL)
+                            list(APPEND VEC128     -mavx512fp16)
+                            list(APPEND VEC128_FMA -mavx512fp16)
+                            list(APPEND VEC256     -mavx512fp16)
+                            list(APPEND VEC256_FMA -mavx512fp16)
+                            list(APPEND VEC512     -mavx512fp16)
+                            list(APPEND VEC512_FMA -mavx512fp16)
+                            list(APPEND VEC_ALL    -mavx512fp16)
+                        else()
+                            message(STATUS "Hardware does not support AVX512_FP16!")
+                        endif()
+                    else()
+                        message(STATUS "Compiler does not support AVX512_FP16!")
+                    endif()
+
+                    # Check for BF16.
+                    if(AVX512_BF16_CC_AVAIL)
+                        message(STATUS "Compiler supports AVX512_BF16")
+                        if(AVX512_BF16_AVAIL)
+                            message(STATUS "Hardware supports AVX512_BF16")
+                            list(APPEND VEC_META   -DAVX512_BF16_AVAIL)
+                            list(APPEND VEC128     -mavx512bf16)
+                            list(APPEND VEC128_FMA -mavx512bf16)
+                            list(APPEND VEC256     -mavx512bf16)
+                            list(APPEND VEC256_FMA -mavx512bf16)
+                            list(APPEND VEC512     -mavx512bf16)
+                            list(APPEND VEC512_FMA -mavx512bf16)
+                            list(APPEND VEC_ALL    -mavx512bf16)
+                        else()
+                            message(STATUS "Hardware does not support AVX512_BF16!")
+                        endif()
+                    else()
+                        message(STATUS "Compiler does not support AVX512_BF16!")
+                    endif()
+
                 else()
                     message(STATUS "Hardware does not support AVX512VL!")
                 endif()
@@ -126,37 +183,11 @@ if(NOT DEFINED ARCH)
                 message(STATUS "Compiler does not support AVX512VL!")
             endif()
 
-            # Check for FP16.
-            if(AVX512_FP16_CC_AVAIL)
-                message(STATUS "Compiler supports AVX512_FP16")
-                if(AVX512_FP16_AVAIL)
-                    message(STATUS "Hardware supports AVX512_FP16")
-                    list(APPEND INSTR  -mavx512_fp16)
-                else()
-                    message(STATUS "Hardware does not support AVX512_FP16!")
-                endif()
-            else()
-                message(STATUS "Compiler does not support AVX512_FP16!")
-            endif()
-
-            # Check for BF16.
-            if(AVX512_BF16_CC_AVAIL)
-                message(STATUS "Compiler supports AVX512_BF16")
-                if(AVX512_BF16_AVAIL)
-                    message(STATUS "Hardware supports AVX512_BF16")
-                    list(APPEND INSTR  -mavx512_bf16)
-                else()
-                    message(STATUS "Hardware does not support AVX512_BF16!")
-                endif()
-            else()
-                message(STATUS "Compiler does not support AVX512_BF16!")
-            endif()
-
         else()
             message(STATUS "Compiler does not support AVX512!")
         endif()
 
-        # Check FMA availability. -- prob need a -DAVX128_FMA_AVAIL flag at some point.
+        # Check FMA availability. -- prob need a meta -DAVX128_FMA_AVAIL flag at some point.
         if(FMA_CC_AVAIL)
             message(STATUS "Compiler supports FMA")
             if(FMA_AVAIL)
@@ -165,7 +196,7 @@ if(NOT DEFINED ARCH)
                 list(APPEND VEC128_FMA -mfma)
                 list(APPEND VEC256_FMA -mfma)
                 list(APPEND VEC512_FMA -mfma)
-                list(APPEND VEC_FMA    -mfma)
+                list(APPEND VEC_ALL    -mfma)
             else()
                 message(STATUS "Hardware does not support FMA!")
             endif()
@@ -180,38 +211,47 @@ if(NOT DEFINED ARCH)
         list(APPEND VEC128_FMA ${VEC_META})
         list(APPEND VEC256_FMA ${VEC_META})
         list(APPEND VEC512_FMA ${VEC_META})
-        list(APPEND VEC_ALL    ${VEC} ${VEC_FMA})
 
         # Conditionally add AVX128 dependencies.
         if(AVX128_CC_AVAIL AND AVX128_AVAIL)
-            list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_hp-128B>
+            list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_fp16-128B>
+                                    $<TARGET_OBJECTS:vec_nonfma_bf16-128B>
                                     $<TARGET_OBJECTS:vec_nonfma_sp-128B>
                                     $<TARGET_OBJECTS:vec_nonfma_dp-128B>)
-            add_library(vec_nonfma_hp-128B OBJECT src/vec_scalar_verify.h src/vec_nonfma_hp.c)
-            target_compile_options(vec_nonfma_hp-128B PRIVATE ${VEC128})
-            set_target_properties(vec_nonfma_hp-128B PROPERTIES OUTPUT_NAME "vec_nonfma_hp-128B")
+            add_library(vec_nonfma_fp16-128B OBJECT src/vec_nonfma_fp16.c)
+            target_compile_options(vec_nonfma_fp16-128B PRIVATE ${VEC128})
+            set_target_properties(vec_nonfma_fp16-128B PROPERTIES OUTPUT_NAME "vec_nonfma_fp16-128B")
 
-            add_library(vec_nonfma_sp-128B OBJECT src/vec_scalar_verify.h src/vec_nonfma_sp.c)
+            add_library(vec_nonfma_bf16-128B OBJECT src/vec_nonfma_bf16.c)
+            target_compile_options(vec_nonfma_bf16-128B PRIVATE ${VEC128})
+            set_target_properties(vec_nonfma_bf16-128B PROPERTIES OUTPUT_NAME "vec_nonfma_bf16-128B")
+
+            add_library(vec_nonfma_sp-128B OBJECT src/vec_nonfma_sp.c)
             target_compile_options(vec_nonfma_sp-128B PRIVATE ${VEC128})
             set_target_properties(vec_nonfma_sp-128B PROPERTIES OUTPUT_NAME "vec_nonfma_sp-128B")
 
-            add_library(vec_nonfma_dp-128B OBJECT src/vec_scalar_verify.h src/vec_nonfma_dp.c)
+            add_library(vec_nonfma_dp-128B OBJECT src/vec_nonfma_dp.c)
             target_compile_options(vec_nonfma_dp-128B PRIVATE ${VEC128})
             set_target_properties(vec_nonfma_dp-128B PROPERTIES OUTPUT_NAME "vec_nonfma_dp-128B")
 
             if(FMA_CC_AVAIL AND FMA_AVAIL)
-                list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_hp-128B>
+                list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_fp16-128B> # note we prob shouldnt add the hp case unless hp is avail, but the code has ifdefs that protect for this.
+                                        $<TARGET_OBJECTS:vec_fma_bf16-128B>
                                         $<TARGET_OBJECTS:vec_fma_sp-128B>
                                         $<TARGET_OBJECTS:vec_fma_dp-128B>)
-                add_library(vec_fma_hp-128B OBJECT src/vec_scalar_verify.h src/vec_fma_hp.c)
-                target_compile_options(vec_fma_hp-128B PRIVATE ${VEC128_FMA})
-                set_target_properties(vec_fma_hp-128B PROPERTIES OUTPUT_NAME "vec_fma_hp-128B")
+                add_library(vec_fma_fp16-128B OBJECT src/vec_fma_fp16.c)
+                target_compile_options(vec_fma_fp16-128B PRIVATE ${VEC128_FMA})
+                set_target_properties(vec_fma_fp16-128B PROPERTIES OUTPUT_NAME "vec_fma_fp16-128B")
 
-                add_library(vec_fma_sp-128B OBJECT src/vec_scalar_verify.h src/vec_fma_sp.c)
+                add_library(vec_fma_bf16-128B OBJECT src/vec_fma_bf16.c)
+                target_compile_options(vec_fma_bf16-128B PRIVATE ${VEC128_FMA})
+                set_target_properties(vec_fma_bf16-128B PROPERTIES OUTPUT_NAME "vec_fma_bf16-128B")
+
+                add_library(vec_fma_sp-128B OBJECT src/vec_fma_sp.c)
                 target_compile_options(vec_fma_sp-128B PRIVATE ${VEC128_FMA})
                 set_target_properties(vec_fma_sp-128B PROPERTIES OUTPUT_NAME "vec_fma_sp-128B")
 
-                add_library(vec_fma_dp-128B OBJECT src/vec_scalar_verify.h src/vec_fma_dp.c)
+                add_library(vec_fma_dp-128B OBJECT src/vec_fma_dp.c)
                 target_compile_options(vec_fma_dp-128B PRIVATE ${VEC128_FMA})
                 set_target_properties(vec_fma_dp-128B PROPERTIES OUTPUT_NAME "vec_fma_dp-128B")
             endif()
@@ -219,34 +259,44 @@ if(NOT DEFINED ARCH)
 
         # Conditionally add AVX256 dependencies.
         if(AVX256_CC_AVAIL AND AVX256_AVAIL)
-            list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_hp-256B>
+            list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_fp16-256B>
+                                    $<TARGET_OBJECTS:vec_nonfma_bf16-256B>
                                     $<TARGET_OBJECTS:vec_nonfma_sp-256B>
                                     $<TARGET_OBJECTS:vec_nonfma_dp-256B>)
-            add_library(vec_nonfma_hp-256B OBJECT src/vec_scalar_verify.h src/vec_nonfma_hp.c)
-            target_compile_options(vec_nonfma_hp-256B PRIVATE ${VEC256})
-            set_target_properties(vec_nonfma_hp-256B PROPERTIES OUTPUT_NAME "vec_nonfma_hp-256B")
+            add_library(vec_nonfma_fp16-256B OBJECT src/vec_nonfma_fp16.c)
+            target_compile_options(vec_nonfma_fp16-256B PRIVATE ${VEC256})
+            set_target_properties(vec_nonfma_fp16-256B PROPERTIES OUTPUT_NAME "vec_nonfma_fp16-256B")
 
-            add_library(vec_nonfma_sp-256B OBJECT src/vec_scalar_verify.h src/vec_nonfma_sp.c)
+            add_library(vec_nonfma_bf16-256B OBJECT src/vec_nonfma_bf16.c)
+            target_compile_options(vec_nonfma_bf16-256B PRIVATE ${VEC256})
+            set_target_properties(vec_nonfma_bf16-256B PROPERTIES OUTPUT_NAME "vec_nonfma_bf16-256B")
+
+            add_library(vec_nonfma_sp-256B OBJECT src/vec_nonfma_sp.c)
             target_compile_options(vec_nonfma_sp-256B PRIVATE ${VEC256})
             set_target_properties(vec_nonfma_sp-256B PROPERTIES OUTPUT_NAME "vec_nonfma_sp-256B")
 
-            add_library(vec_nonfma_dp-256B OBJECT src/vec_scalar_verify.h src/vec_nonfma_dp.c)
+            add_library(vec_nonfma_dp-256B OBJECT src/vec_nonfma_dp.c)
             target_compile_options(vec_nonfma_dp-256B PRIVATE ${VEC256})
             set_target_properties(vec_nonfma_dp-256B PROPERTIES OUTPUT_NAME "vec_nonfma_dp-256B")
 
             if(FMA_CC_AVAIL AND FMA_AVAIL)
-                list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_hp-256B>
+                list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_fp16-256B>
+                                        $<TARGET_OBJECTS:vec_fma_bf16-256B>
                                         $<TARGET_OBJECTS:vec_fma_sp-256B>
                                         $<TARGET_OBJECTS:vec_fma_dp-256B>)
-                add_library(vec_fma_hp-256B OBJECT src/vec_scalar_verify.h src/vec_fma_hp.c)
-                target_compile_options(vec_fma_hp-256B PRIVATE ${VEC256_FMA})
-                set_target_properties(vec_fma_hp-256B PROPERTIES OUTPUT_NAME "vec_fma_hp-256B")
+                add_library(vec_fma_fp16-256B OBJECT src/vec_fma_fp16.c)
+                target_compile_options(vec_fma_fp16-256B PRIVATE ${VEC256_FMA})
+                set_target_properties(vec_fma_fp16-256B PROPERTIES OUTPUT_NAME "vec_fma_fp16-256B")
 
-                add_library(vec_fma_sp-256B OBJECT src/vec_scalar_verify.h src/vec_fma_sp.c)
+                add_library(vec_fma_bf16-256B OBJECT src/vec_fma_bf16.c)
+                target_compile_options(vec_fma_bf16-256B PRIVATE ${VEC256_FMA})
+                set_target_properties(vec_fma_bf16-256B PROPERTIES OUTPUT_NAME "vec_fma_bf16-256B")
+
+                add_library(vec_fma_sp-256B OBJECT src/vec_fma_sp.c)
                 target_compile_options(vec_fma_sp-256B PRIVATE ${VEC256_FMA})
                 set_target_properties(vec_fma_sp-256B PROPERTIES OUTPUT_NAME "vec_fma_sp-256B")
 
-                add_library(vec_fma_dp-256B OBJECT src/vec_scalar_verify.h src/vec_fma_dp.c)
+                add_library(vec_fma_dp-256B OBJECT src/vec_fma_dp.c)
                 target_compile_options(vec_fma_dp-256B PRIVATE ${VEC256_FMA})
                 set_target_properties(vec_fma_dp-256B PROPERTIES OUTPUT_NAME "vec_fma_dp-256B")
             endif()
@@ -254,96 +304,118 @@ if(NOT DEFINED ARCH)
 
         # Conditionally add AVX512 dependencies.
         if(AVX512_CC_AVAIL AND AVX512_AVAIL)
-            list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_hp-512B>
+            list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_fp16-512B>
+                                    $<TARGET_OBJECTS:vec_nonfma_bf16-512B>
                                     $<TARGET_OBJECTS:vec_nonfma_sp-512B>
                                     $<TARGET_OBJECTS:vec_nonfma_dp-512B>)
-            add_library(vec_nonfma_hp-512B OBJECT src/vec_scalar_verify.h src/vec_nonfma_hp.c)
-            target_compile_options(vec_nonfma_hp-512B PRIVATE ${VEC512})
-            set_target_properties(vec_nonfma_hp-512B PROPERTIES OUTPUT_NAME "vec_nonfma_hp-512B")
+            add_library(vec_nonfma_fp16-512B OBJECT src/vec_nonfma_fp16.c)
+            target_compile_options(vec_nonfma_fp16-512B PRIVATE ${VEC512})
+            set_target_properties(vec_nonfma_fp16-512B PROPERTIES OUTPUT_NAME "vec_nonfma_fp16-512B")
 
-            add_library(vec_nonfma_sp-512B OBJECT src/vec_scalar_verify.h src/vec_nonfma_sp.c)
+            add_library(vec_nonfma_bf16-512B OBJECT src/vec_nonfma_bf16.c)
+            target_compile_options(vec_nonfma_bf16-512B PRIVATE ${VEC512})
+            set_target_properties(vec_nonfma_bf16-512B PROPERTIES OUTPUT_NAME "vec_nonfma_bf16-512B")
+
+            add_library(vec_nonfma_sp-512B OBJECT src/vec_nonfma_sp.c)
             target_compile_options(vec_nonfma_sp-512B PRIVATE ${VEC512})
             set_target_properties(vec_nonfma_sp-512B PROPERTIES OUTPUT_NAME "vec_nonfma_sp-512B")
 
-            add_library(vec_nonfma_dp-512B OBJECT src/vec_scalar_verify.h src/vec_nonfma_dp.c)
+            add_library(vec_nonfma_dp-512B OBJECT src/vec_nonfma_dp.c)
             target_compile_options(vec_nonfma_dp-512B PRIVATE ${VEC512})
             set_target_properties(vec_nonfma_dp-512B PROPERTIES OUTPUT_NAME "vec_nonfma_dp-512B")
 
             if(FMA_CC_AVAIL AND FMA_AVAIL)
-                list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_hp-512B>
+                list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_fp16-512B>
+                                        $<TARGET_OBJECTS:vec_fma_bf16-512B>
                                         $<TARGET_OBJECTS:vec_fma_sp-512B>
                                         $<TARGET_OBJECTS:vec_fma_dp-512B>)
-                add_library(vec_fma_hp-512B OBJECT src/vec_scalar_verify.h src/vec_fma_hp.c)
-                target_compile_options(vec_fma_hp-512B PRIVATE ${VEC512_FMA})
-                set_target_properties(vec_fma_hp-512B PROPERTIES OUTPUT_NAME "vec_fma_hp-512B")
+                add_library(vec_fma_fp16-512B OBJECT src/vec_fma_fp16.c)
+                target_compile_options(vec_fma_fp16-512B PRIVATE ${VEC512_FMA})
+                set_target_properties(vec_fma_fp16-512B PROPERTIES OUTPUT_NAME "vec_fma_fp16-512B")
 
-                add_library(vec_fma_sp-512B OBJECT src/vec_scalar_verify.h src/vec_fma_sp.c)
+                add_library(vec_fma_bf16-512B OBJECT src/vec_fma_bf16.c)
+                target_compile_options(vec_fma_bf16-512B PRIVATE ${VEC512_FMA})
+                set_target_properties(vec_fma_bf16-512B PROPERTIES OUTPUT_NAME "vec_fma_bf16-512B")
+
+                add_library(vec_fma_sp-512B OBJECT src/vec_fma_sp.c)
                 target_compile_options(vec_fma_sp-512B PRIVATE ${VEC512_FMA})
                 set_target_properties(vec_fma_sp-512B PROPERTIES OUTPUT_NAME "vec_fma_sp-512B")
 
-                add_library(vec_fma_dp-512B OBJECT src/vec_scalar_verify.h src/vec_fma_dp.c)
+                add_library(vec_fma_dp-512B OBJECT src/vec_fma_dp.c)
                 target_compile_options(vec_fma_dp-512B PRIVATE ${VEC512_FMA})
                 set_target_properties(vec_fma_dp-512B PROPERTIES OUTPUT_NAME "vec_fma_dp-512B")
             endif()
         endif()
     elseif(UNAME_M STREQUAL "aarch64")
         set(ARCH "ARM")
-        set(FLOP -march=armv8.2-a+fp16 -DARM)
-        set(VEC -march=armv8.2-a+fp16 -O0 -DARM)
-        set(VEC_FMA -march=armv8.2-a+fp16 -O0 -DARM)
-        set(VEC_ALL ${VEC} -O0 -DARM)
-        list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_hp>
+        set(FLOP    -march=armv8.2-a+fp16 -DARM)
+        set(VEC_ALL -march=armv8.2-a+fp16 -O0 -DARM)
+        list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_fp16>
+                                $<TARGET_OBJECTS:vec_fma_bf16>
                                 $<TARGET_OBJECTS:vec_fma_sp>
                                 $<TARGET_OBJECTS:vec_fma_dp>
-                                $<TARGET_OBJECTS:vec_nonfma_hp>
+                                $<TARGET_OBJECTS:vec_nonfma_fp16>
+                                $<TARGET_OBJECTS:vec_nonfma_bf16>
                                 $<TARGET_OBJECTS:vec_nonfma_sp>
                                 $<TARGET_OBJECTS:vec_nonfma_dp>)
-        add_library(vec_fma_hp OBJECT src/vec_scalar_verify.h src/vec_fma_hp.c)
-        target_compile_options(vec_fma_hp PRIVATE ${VEC_FMA})
+        add_library(vec_fma_fp16 OBJECT src/vec_fma_fp16.c)
+        target_compile_options(vec_fma_fp16 PRIVATE ${VEC_ALL})
 
-        add_library(vec_fma_sp OBJECT src/vec_scalar_verify.h src/vec_fma_sp.c)
-        target_compile_options(vec_fma_sp PRIVATE ${VEC_FMA})
+        add_library(vec_fma_bf16 OBJECT src/vec_fma_bf16.c)
+        target_compile_options(vec_fma_bf16 PRIVATE ${VEC_ALL})
 
-        add_library(vec_fma_dp OBJECT src/vec_scalar_verify.h src/vec_fma_dp.c)
-        target_compile_options(vec_fma_dp PRIVATE ${VEC_FMA})
+        add_library(vec_fma_sp OBJECT src/vec_fma_sp.c)
+        target_compile_options(vec_fma_sp PRIVATE ${VEC_ALL})
 
-        add_library(vec_nonfma_hp OBJECT src/vec_scalar_verify.h src/vec_nonfma_hp.c)
-        target_compile_options(vec_nonfma_hp PRIVATE ${VEC})
+        add_library(vec_fma_dp OBJECT src/vec_fma_dp.c)
+        target_compile_options(vec_fma_dp PRIVATE ${VEC_ALL})
 
-        add_library(vec_nonfma_sp OBJECT src/vec_scalar_verify.h src/vec_nonfma_sp.c)
-        target_compile_options(vec_nonfma_sp PRIVATE ${VEC})
+        add_library(vec_nonfma_fp16 OBJECT src/vec_nonfma_fp16.c)
+        target_compile_options(vec_nonfma_fp16 PRIVATE ${VEC_ALL})
 
-        add_library(vec_nonfma_dp OBJECT src/vec_scalar_verify.h src/vec_nonfma_dp.c)
-        target_compile_options(vec_nonfma_dp PRIVATE ${VEC})
+        add_library(vec_nonfma_bf16 OBJECT src/vec_nonfma_bf16.c)
+        target_compile_options(vec_nonfma_bf16 PRIVATE ${VEC_ALL})
+
+        add_library(vec_nonfma_sp OBJECT src/vec_nonfma_sp.c)
+        target_compile_options(vec_nonfma_sp PRIVATE ${VEC_ALL})
+
+        add_library(vec_nonfma_dp OBJECT src/vec_nonfma_dp.c)
+        target_compile_options(vec_nonfma_dp PRIVATE ${VEC_ALL})
     else()
         set(ARCH "POWER")
-        set(FLOP -maltivec -DPOWER)
-        set(VEC -maltivec -DPOWER)
-        set(VEC_FMA -maltivec -DPOWER)
-        set(VEC_ALL ${VEC} -DPOWER)
-        list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_hp>
+        set(FLOP    -maltivec -DPOWER)
+        set(VEC_ALL -maltivec -DPOWER)
+        list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_fp16>
+                                $<TARGET_OBJECTS:vec_fma_bf16>
                                 $<TARGET_OBJECTS:vec_fma_sp>
                                 $<TARGET_OBJECTS:vec_fma_dp>
-                                $<TARGET_OBJECTS:vec_nonfma_hp>
+                                $<TARGET_OBJECTS:vec_nonfma_fp16>
+                                $<TARGET_OBJECTS:vec_nonfma_bf16>
                                 $<TARGET_OBJECTS:vec_nonfma_sp>
                                 $<TARGET_OBJECTS:vec_nonfma_dp>)
-        add_library(vec_fma_hp OBJECT src/vec_scalar_verify.h src/vec_fma_hp.c)
-        target_compile_options(vec_fma_hp PRIVATE ${VEC_FMA})
+        add_library(vec_fma_fp16 OBJECT src/vec_fma_fp16.c)
+        target_compile_options(vec_fma_fp16 PRIVATE ${VEC_ALL})
 
-        add_library(vec_fma_sp OBJECT src/vec_scalar_verify.h src/vec_fma_sp.c)
-        target_compile_options(vec_fma_sp PRIVATE ${VEC_FMA})
+        add_library(vec_fma_bf16 OBJECT src/vec_fma_bf16.c)
+        target_compile_options(vec_fma_bf16 PRIVATE ${VEC_ALL})
 
-        add_library(vec_fma_dp OBJECT src/vec_scalar_verify.h src/vec_fma_dp.c)
-        target_compile_options(vec_fma_dp PRIVATE ${VEC_FMA})
+        add_library(vec_fma_sp OBJECT src/vec_fma_sp.c)
+        target_compile_options(vec_fma_sp PRIVATE ${VEC_ALL})
 
-        add_library(vec_nonfma_hp OBJECT src/vec_scalar_verify.h src/vec_nonfma_hp.c)
-        target_compile_options(vec_nonfma_hp PRIVATE ${VEC})
+        add_library(vec_fma_dp OBJECT src/vec_fma_dp.c)
+        target_compile_options(vec_fma_dp PRIVATE ${VEC_ALL})
 
-        add_library(vec_nonfma_sp OBJECT src/vec_scalar_verify.h src/vec_nonfma_sp.c)
-        target_compile_options(vec_nonfma_sp PRIVATE ${VEC})
+        add_library(vec_nonfma_fp16 OBJECT src/vec_nonfma_fp16.c)
+        target_compile_options(vec_nonfma_fp16 PRIVATE ${VEC_ALL})
 
-        add_library(vec_nonfma_dp OBJECT src/vec_scalar_verify.h src/vec_nonfma_dp.c)
-        target_compile_options(vec_nonfma_dp PRIVATE ${VEC})
+        add_library(vec_nonfma_bf16 OBJECT src/vec_nonfma_bf16.c)
+        target_compile_options(vec_nonfma_bf16 PRIVATE ${VEC_ALL})
+
+        add_library(vec_nonfma_sp OBJECT src/vec_nonfma_sp.c)
+        target_compile_options(vec_nonfma_sp PRIVATE ${VEC_ALL})
+
+        add_library(vec_nonfma_dp OBJECT src/vec_nonfma_dp.c)
+        target_compile_options(vec_nonfma_dp PRIVATE ${VEC_ALL})
     endif()
     message(STATUS "Setting ARCH=${ARCH}")
 endif()
@@ -354,21 +426,21 @@ add_executable(cat_collect src/main.c)
 
 #-------------------------------------------------------------------------------
 # Branch benchmarks target.
-add_library(branch OBJECT src/branch.h src/branch.c)
+add_library(branch OBJECT src/branch.c)
 target_compile_options(branch PRIVATE -O0)
 
 #-------------------------------------------------------------------------------
 # Data cache benchmarks targets.
-add_library(timing_kernels OBJECT src/timing_kernels.h src/timing_kernels.c)
+add_library(timing_kernels OBJECT src/timing_kernels.c)
 target_compile_options(timing_kernels PRIVATE -O2)
 
-add_library(prepareArray OBJECT src/prepareArray.h src/prepareArray.c)
+add_library(prepareArray OBJECT src/prepareArray.c)
 target_compile_options(prepareArray PRIVATE -O2)
 
 add_library(compar OBJECT src/compar.c)
 target_compile_options(compar PRIVATE -O2)
 
-add_library(dcache OBJECT src/dcache.h src/dcache.c)
+add_library(dcache OBJECT src/dcache.c)
 target_compile_options(dcache PRIVATE -O2)
 
 add_custom_command(
@@ -379,26 +451,26 @@ add_custom_command(
 
 #-------------------------------------------------------------------------------
 # Event stock target.
-add_library(eventstock OBJECT src/eventstock.h src/eventstock.c)
+add_library(eventstock OBJECT src/eventstock.c)
 target_compile_options(eventstock PRIVATE -O0)
 
 #-------------------------------------------------------------------------------
 # FLOPs benchmark target.
-add_library(flops OBJECT src/cat_arch.h src/flops.h src/flops.c)
+add_library(flops OBJECT src/flops.c)
 target_compile_options(flops PRIVATE -O1 ${FLOP})
 
 #-------------------------------------------------------------------------------
 # Instructions benchmark target. Legacy Makefile used manual silence.
-add_library(instructions OBJECT src/instr.h src/instructions.c)
+add_library(instructions OBJECT src/instructions.c)
 target_compile_options(instructions PRIVATE -O2 -ftree-vectorize ${FLOP} ${INSTR})
 
 #-------------------------------------------------------------------------------
 # Weak symbols target.
-add_library(weak_symbols OBJECT src/vec.h src/weak_symbols.c)
+add_library(weak_symbols OBJECT src/weak_symbols.c)
 
 #-------------------------------------------------------------------------------
 # Instruction cache targets.
-add_library(icache OBJECT src/icache.h src/icache.c)
+add_library(icache OBJECT src/icache.c)
 add_custom_command(
     OUTPUT ${CMAKE_SOURCE_DIR}/src/icache_seq.h
            ${CMAKE_SOURCE_DIR}/src/icache_seq.c
@@ -409,7 +481,7 @@ add_custom_command(
 )
 target_compile_options(icache PRIVATE -O0)
 
-add_library(icache_seq OBJECT ${CMAKE_SOURCE_DIR}/src/icache_seq.h ${CMAKE_SOURCE_DIR}/src/icache_seq.c)
+add_library(icache_seq OBJECT ${CMAKE_SOURCE_DIR}/src/icache_seq.c)
 target_compile_options(icache_seq PRIVATE -O0)
 
 add_library(icache_seq_kernel OBJECT ${CMAKE_SOURCE_DIR}/src/icache_seq_kernel.c)
@@ -428,11 +500,11 @@ add_custom_command(
 
 #-------------------------------------------------------------------------------
 # Vector FLOPs targets.
-add_library(vec OBJECT src/vec.h src/vec.c)
+add_library(vec OBJECT src/vec.c)
 target_compile_options(vec PRIVATE -D${ARCH} ${VEC_META})
 
-add_library(scalar OBJECT src/cat_arch.h src/vec_scalar_verify.h src/vec_scalar_verify.c)
-target_compile_options(scalar PRIVATE ${VEC_ALL})
+add_library(scalar OBJECT src/vec_scalar_verify.c)
+target_compile_options(scalar PRIVATE ${VEC_ALL} ${VEC_META}) # adding vec_meta b/c half precision stuff may be tricky even for this file
 
 #-------------------------------------------------------------------------------
 # Formatting.
