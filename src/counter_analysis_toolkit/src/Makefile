@@ -34,7 +34,7 @@ endif
 # Note, we can't use -mavx512fp16 -mavx512bf16 for ANY AVX unless AVX512 is avail.
 ifeq ($(ARCH),X86)
     FLOP+=-mfma -DX86
-    VECSRC=vec_fma_fp16 vec_fma_sp vec_fma_dp vec_nonfma_fp16 vec_nonfma_sp vec_nonfma_dp
+    VECSRC=vec_fma_bf16 vec_fma_fp16 vec_fma_sp vec_fma_dp vec_nonfma_fp16 vec_nonfma_sp vec_nonfma_dp
     VEC_META=-DAVX128_AVAIL -DAVX256_AVAIL -DAVX512_AVAIL
     VEC128=-mavx -mavx512vl -mavx512fp16 -mavx512bf16 -O0 -DX86 $(VEC_META) -DX86_VEC_WIDTH_128B
     VEC256=-mavx -mavx512vl -mavx512fp16 -mavx512bf16 -O0 -DX86 $(VEC_META) -DX86_VEC_WIDTH_256B
@@ -116,6 +116,9 @@ vec_fma_fp16: vec_fma_fp16.c vec_scalar_verify.h
 	-$(CC) -c $(CFLAGS) $(OPT1) $(INCFLAGS) $(VEC128_FMA) vec_fma_fp16.c -o vec_fma_fp16-128B.o
 	-$(CC) -c $(CFLAGS) $(OPT1) $(INCFLAGS) $(VEC256_FMA) vec_fma_fp16.c -o vec_fma_fp16-256B.o
 	-$(CC) -c $(CFLAGS) $(OPT1) $(INCFLAGS) $(VEC512_FMA) vec_fma_fp16.c -o vec_fma_fp16-512B.o
+
+vec_fma_bf16: tmp_bf16_kernels.c tmp_bf16_kernels.h
+	-$(CC) -c $(CFLAGS) $(OPT1) $(INCFLAGS) $(VEC_META) $(VEC_ALL) tmp_bf16_kernels.c
 
 vec_fma_sp.o: vec_fma_sp.c vec_scalar_verify.h
 	-$(CC) -c $(CFLAGS) $(OPT1) $(INCFLAGS) $(VEC_ALL) vec_fma_sp.c

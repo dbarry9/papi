@@ -1,8 +1,13 @@
 #include <inttypes.h>
+#include <stdio.h>
 
 typedef unsigned long long uint64;
 
 #if defined(X86)
+void tmp_test_bf16_x86_128B_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp );
+void tmp_test_bf16_x86_256B_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp );
+void tmp_test_bf16_x86_512B_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp );
+
 void test_fp16_x86_128B_VEC( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp );
 void test_bf16_x86_128B_VEC( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp );
 void test_sp_x86_128B_VEC( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp );
