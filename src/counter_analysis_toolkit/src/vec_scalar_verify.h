@@ -19,7 +19,7 @@ float test_fp16_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp );
 float test_fp16_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp );
 #endif
 
-#if defined(BF16_AVAIL) //|| (defined(AVX512_BF16_AVAIL) && defined(X86_VEC_WIDTH_512B))
+#if defined(BF16_AVAIL) //|| defined(AVX512_BF16_AVAIL)
 bf16_half test_bf16_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp );
 bf16_half test_bf16_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp );
 bf16_half test_bf16_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp );
@@ -48,7 +48,7 @@ float test_fp16_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp );
 float test_fp16_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp );
 #endif
 
-#if defined(BF16_AVAIL) //|| (defined(AVX512_BF16_AVAIL) && defined(X86_VEC_WIDTH_512B))
+#if defined(BF16_AVAIL) //|| defined(AVX512_BF16_AVAIL)
 bf16_half test_bf16_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp );
 bf16_half test_bf16_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp );
 bf16_half test_bf16_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp );

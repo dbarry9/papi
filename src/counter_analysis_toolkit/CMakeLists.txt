@@ -216,17 +216,21 @@ if(UNAME_M STREQUAL "x86_64")
 
     # Conditionally add AVX128 dependencies.
     if(AVX128_CC_AVAIL AND AVX128_AVAIL)
-        list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_fp16-128B>
-                                $<TARGET_OBJECTS:vec_nonfma_bf16-128B>
-                                $<TARGET_OBJECTS:vec_nonfma_sp-128B>
+        list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_sp-128B>
                                 $<TARGET_OBJECTS:vec_nonfma_dp-128B>)
-        add_library(vec_nonfma_fp16-128B OBJECT src/vec_nonfma_fp16.c)
-        target_compile_options(vec_nonfma_fp16-128B PRIVATE ${VEC128})
-        set_target_properties(vec_nonfma_fp16-128B PROPERTIES OUTPUT_NAME "vec_nonfma_fp16-128B")
+        if(AVX512_FP16_CC_AVAIL AND AVX512_FP16_AVAIL)
+            list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_fp16-128B>)
+            add_library(vec_nonfma_fp16-128B OBJECT src/vec_nonfma_fp16.c)
+            target_compile_options(vec_nonfma_fp16-128B PRIVATE ${VEC128})
+            set_target_properties(vec_nonfma_fp16-128B PROPERTIES OUTPUT_NAME "vec_nonfma_fp16-128B")
+        endif()
 
-        add_library(vec_nonfma_bf16-128B OBJECT src/vec_nonfma_bf16.c)
-        target_compile_options(vec_nonfma_bf16-128B PRIVATE ${VEC128})
-        set_target_properties(vec_nonfma_bf16-128B PROPERTIES OUTPUT_NAME "vec_nonfma_bf16-128B")
+        if(AVX512_BF16_CC_AVAIL AND AVX512_BF16_AVAIL)
+            #list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_bf16-128B>)
+            #add_library(vec_nonfma_bf16-128B OBJECT src/vec_nonfma_bf16.c)
+            #target_compile_options(vec_nonfma_bf16-128B PRIVATE ${VEC128})
+            #set_target_properties(vec_nonfma_bf16-128B PROPERTIES OUTPUT_NAME "vec_nonfma_bf16-128B")
+        endif()
 
         add_library(vec_nonfma_sp-128B OBJECT src/vec_nonfma_sp.c)
         target_compile_options(vec_nonfma_sp-128B PRIVATE ${VEC128})
@@ -237,17 +241,21 @@ if(UNAME_M STREQUAL "x86_64")
         set_target_properties(vec_nonfma_dp-128B PROPERTIES OUTPUT_NAME "vec_nonfma_dp-128B")
 
         if(FMA_CC_AVAIL AND FMA_AVAIL)
-            list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_fp16-128B> # note we prob shouldnt add the hp case unless hp is avail, but the code has ifdefs that protect for this.
-                                    $<TARGET_OBJECTS:vec_fma_bf16-128B>
-                                    $<TARGET_OBJECTS:vec_fma_sp-128B>
+            list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_sp-128B>
                                     $<TARGET_OBJECTS:vec_fma_dp-128B>)
-            add_library(vec_fma_fp16-128B OBJECT src/vec_fma_fp16.c)
-            target_compile_options(vec_fma_fp16-128B PRIVATE ${VEC128_FMA})
-            set_target_properties(vec_fma_fp16-128B PROPERTIES OUTPUT_NAME "vec_fma_fp16-128B")
+            if(AVX512_FP16_CC_AVAIL AND AVX512_FP16_AVAIL)
+                list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_fp16-128B>)
+                add_library(vec_fma_fp16-128B OBJECT src/vec_fma_fp16.c)
+                target_compile_options(vec_fma_fp16-128B PRIVATE ${VEC128_FMA})
+                set_target_properties(vec_fma_fp16-128B PROPERTIES OUTPUT_NAME "vec_fma_fp16-128B")
+            endif()
 
-            add_library(vec_fma_bf16-128B OBJECT src/vec_fma_bf16.c)
-            target_compile_options(vec_fma_bf16-128B PRIVATE ${VEC128_FMA})
-            set_target_properties(vec_fma_bf16-128B PROPERTIES OUTPUT_NAME "vec_fma_bf16-128B")
+            if(AVX512_BF16_CC_AVAIL AND AVX512_BF16_AVAIL)
+                #list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_bf16-128B>)
+                #add_library(vec_fma_bf16-128B OBJECT src/vec_fma_bf16.c)
+                #target_compile_options(vec_fma_bf16-128B PRIVATE ${VEC128_FMA})
+                #set_target_properties(vec_fma_bf16-128B PROPERTIES OUTPUT_NAME "vec_fma_bf16-128B")
+            endif()
 
             add_library(vec_fma_sp-128B OBJECT src/vec_fma_sp.c)
             target_compile_options(vec_fma_sp-128B PRIVATE ${VEC128_FMA})
@@ -261,17 +269,21 @@ if(UNAME_M STREQUAL "x86_64")
 
     # Conditionally add AVX256 dependencies.
     if(AVX256_CC_AVAIL AND AVX256_AVAIL)
-        list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_fp16-256B>
-                                $<TARGET_OBJECTS:vec_nonfma_bf16-256B>
-                                $<TARGET_OBJECTS:vec_nonfma_sp-256B>
+        list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_sp-256B>
                                 $<TARGET_OBJECTS:vec_nonfma_dp-256B>)
-        add_library(vec_nonfma_fp16-256B OBJECT src/vec_nonfma_fp16.c)
-        target_compile_options(vec_nonfma_fp16-256B PRIVATE ${VEC256})
-        set_target_properties(vec_nonfma_fp16-256B PROPERTIES OUTPUT_NAME "vec_nonfma_fp16-256B")
+        if(AVX512_FP16_CC_AVAIL AND AVX512_FP16_AVAIL)
+            list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_fp16-256B>)
+            add_library(vec_nonfma_fp16-256B OBJECT src/vec_nonfma_fp16.c)
+            target_compile_options(vec_nonfma_fp16-256B PRIVATE ${VEC256})
+            set_target_properties(vec_nonfma_fp16-256B PROPERTIES OUTPUT_NAME "vec_nonfma_fp16-256B")
+        endif()
 
-        add_library(vec_nonfma_bf16-256B OBJECT src/vec_nonfma_bf16.c)
-        target_compile_options(vec_nonfma_bf16-256B PRIVATE ${VEC256})
-        set_target_properties(vec_nonfma_bf16-256B PROPERTIES OUTPUT_NAME "vec_nonfma_bf16-256B")
+        if(AVX512_BF16_CC_AVAIL AND AVX512_BF16_AVAIL)
+            #list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_bf16-256B>)
+            #add_library(vec_nonfma_bf16-256B OBJECT src/vec_nonfma_bf16.c)
+            #target_compile_options(vec_nonfma_bf16-256B PRIVATE ${VEC256})
+            #set_target_properties(vec_nonfma_bf16-256B PROPERTIES OUTPUT_NAME "vec_nonfma_bf16-256B")
+        endif()
 
         add_library(vec_nonfma_sp-256B OBJECT src/vec_nonfma_sp.c)
         target_compile_options(vec_nonfma_sp-256B PRIVATE ${VEC256})
@@ -282,17 +294,21 @@ if(UNAME_M STREQUAL "x86_64")
         set_target_properties(vec_nonfma_dp-256B PROPERTIES OUTPUT_NAME "vec_nonfma_dp-256B")
 
         if(FMA_CC_AVAIL AND FMA_AVAIL)
-            list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_fp16-256B>
-                                    $<TARGET_OBJECTS:vec_fma_bf16-256B>
-                                    $<TARGET_OBJECTS:vec_fma_sp-256B>
+            list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_sp-256B>
                                     $<TARGET_OBJECTS:vec_fma_dp-256B>)
-            add_library(vec_fma_fp16-256B OBJECT src/vec_fma_fp16.c)
-            target_compile_options(vec_fma_fp16-256B PRIVATE ${VEC256_FMA})
-            set_target_properties(vec_fma_fp16-256B PROPERTIES OUTPUT_NAME "vec_fma_fp16-256B")
+            if(AVX512_FP16_CC_AVAIL AND AVX512_FP16_AVAIL)
+                list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_fp16-256B>)
+                add_library(vec_fma_fp16-256B OBJECT src/vec_fma_fp16.c)
+                target_compile_options(vec_fma_fp16-256B PRIVATE ${VEC256_FMA})
+                set_target_properties(vec_fma_fp16-256B PROPERTIES OUTPUT_NAME "vec_fma_fp16-256B")
+            endif()
 
-            add_library(vec_fma_bf16-256B OBJECT src/vec_fma_bf16.c)
-            target_compile_options(vec_fma_bf16-256B PRIVATE ${VEC256_FMA})
-            set_target_properties(vec_fma_bf16-256B PROPERTIES OUTPUT_NAME "vec_fma_bf16-256B")
+            if(AVX512_BF16_CC_AVAIL AND AVX512_BF16_AVAIL)
+                #list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_bf16-256B>)
+                #add_library(vec_fma_bf16-256B OBJECT src/vec_fma_bf16.c)
+                #target_compile_options(vec_fma_bf16-256B PRIVATE ${VEC256_FMA})
+                #set_target_properties(vec_fma_bf16-256B PROPERTIES OUTPUT_NAME "vec_fma_bf16-256B")
+            endif()
 
             add_library(vec_fma_sp-256B OBJECT src/vec_fma_sp.c)
             target_compile_options(vec_fma_sp-256B PRIVATE ${VEC256_FMA})
@@ -306,17 +322,21 @@ if(UNAME_M STREQUAL "x86_64")
 
     # Conditionally add AVX512 dependencies.
     if(AVX512_CC_AVAIL AND AVX512_AVAIL)
-        list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_fp16-512B>
-                                $<TARGET_OBJECTS:vec_nonfma_bf16-512B>
-                                $<TARGET_OBJECTS:vec_nonfma_sp-512B>
+        list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_sp-512B>
                                 $<TARGET_OBJECTS:vec_nonfma_dp-512B>)
-        add_library(vec_nonfma_fp16-512B OBJECT src/vec_nonfma_fp16.c)
-        target_compile_options(vec_nonfma_fp16-512B PRIVATE ${VEC512})
-        set_target_properties(vec_nonfma_fp16-512B PROPERTIES OUTPUT_NAME "vec_nonfma_fp16-512B")
+        if(AVX512_FP16_CC_AVAIL AND AVX512_FP16_AVAIL)
+            list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_fp16-512B>)
+            add_library(vec_nonfma_fp16-512B OBJECT src/vec_nonfma_fp16.c)
+            target_compile_options(vec_nonfma_fp16-512B PRIVATE ${VEC512})
+            set_target_properties(vec_nonfma_fp16-512B PROPERTIES OUTPUT_NAME "vec_nonfma_fp16-512B")
+        endif()
 
-        add_library(vec_nonfma_bf16-512B OBJECT src/vec_nonfma_bf16.c)
-        target_compile_options(vec_nonfma_bf16-512B PRIVATE ${VEC512})
-        set_target_properties(vec_nonfma_bf16-512B PROPERTIES OUTPUT_NAME "vec_nonfma_bf16-512B")
+        if(AVX512_BF16_CC_AVAIL AND AVX512_BF16_AVAIL)
+            #list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_nonfma_bf16-512B>)
+            #add_library(vec_nonfma_bf16-512B OBJECT src/vec_nonfma_bf16.c)
+            #target_compile_options(vec_nonfma_bf16-512B PRIVATE ${VEC512})
+            #set_target_properties(vec_nonfma_bf16-512B PROPERTIES OUTPUT_NAME "vec_nonfma_bf16-512B")
+        endif()
 
         add_library(vec_nonfma_sp-512B OBJECT src/vec_nonfma_sp.c)
         target_compile_options(vec_nonfma_sp-512B PRIVATE ${VEC512})
@@ -327,17 +347,26 @@ if(UNAME_M STREQUAL "x86_64")
         set_target_properties(vec_nonfma_dp-512B PROPERTIES OUTPUT_NAME "vec_nonfma_dp-512B")
 
         if(FMA_CC_AVAIL AND FMA_AVAIL)
-            list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_fp16-512B>
-                                    $<TARGET_OBJECTS:vec_fma_bf16-512B>
-                                    $<TARGET_OBJECTS:vec_fma_sp-512B>
+            list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_sp-512B>
                                     $<TARGET_OBJECTS:vec_fma_dp-512B>)
-            add_library(vec_fma_fp16-512B OBJECT src/vec_fma_fp16.c)
-            target_compile_options(vec_fma_fp16-512B PRIVATE ${VEC512_FMA})
-            set_target_properties(vec_fma_fp16-512B PROPERTIES OUTPUT_NAME "vec_fma_fp16-512B")
+            if(AVX512_FP16_CC_AVAIL AND AVX512_FP16_AVAIL)
+                list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_fp16-512B>)
+                add_library(vec_fma_fp16-512B OBJECT src/vec_fma_fp16.c)
+                target_compile_options(vec_fma_fp16-512B PRIVATE ${VEC512_FMA})
+                set_target_properties(vec_fma_fp16-512B PROPERTIES OUTPUT_NAME "vec_fma_fp16-512B")
+            endif()
 
-            add_library(vec_fma_bf16-512B OBJECT src/vec_fma_bf16.c)
-            target_compile_options(vec_fma_bf16-512B PRIVATE ${VEC512_FMA})
-            set_target_properties(vec_fma_bf16-512B PROPERTIES OUTPUT_NAME "vec_fma_bf16-512B")
+            if(AVX512_BF16_CC_AVAIL AND AVX512_BF16_AVAIL)
+                #list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:vec_fma_bf16-512B>)
+                #add_library(vec_fma_bf16-512B OBJECT src/vec_fma_bf16.c)
+                #target_compile_options(vec_fma_bf16-512B PRIVATE ${VEC512_FMA})
+                #set_target_properties(vec_fma_bf16-512B PROPERTIES OUTPUT_NAME "vec_fma_bf16-512B")
+
+                list(APPEND VEC_OBJECTS $<TARGET_OBJECTS:tmp_bf16_kernels>)
+                add_library(tmp_bf16_kernels OBJECT src/tmp_bf16_kernels.c)
+                target_compile_options(tmp_bf16_kernels PRIVATE ${VEC512})
+                set_target_properties(tmp_bf16_kernels PROPERTIES OUTPUT_NAME "tmp_bf16_kernels")
+            endif()
 
             add_library(vec_fma_sp-512B OBJECT src/vec_fma_sp.c)
             target_compile_options(vec_fma_sp-512B PRIVATE ${VEC512_FMA})

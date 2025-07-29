@@ -47,6 +47,7 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
 
 #if defined(AVX128_AVAIL)
 
+#if defined(AVX512_FP16_AVAIL)
     // FP16 Non-FMA instruction trials.
     fprintf(ofp_papi, "# FP16 Non-FMA Scalar\n");
     test_fp16_scalar_VEC_24( ITER, EventSet, ofp_papi );
@@ -71,7 +72,9 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     test_fp16_x86_512B_VEC( 96, ITER, EventSet, ofp_papi );
     #endif
   #endif
+#endif
 
+#if defined(AVX512_BF16_AVAIL)
     // BF16 Non-FMA instruction trials.
     /*fprintf(ofp_papi, "# BF16 Non-FMA Scalar\n");
     test_bf16_scalar_VEC_24( ITER, EventSet, ofp_papi );
@@ -96,6 +99,7 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     test_bf16_x86_512B_VEC( 96, ITER, EventSet, ofp_papi );*/
     #endif
   #endif
+#endif
 
     // SP Non-FMA instruction trials.
     fprintf(ofp_papi, "# SP Non-FMA Scalar\n");
@@ -147,6 +151,7 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     #endif
   #endif
 
+#if defined(AVX512_FP16_AVAIL)
     // FP16 FMA instruction trials.
     fprintf(ofp_papi, "# FP16 FMA Scalar\n");
     test_fp16_scalar_VEC_FMA_12( ITER, EventSet, ofp_papi );
@@ -171,26 +176,49 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     test_fp16_x86_512B_VEC_FMA( 48, ITER, EventSet, ofp_papi );
     #endif
   #endif
+#endif
 
+#if defined(AVX512_BF16_AVAIL)
     // BF16 FMA instruction trials.
+    /*fprintf(ofp_papi, "# BF16 FMA Scalar\n");
+    test_bf16_scalar_VEC_FMA_12( ITER, EventSet, ofp_papi );
+    test_bf16_scalar_VEC_FMA_24( ITER, EventSet, ofp_papi );
+    test_bf16_scalar_VEC_FMA_48( ITER, EventSet, ofp_papi );*/
+
+    /*fprintf(ofp_papi, "# BF16 FMA Vector AVX128\n");
+    test_bf16_x86_128B_VEC_FMA( 12, ITER, EventSet, ofp_papi );
+    test_bf16_x86_128B_VEC_FMA( 24, ITER, EventSet, ofp_papi );
+    test_bf16_x86_128B_VEC_FMA( 48, ITER, EventSet, ofp_papi );*/
+
     fprintf(ofp_papi, "# BF16 FMA Vector AVX128\n");
     tmp_test_bf16_x86_128B_VEC_FMA( 12, ITER, EventSet, ofp_papi );
     tmp_test_bf16_x86_128B_VEC_FMA( 24, ITER, EventSet, ofp_papi );
     tmp_test_bf16_x86_128B_VEC_FMA( 48, ITER, EventSet, ofp_papi );
 
   #if defined(AVX256_AVAIL)
+    /*fprintf(ofp_papi, "# BF16 FMA Vector AVX256\n");
+    test_bf16_x86_256B_VEC_FMA( 12, ITER, EventSet, ofp_papi );
+    test_bf16_x86_256B_VEC_FMA( 24, ITER, EventSet, ofp_papi );
+    test_bf16_x86_256B_VEC_FMA( 48, ITER, EventSet, ofp_papi );*/
+
     fprintf(ofp_papi, "# BF16 FMA Vector AVX256\n");
     tmp_test_bf16_x86_256B_VEC_FMA( 12, ITER, EventSet, ofp_papi );
     tmp_test_bf16_x86_256B_VEC_FMA( 24, ITER, EventSet, ofp_papi );
     tmp_test_bf16_x86_256B_VEC_FMA( 48, ITER, EventSet, ofp_papi );
 
     #if defined(AVX512_AVAIL)
+    /*fprintf(ofp_papi, "# BF16 FMA Vector AVX512\n");
+    test_bf16_x86_512B_VEC_FMA( 12, ITER, EventSet, ofp_papi );
+    test_bf16_x86_512B_VEC_FMA( 24, ITER, EventSet, ofp_papi );
+    test_bf16_x86_512B_VEC_FMA( 48, ITER, EventSet, ofp_papi );*/
+
     fprintf(ofp_papi, "# BF16 FMA Vector AVX512\n");
     tmp_test_bf16_x86_512B_VEC_FMA( 12, ITER, EventSet, ofp_papi );
     tmp_test_bf16_x86_512B_VEC_FMA( 24, ITER, EventSet, ofp_papi );
     tmp_test_bf16_x86_512B_VEC_FMA( 48, ITER, EventSet, ofp_papi );
     #endif
   #endif
+#endif
 
     // SP FMA instruction trials.
     fprintf(ofp_papi, "# SP FMA Scalar\n");
@@ -248,6 +276,7 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
 
 #elif defined(ARM)
 
+#if defined(FP16_AVAIL)
     // Non-FMA instruction trials.
     fprintf(ofp_papi, "# FP16 Non-FMA Scalar\n");
     test_fp16_scalar_VEC_24( ITER, EventSet, ofp_papi );
@@ -258,7 +287,9 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     test_fp16_arm_VEC( 24, ITER, EventSet, ofp_papi );
     test_fp16_arm_VEC( 48, ITER, EventSet, ofp_papi );
     test_fp16_arm_VEC( 96, ITER, EventSet, ofp_papi );
+#endif
 
+#if defined(BF16_AVAIL)
     fprintf(ofp_papi, "# BF16 Non-FMA Scalar\n");
     test_bf16_scalar_VEC_24( ITER, EventSet, ofp_papi );
     test_bf16_scalar_VEC_48( ITER, EventSet, ofp_papi );
@@ -268,6 +299,7 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     test_bf16_arm_VEC( 24, ITER, EventSet, ofp_papi );
     test_bf16_arm_VEC( 48, ITER, EventSet, ofp_papi );
     test_bf16_arm_VEC( 96, ITER, EventSet, ofp_papi );
+#endif
 
     fprintf(ofp_papi, "# SP Non-FMA Scalar\n");
     test_sp_scalar_VEC_24( ITER, EventSet, ofp_papi );
@@ -290,6 +322,7 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     test_dp_arm_VEC( 96, ITER, EventSet, ofp_papi );
 
     // FMA instruction trials.
+#if defined(FP16_AVAIL)
     fprintf(ofp_papi, "# FP16 FMA Scalar\n");
     test_fp16_scalar_VEC_FMA_12( ITER, EventSet, ofp_papi );
     test_fp16_scalar_VEC_FMA_24( ITER, EventSet, ofp_papi );
@@ -299,7 +332,9 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     test_fp16_arm_VEC_FMA( 12, ITER, EventSet, ofp_papi );
     test_fp16_arm_VEC_FMA( 24, ITER, EventSet, ofp_papi );
     test_fp16_arm_VEC_FMA( 48, ITER, EventSet, ofp_papi );
+#endif
 
+#if defined(BF16_AVAIL)
     fprintf(ofp_papi, "# BF16 FMA Scalar\n");
     test_bf16_scalar_VEC_FMA_12( ITER, EventSet, ofp_papi );
     test_bf16_scalar_VEC_FMA_24( ITER, EventSet, ofp_papi );
@@ -309,6 +344,7 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     test_bf16_arm_VEC_FMA( 12, ITER, EventSet, ofp_papi );
     test_bf16_arm_VEC_FMA( 24, ITER, EventSet, ofp_papi );
     test_bf16_arm_VEC_FMA( 48, ITER, EventSet, ofp_papi );
+#endif
 
     fprintf(ofp_papi, "# SP FMA Scalar\n");
     test_sp_scalar_VEC_FMA_12( ITER, EventSet, ofp_papi );
@@ -332,6 +368,7 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
 
 #elif defined(POWER)
 
+#if defined(FP16_AVAIL)
     // Non-FMA instruction trials.
     fprintf(ofp_papi, "# FP16 Non-FMA Scalar\n");
     test_fp16_scalar_VEC_24( ITER, EventSet, ofp_papi );
@@ -342,7 +379,9 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     test_fp16_power_VEC( 24, ITER, EventSet, ofp_papi );
     test_fp16_power_VEC( 48, ITER, EventSet, ofp_papi );
     test_fp16_power_VEC( 96, ITER, EventSet, ofp_papi );
+#endif
 
+#if defined(BF16_AVAIL)
     fprintf(ofp_papi, "# BF16 Non-FMA Scalar\n");
     test_bf16_scalar_VEC_24( ITER, EventSet, ofp_papi );
     test_bf16_scalar_VEC_48( ITER, EventSet, ofp_papi );
@@ -352,6 +391,7 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     test_bf16_power_VEC( 24, ITER, EventSet, ofp_papi );
     test_bf16_power_VEC( 48, ITER, EventSet, ofp_papi );
     test_bf16_power_VEC( 96, ITER, EventSet, ofp_papi );
+#endif
 
     fprintf(ofp_papi, "# SP Non-FMA Scalar\n");
     test_sp_scalar_VEC_24( ITER, EventSet, ofp_papi );
@@ -373,6 +413,7 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     test_dp_power_VEC( 48, ITER, EventSet, ofp_papi );
     test_dp_power_VEC( 96, ITER, EventSet, ofp_papi );
 
+#if defined(FP16_AVAIL)
     // FMA instruction trials.
     fprintf(ofp_papi, "# FP16 FMA Scalar\n");
     test_fp16_scalar_VEC_FMA_12( ITER, EventSet, ofp_papi );
@@ -383,7 +424,9 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     test_fp16_power_VEC_FMA( 12, ITER, EventSet, ofp_papi );
     test_fp16_power_VEC_FMA( 24, ITER, EventSet, ofp_papi );
     test_fp16_power_VEC_FMA( 48, ITER, EventSet, ofp_papi );
+#endif
 
+#if defined(BF16_AVAIL)
     fprintf(ofp_papi, "# BF16 FMA Scalar\n");
     test_bf16_scalar_VEC_FMA_12( ITER, EventSet, ofp_papi );
     test_bf16_scalar_VEC_FMA_24( ITER, EventSet, ofp_papi );
@@ -393,6 +436,7 @@ void vec_driver(char* papi_event_name, hw_desc_t *hw_desc, char* outdir)
     test_bf16_power_VEC_FMA( 12, ITER, EventSet, ofp_papi );
     test_bf16_power_VEC_FMA( 24, ITER, EventSet, ofp_papi );
     test_bf16_power_VEC_FMA( 48, ITER, EventSet, ofp_papi );
+#endif
 
     fprintf(ofp_papi, "# SP FMA Scalar\n");
     test_sp_scalar_VEC_FMA_12( ITER, EventSet, ofp_papi );
