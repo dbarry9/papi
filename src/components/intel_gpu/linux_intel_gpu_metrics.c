@@ -190,8 +190,9 @@ intel_gpu_init_component(int cidx)
 	char *errStr = NULL;
 	memset(_intel_gpu_vector.cmp_info.disabled_reason, 0, PAPI_MAX_STR_LEN);
 
-	if (putenv("ZET_ENABLE_METRICS=1")) {
-		errStr = "Set ZET_ENABLE_METRICS=1 failed. Cannot access GPU metrics. ";
+    char* envVarDefined = getenv("ZET_ENABLE_METRICS");
+    if (NULL == envVarDefined || 0 == strcmp(envVarDefined, "0")) {
+		errStr = "Please set ZET_ENABLE_METRICS=1 to access GPU metrics.";
 		strncpy_se(_intel_gpu_vector.cmp_info.disabled_reason, PAPI_MAX_STR_LEN,
 				   errStr, strlen(errStr));
 		retval = PAPI_ENOSUPP;
