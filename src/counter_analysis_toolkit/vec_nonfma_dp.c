@@ -33,7 +33,9 @@ void test_dp_power_VEC( int instr_per_loop, uint64 iterations, int EventSet, FIL
 /************************************/
 static
 double test_dp_mac_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
+
     register DP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    long long iterValues[1]; iterValues[0] = 0;
 
     /* Generate starting data */
     r0 = SET_VEC_PD(0.01);
@@ -61,7 +63,7 @@ double test_dp_mac_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < ITER){
+        while (i < 1){
             /* The performance critical part */
 
             r0 = MUL_VEC_PD(r0,rC);
@@ -96,7 +98,10 @@ double test_dp_mac_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
     }
 
     /* Stop PAPI counters */
-    papi_stop_and_print(24, EventSet, fp);
+    if ( PAPI_stop(EventSet, iterValues) != PAPI_OK ) {
+      return -1;
+    }
+    papi_print(24, fp, (double)iterValues[0]);
 
     /* Use data so that compiler does not eliminate it when using -O2 */
     r0 = ADD_VEC_PD(r0,r1);
@@ -126,7 +131,9 @@ double test_dp_mac_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
 /************************************/
 static
 double test_dp_mac_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
+
     register DP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    long long iterValues[1]; iterValues[0] = 0;
 
     /* Generate starting data */
     r0 = SET_VEC_PD(0.01);
@@ -154,7 +161,7 @@ double test_dp_mac_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < ITER){
+        while (i < 1){
             /* The performance critical part */
 
             r0 = MUL_VEC_PD(r0,rC);
@@ -215,7 +222,10 @@ double test_dp_mac_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
     }
 
     /* Stop PAPI counters */
-    papi_stop_and_print(48, EventSet, fp);
+    if ( PAPI_stop(EventSet, iterValues) != PAPI_OK ) {
+      return -1;
+    }
+    papi_print(48, fp, (double)iterValues[0]);
 
     /* Use data so that compiler does not eliminate it when using -O2 */
     r0 = ADD_VEC_PD(r0,r1);
@@ -245,7 +255,9 @@ double test_dp_mac_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
 /************************************/
 static
 double test_dp_mac_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
+
     register DP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    long long iterValues[1]; iterValues[0] = 0;
 
     /* Generate starting data */
     r0 = SET_VEC_PD(0.01);
@@ -273,7 +285,7 @@ double test_dp_mac_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
     uint64 c = 0;
     while (c < iterations){
         size_t i = 0;
-        while (i < ITER){
+        while (i < 1){
             /* The performance critical part */
 
             r0 = MUL_VEC_PD(r0,rC);
@@ -386,7 +398,10 @@ double test_dp_mac_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
     }
 
     /* Stop PAPI counters */
-    papi_stop_and_print(96, EventSet, fp);
+    if ( PAPI_stop(EventSet, iterValues) != PAPI_OK ) {
+      return -1;
+    }
+    papi_print(96, fp, (double)iterValues[0]);
 
     /* Use data so that compiler does not eliminate it when using -O2 */
     r0 = ADD_VEC_PD(r0,r1);

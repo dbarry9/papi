@@ -94,8 +94,10 @@ void  test_sp_arm_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, 
 void  test_dp_arm_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp );
 
 #include <arm_neon.h>
+#include <arm_sve.h>
 
 typedef __fp16 half;
+typedef __fp16 HP_SCALAR_TYPE;
 typedef float  SP_SCALAR_TYPE;
 typedef double DP_SCALAR_TYPE;
 typedef float16x8_t HP_VEC_TYPE;
@@ -119,9 +121,10 @@ typedef float64x2_t DP_VEC_TYPE;
 #define FMA_VEC_PD(_I_,_J_,_K_) (DP_VEC_TYPE)vfmaq_f64( _K_ , _J_ , _I_ );
 
 /* There is no scalar FMA intrinsic available on this architecture. */
+/* Don't use NEON intrinsics until vector ones are verified in CAT. */
 #define SET_VEC_SH(_I_)         _I_ ;
-#define ADD_VEC_SH(_I_,_J_)     vaddh_f16( _I_ , _J_ );
-#define MUL_VEC_SH(_I_,_J_)     vmulh_f16( _I_ , _J_ );
+#define ADD_VEC_SH(_I_,_J_)     _I_ + _J_ ;
+#define MUL_VEC_SH(_I_,_J_)     _I_ * _J_ ;
 #define SQRT_VEC_SH(_I_)        vsqrth_f16( _I_ );
 #define FMA_VEC_SH(_out_,_I_,_J_,_K_) _out_ = _I_ * _J_ + _K_;
 

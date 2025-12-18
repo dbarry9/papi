@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include "cat_arch.h"
 
-#define ITER 1
+#define ITERS 100000
 
 void papi_stop_and_print_placeholder(long long theory, FILE *fp);
-void papi_stop_and_print(long long theory, int EventSet, FILE *fp);
+void papi_print(long long theory, FILE *fp, double values);
 
 // Non-FMA-like computations.
 #if defined(ARM)
