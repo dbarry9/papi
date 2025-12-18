@@ -20,7 +20,7 @@ void papi_stop_and_print(long long theory, int EventSet, FILE *fp)
 
 #if defined(ARM)
 half test_hp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
-    register half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SH(0.01);
@@ -112,7 +112,7 @@ half test_hp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
 }
 
 half test_hp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
-    register half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SH(0.01);
@@ -230,7 +230,7 @@ half test_hp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
 }
 
 half test_hp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
-    register half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SH(0.01);
@@ -441,7 +441,7 @@ float test_hp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  24 instructions */
 /************************************/
 float test_sp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
-    register SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SS(0.01);
@@ -536,7 +536,7 @@ float test_sp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  48 instructions */
 /************************************/
 float test_sp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
-    register SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SS(0.01);
@@ -657,7 +657,7 @@ float test_sp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  96 instructions */
 /************************************/
 float test_sp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
-    register SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SS(0.01);
@@ -830,7 +830,7 @@ float test_sp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  24 instructions */
 /************************************/
 double test_dp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
-    register DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SD(0.01);
@@ -925,7 +925,7 @@ double test_dp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  48 instructions */
 /************************************/
 double test_dp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
-    register DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SD(0.01);
@@ -1046,7 +1046,7 @@ double test_dp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  96 instructions */
 /************************************/
 double test_dp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
-    register DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SD(0.01);
@@ -1217,7 +1217,7 @@ double test_dp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
 
 #if defined(ARM)
 half test_hp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
-    register half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SH(0.01);
@@ -1292,7 +1292,7 @@ half test_hp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
 }
 
 half test_hp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
-    register half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SH(0.01);
@@ -1381,7 +1381,7 @@ half test_hp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
 }
 
 half test_hp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
-    register half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SH(0.01);
@@ -1538,9 +1538,9 @@ float test_hp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
 /************************************/
 /* Loop unrolling:  12 instructions */
 /************************************/
-#pragma GCC optimize ("O2")
+//#pragma GCC optimize ("O2")
 float test_sp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
-    register SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SS(0.01);
@@ -1567,30 +1567,20 @@ float test_sp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
       }
     }
 
-    uint64 c = 0;
-    while (c < iterations){
-        size_t i = 0;
-        while (i < ITER){
+    /* The performance critical part */
+    FMA_VEC_SS(r0,r0,r7,r0);
+    FMA_VEC_SS(r0,r1,r8,r0);
+    FMA_VEC_SS(r0,r2,r9,r0);
+    FMA_VEC_SS(r0,r3,rA,r0);
+    FMA_VEC_SS(r0,r4,rB,r0);
+    FMA_VEC_SS(r0,r5,rC,r0);
 
-            /* The performance critical part */
-            FMA_VEC_SS(r0,r0,r7,r9);
-            FMA_VEC_SS(r1,r1,r8,rA);
-            FMA_VEC_SS(r2,r2,r9,rB);
-            FMA_VEC_SS(r3,r3,rA,rC);
-            FMA_VEC_SS(r4,r4,rB,rD);
-            FMA_VEC_SS(r5,r5,rC,rE);
-
-            FMA_VEC_SS(r0,r0,rD,rF);
-            FMA_VEC_SS(r1,r1,rC,rE);
-            FMA_VEC_SS(r2,r2,rB,rD);
-            FMA_VEC_SS(r3,r3,rA,rC);
-            FMA_VEC_SS(r4,r4,r9,rB);
-            FMA_VEC_SS(r5,r5,r8,rA);
-
-            i++;
-        }
-        c++;
-    }
+    FMA_VEC_SS(r0,r0,rD,r0);
+    FMA_VEC_SS(r0,r1,rC,r0);
+    FMA_VEC_SS(r0,r2,rB,r0);
+    FMA_VEC_SS(r0,r3,rA,r0);
+    FMA_VEC_SS(r0,r4,r9,r0);
+    FMA_VEC_SS(r0,r5,r8,r0);
 
     /* Stop PAPI counters */
     if ( NULL != fp ) {
@@ -1618,7 +1608,7 @@ float test_sp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  24 instructions */
 /************************************/
 float test_sp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
-    register SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SS(0.01);
@@ -1645,44 +1635,34 @@ float test_sp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
       }
     }
 
-    uint64 c = 0;
-    while (c < iterations){
-        size_t i = 0;
-        while (i < ITER){
+    /* The performance critical part */
+    FMA_VEC_SS(r0,r0,r7,r0);
+    FMA_VEC_SS(r0,r1,r8,r0);
+    FMA_VEC_SS(r0,r2,r9,r0);
+    FMA_VEC_SS(r0,r3,rA,r0);
+    FMA_VEC_SS(r0,r4,rB,r0);
+    FMA_VEC_SS(r0,r5,rC,r0);
 
-            /* The performance critical part */
-            FMA_VEC_SS(r0,r0,r7,r9);
-            FMA_VEC_SS(r1,r1,r8,rA);
-            FMA_VEC_SS(r2,r2,r9,rB);
-            FMA_VEC_SS(r3,r3,rA,rC);
-            FMA_VEC_SS(r4,r4,rB,rD);
-            FMA_VEC_SS(r5,r5,rC,rE);
+    FMA_VEC_SS(r0,r0,rD,r0);
+    FMA_VEC_SS(r0,r1,rC,r0);
+    FMA_VEC_SS(r0,r2,rB,r0);
+    FMA_VEC_SS(r0,r3,rA,r0);
+    FMA_VEC_SS(r0,r4,r9,r0);
+    FMA_VEC_SS(r0,r5,r8,r0);
 
-            FMA_VEC_SS(r0,r0,rD,rF);
-            FMA_VEC_SS(r1,r1,rC,rE);
-            FMA_VEC_SS(r2,r2,rB,rD);
-            FMA_VEC_SS(r3,r3,rA,rC);
-            FMA_VEC_SS(r4,r4,r9,rB);
-            FMA_VEC_SS(r5,r5,r8,rA);
+    FMA_VEC_SS(r0,r0,r7,r0);
+    FMA_VEC_SS(r0,r1,r8,r0);
+    FMA_VEC_SS(r0,r2,r9,r0);
+    FMA_VEC_SS(r0,r3,rA,r0);
+    FMA_VEC_SS(r0,r4,rB,r0);
+    FMA_VEC_SS(r0,r5,rC,r0);
 
-            FMA_VEC_SS(r0,r0,r7,r9);
-            FMA_VEC_SS(r1,r1,r8,rA);
-            FMA_VEC_SS(r2,r2,r9,rB);
-            FMA_VEC_SS(r3,r3,rA,rC);
-            FMA_VEC_SS(r4,r4,rB,rD);
-            FMA_VEC_SS(r5,r5,rC,rE);
-
-            FMA_VEC_SS(r0,r0,rD,rF);
-            FMA_VEC_SS(r1,r1,rC,rE);
-            FMA_VEC_SS(r2,r2,rB,rD);
-            FMA_VEC_SS(r3,r3,rA,rC);
-            FMA_VEC_SS(r4,r4,r9,rB);
-            FMA_VEC_SS(r5,r5,r8,rA);
-
-            i++;
-        }
-        c++;
-    }
+    FMA_VEC_SS(r0,r0,rD,r0);
+    FMA_VEC_SS(r0,r1,rC,r0);
+    FMA_VEC_SS(r0,r2,rB,r0);
+    FMA_VEC_SS(r0,r3,rA,r0);
+    FMA_VEC_SS(r0,r4,r9,r0);
+    FMA_VEC_SS(r0,r5,r8,r0);
 
     /* Stop PAPI counters */
     if ( NULL != fp ) {
@@ -1710,7 +1690,7 @@ float test_sp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  48 instructions */
 /************************************/
 float test_sp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
-    register SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SS(0.01);
@@ -1737,72 +1717,62 @@ float test_sp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
       }
     }
 
-    uint64 c = 0;
-    while (c < iterations){
-        size_t i = 0;
-        while (i < ITER){
+    /* The performance critical part */
+    FMA_VEC_SS(r0,r0,r7,r0);
+    FMA_VEC_SS(r0,r1,r8,r0);
+    FMA_VEC_SS(r0,r2,r9,r0);
+    FMA_VEC_SS(r0,r3,rA,r0);
+    FMA_VEC_SS(r0,r4,rB,r0);
+    FMA_VEC_SS(r0,r5,rC,r0);
 
-            /* The performance critical part */
-            FMA_VEC_SS(r0,r0,r7,r9);
-            FMA_VEC_SS(r1,r1,r8,rA);
-            FMA_VEC_SS(r2,r2,r9,rB);
-            FMA_VEC_SS(r3,r3,rA,rC);
-            FMA_VEC_SS(r4,r4,rB,rD);
-            FMA_VEC_SS(r5,r5,rC,rE);
+    FMA_VEC_SS(r0,r0,rD,r0);
+    FMA_VEC_SS(r0,r1,rC,r0);
+    FMA_VEC_SS(r0,r2,rB,r0);
+    FMA_VEC_SS(r0,r3,rA,r0);
+    FMA_VEC_SS(r0,r4,r9,r0);
+    FMA_VEC_SS(r0,r5,r8,r0);
 
-            FMA_VEC_SS(r0,r0,rD,rF);
-            FMA_VEC_SS(r1,r1,rC,rE);
-            FMA_VEC_SS(r2,r2,rB,rD);
-            FMA_VEC_SS(r3,r3,rA,rC);
-            FMA_VEC_SS(r4,r4,r9,rB);
-            FMA_VEC_SS(r5,r5,r8,rA);
+    FMA_VEC_SS(r0,r0,r7,r0);
+    FMA_VEC_SS(r0,r1,r8,r0);
+    FMA_VEC_SS(r0,r2,r9,r0);
+    FMA_VEC_SS(r0,r3,rA,r0);
+    FMA_VEC_SS(r0,r4,rB,r0);
+    FMA_VEC_SS(r0,r5,rC,r0);
 
-            FMA_VEC_SS(r0,r0,r7,r9);
-            FMA_VEC_SS(r1,r1,r8,rA);
-            FMA_VEC_SS(r2,r2,r9,rB);
-            FMA_VEC_SS(r3,r3,rA,rC);
-            FMA_VEC_SS(r4,r4,rB,rD);
-            FMA_VEC_SS(r5,r5,rC,rE);
+    FMA_VEC_SS(r0,r0,rD,r0);
+    FMA_VEC_SS(r0,r1,rC,r0);
+    FMA_VEC_SS(r0,r2,rB,r0);
+    FMA_VEC_SS(r0,r3,rA,r0);
+    FMA_VEC_SS(r0,r4,r9,r0);
+    FMA_VEC_SS(r0,r5,r8,r0);
 
-            FMA_VEC_SS(r0,r0,rD,rF);
-            FMA_VEC_SS(r1,r1,rC,rE);
-            FMA_VEC_SS(r2,r2,rB,rD);
-            FMA_VEC_SS(r3,r3,rA,rC);
-            FMA_VEC_SS(r4,r4,r9,rB);
-            FMA_VEC_SS(r5,r5,r8,rA);
+    FMA_VEC_SS(r0,r0,r7,r0);
+    FMA_VEC_SS(r0,r1,r8,r0);
+    FMA_VEC_SS(r0,r2,r9,r0);
+    FMA_VEC_SS(r0,r3,rA,r0);
+    FMA_VEC_SS(r0,r4,rB,r0);
+    FMA_VEC_SS(r0,r5,rC,r0);
 
-            FMA_VEC_SS(r0,r0,r7,r9);
-            FMA_VEC_SS(r1,r1,r8,rA);
-            FMA_VEC_SS(r2,r2,r9,rB);
-            FMA_VEC_SS(r3,r3,rA,rC);
-            FMA_VEC_SS(r4,r4,rB,rD);
-            FMA_VEC_SS(r5,r5,rC,rE);
+    FMA_VEC_SS(r0,r0,rD,r0);
+    FMA_VEC_SS(r0,r1,rC,r0);
+    FMA_VEC_SS(r0,r2,rB,r0);
+    FMA_VEC_SS(r0,r3,rA,r0);
+    FMA_VEC_SS(r0,r4,r9,r0);
+    FMA_VEC_SS(r0,r5,r8,r0);
 
-            FMA_VEC_SS(r0,r0,rD,rF);
-            FMA_VEC_SS(r1,r1,rC,rE);
-            FMA_VEC_SS(r2,r2,rB,rD);
-            FMA_VEC_SS(r3,r3,rA,rC);
-            FMA_VEC_SS(r4,r4,r9,rB);
-            FMA_VEC_SS(r5,r5,r8,rA);
+    FMA_VEC_SS(r0,r0,r7,r0);
+    FMA_VEC_SS(r0,r1,r8,r0);
+    FMA_VEC_SS(r0,r2,r9,r0);
+    FMA_VEC_SS(r0,r3,rA,r0);
+    FMA_VEC_SS(r0,r4,rB,r0);
+    FMA_VEC_SS(r0,r5,rC,r0);
 
-            FMA_VEC_SS(r0,r0,r7,r9);
-            FMA_VEC_SS(r1,r1,r8,rA);
-            FMA_VEC_SS(r2,r2,r9,rB);
-            FMA_VEC_SS(r3,r3,rA,rC);
-            FMA_VEC_SS(r4,r4,rB,rD);
-            FMA_VEC_SS(r5,r5,rC,rE);
-
-            FMA_VEC_SS(r0,r0,rD,rF);
-            FMA_VEC_SS(r1,r1,rC,rE);
-            FMA_VEC_SS(r2,r2,rB,rD);
-            FMA_VEC_SS(r3,r3,rA,rC);
-            FMA_VEC_SS(r4,r4,r9,rB);
-            FMA_VEC_SS(r5,r5,r8,rA);
-
-            i++;
-        }
-        c++;
-    }
+    FMA_VEC_SS(r0,r0,rD,r0);
+    FMA_VEC_SS(r0,r1,rC,r0);
+    FMA_VEC_SS(r0,r2,rB,r0);
+    FMA_VEC_SS(r0,r3,rA,r0);
+    FMA_VEC_SS(r0,r4,r9,r0);
+    FMA_VEC_SS(r0,r5,r8,r0);
 
     /* Stop PAPI counters */
     if ( NULL != fp ) {
@@ -1830,7 +1800,7 @@ float test_sp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  12 instructions */
 /************************************/
 double test_dp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
-    register DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SD(0.01);
@@ -1857,30 +1827,20 @@ double test_dp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
       }
     }
 
-    uint64 c = 0;
-    while (c < iterations){
-        size_t i = 0;
-        while (i < ITER){
+    /* The performance critical part */
+    FMA_VEC_SD(r0,r0,r7,r0);
+    FMA_VEC_SD(r0,r1,r8,r0);
+    FMA_VEC_SD(r0,r2,r9,r0);
+    FMA_VEC_SD(r0,r3,rA,r0);
+    FMA_VEC_SD(r0,r4,rB,r0);
+    FMA_VEC_SD(r0,r5,rC,r0);
 
-            /* The performance critical part */
-            FMA_VEC_SD(r0,r0,r7,r9);
-            FMA_VEC_SD(r1,r1,r8,rA);
-            FMA_VEC_SD(r2,r2,r9,rB);
-            FMA_VEC_SD(r3,r3,rA,rC);
-            FMA_VEC_SD(r4,r4,rB,rD);
-            FMA_VEC_SD(r5,r5,rC,rE);
-            
-            FMA_VEC_SD(r0,r0,rD,rF);
-            FMA_VEC_SD(r1,r1,rC,rE);
-            FMA_VEC_SD(r2,r2,rB,rD);
-            FMA_VEC_SD(r3,r3,rA,rC);
-            FMA_VEC_SD(r4,r4,r9,rB);
-            FMA_VEC_SD(r5,r5,r8,rA);
-
-            i++;
-        }
-        c++;
-    }
+    FMA_VEC_SD(r0,r0,rD,r0);
+    FMA_VEC_SD(r0,r1,rC,r0);
+    FMA_VEC_SD(r0,r2,rB,r0);
+    FMA_VEC_SD(r0,r3,rA,r0);
+    FMA_VEC_SD(r0,r4,r9,r0);
+    FMA_VEC_SD(r0,r5,r8,r0);
 
     /* Stop PAPI counters */
     if ( NULL != fp ) {
@@ -1908,7 +1868,7 @@ double test_dp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  24 instructions */
 /************************************/
 double test_dp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
-    register DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SD(0.01);
@@ -1935,44 +1895,34 @@ double test_dp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
       }
     }
 
-    uint64 c = 0;
-    while (c < iterations){
-        size_t i = 0;
-        while (i < ITER){
+    /* The performance critical part */
+    FMA_VEC_SD(r0,r0,r7,r0);
+    FMA_VEC_SD(r0,r1,r8,r0);
+    FMA_VEC_SD(r0,r2,r9,r0);
+    FMA_VEC_SD(r0,r3,rA,r0);
+    FMA_VEC_SD(r0,r4,rB,r0);
+    FMA_VEC_SD(r0,r5,rC,r0);
 
-            /* The performance critical part */
-            FMA_VEC_SD(r0,r0,r7,r9);
-            FMA_VEC_SD(r1,r1,r8,rA);
-            FMA_VEC_SD(r2,r2,r9,rB);
-            FMA_VEC_SD(r3,r3,rA,rC);
-            FMA_VEC_SD(r4,r4,rB,rD);
-            FMA_VEC_SD(r5,r5,rC,rE);
-            
-            FMA_VEC_SD(r0,r0,rD,rF);
-            FMA_VEC_SD(r1,r1,rC,rE);
-            FMA_VEC_SD(r2,r2,rB,rD);
-            FMA_VEC_SD(r3,r3,rA,rC);
-            FMA_VEC_SD(r4,r4,r9,rB);
-            FMA_VEC_SD(r5,r5,r8,rA);
+    FMA_VEC_SD(r0,r0,rD,r0);
+    FMA_VEC_SD(r0,r1,rC,r0);
+    FMA_VEC_SD(r0,r2,rB,r0);
+    FMA_VEC_SD(r0,r3,rA,r0);
+    FMA_VEC_SD(r0,r4,r9,r0);
+    FMA_VEC_SD(r0,r5,r8,r0);
 
-            FMA_VEC_SD(r0,r0,r7,r9);
-            FMA_VEC_SD(r1,r1,r8,rA);
-            FMA_VEC_SD(r2,r2,r9,rB);
-            FMA_VEC_SD(r3,r3,rA,rC);
-            FMA_VEC_SD(r4,r4,rB,rD);
-            FMA_VEC_SD(r5,r5,rC,rE);
-            
-            FMA_VEC_SD(r0,r0,rD,rF);
-            FMA_VEC_SD(r1,r1,rC,rE);
-            FMA_VEC_SD(r2,r2,rB,rD);
-            FMA_VEC_SD(r3,r3,rA,rC);
-            FMA_VEC_SD(r4,r4,r9,rB);
-            FMA_VEC_SD(r5,r5,r8,rA);
+    FMA_VEC_SD(r0,r0,r7,r0);
+    FMA_VEC_SD(r0,r1,r8,r0);
+    FMA_VEC_SD(r0,r2,r9,r0);
+    FMA_VEC_SD(r0,r3,rA,r0);
+    FMA_VEC_SD(r0,r4,rB,r0);
+    FMA_VEC_SD(r0,r5,rC,r0);
 
-            i++;
-        }
-        c++;
-    }
+    FMA_VEC_SD(r0,r0,rD,r0);
+    FMA_VEC_SD(r0,r1,rC,r0);
+    FMA_VEC_SD(r0,r2,rB,r0);
+    FMA_VEC_SD(r0,r3,rA,r0);
+    FMA_VEC_SD(r0,r4,r9,r0);
+    FMA_VEC_SD(r0,r5,r8,r0);
 
     /* Stop PAPI counters */
     if ( NULL != fp ) {
@@ -2000,7 +1950,7 @@ double test_dp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  48 instructions */
 /************************************/
 double test_dp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
-    register DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
 
     /* Generate starting data */
     r0 = SET_VEC_SD(0.01);
@@ -2027,72 +1977,62 @@ double test_dp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
       }
     }
 
-    uint64 c = 0;
-    while (c < iterations){
-        size_t i = 0;
-        while (i < ITER){
+    /* The performance critical part */
+    FMA_VEC_SD(r0,r0,r7,r0);
+    FMA_VEC_SD(r0,r1,r8,r0);
+    FMA_VEC_SD(r0,r2,r9,r0);
+    FMA_VEC_SD(r0,r3,rA,r0);
+    FMA_VEC_SD(r0,r4,rB,r0);
+    FMA_VEC_SD(r0,r5,rC,r0);
 
-            /* The performance critical part */
-            FMA_VEC_SD(r0,r0,r7,r9);
-            FMA_VEC_SD(r1,r1,r8,rA);
-            FMA_VEC_SD(r2,r2,r9,rB);
-            FMA_VEC_SD(r3,r3,rA,rC);
-            FMA_VEC_SD(r4,r4,rB,rD);
-            FMA_VEC_SD(r5,r5,rC,rE);
-            
-            FMA_VEC_SD(r0,r0,rD,rF);
-            FMA_VEC_SD(r1,r1,rC,rE);
-            FMA_VEC_SD(r2,r2,rB,rD);
-            FMA_VEC_SD(r3,r3,rA,rC);
-            FMA_VEC_SD(r4,r4,r9,rB);
-            FMA_VEC_SD(r5,r5,r8,rA);
+    FMA_VEC_SD(r0,r0,rD,r0);
+    FMA_VEC_SD(r0,r1,rC,r0);
+    FMA_VEC_SD(r0,r2,rB,r0);
+    FMA_VEC_SD(r0,r3,rA,r0);
+    FMA_VEC_SD(r0,r4,r9,r0);
+    FMA_VEC_SD(r0,r5,r8,r0);
 
-            FMA_VEC_SD(r0,r0,r7,r9);
-            FMA_VEC_SD(r1,r1,r8,rA);
-            FMA_VEC_SD(r2,r2,r9,rB);
-            FMA_VEC_SD(r3,r3,rA,rC);
-            FMA_VEC_SD(r4,r4,rB,rD);
-            FMA_VEC_SD(r5,r5,rC,rE);
-            
-            FMA_VEC_SD(r0,r0,rD,rF);
-            FMA_VEC_SD(r1,r1,rC,rE);
-            FMA_VEC_SD(r2,r2,rB,rD);
-            FMA_VEC_SD(r3,r3,rA,rC);
-            FMA_VEC_SD(r4,r4,r9,rB);
-            FMA_VEC_SD(r5,r5,r8,rA);
+    FMA_VEC_SD(r0,r0,r7,r0);
+    FMA_VEC_SD(r0,r1,r8,r0);
+    FMA_VEC_SD(r0,r2,r9,r0);
+    FMA_VEC_SD(r0,r3,rA,r0);
+    FMA_VEC_SD(r0,r4,rB,r0);
+    FMA_VEC_SD(r0,r5,rC,r0);
 
-            FMA_VEC_SD(r0,r0,r7,r9);
-            FMA_VEC_SD(r1,r1,r8,rA);
-            FMA_VEC_SD(r2,r2,r9,rB);
-            FMA_VEC_SD(r3,r3,rA,rC);
-            FMA_VEC_SD(r4,r4,rB,rD);
-            FMA_VEC_SD(r5,r5,rC,rE);
-            
-            FMA_VEC_SD(r0,r0,rD,rF);
-            FMA_VEC_SD(r1,r1,rC,rE);
-            FMA_VEC_SD(r2,r2,rB,rD);
-            FMA_VEC_SD(r3,r3,rA,rC);
-            FMA_VEC_SD(r4,r4,r9,rB);
-            FMA_VEC_SD(r5,r5,r8,rA);
+    FMA_VEC_SD(r0,r0,rD,r0);
+    FMA_VEC_SD(r0,r1,rC,r0);
+    FMA_VEC_SD(r0,r2,rB,r0);
+    FMA_VEC_SD(r0,r3,rA,r0);
+    FMA_VEC_SD(r0,r4,r9,r0);
+    FMA_VEC_SD(r0,r5,r8,r0);
 
-            FMA_VEC_SD(r0,r0,r7,r9);
-            FMA_VEC_SD(r1,r1,r8,rA);
-            FMA_VEC_SD(r2,r2,r9,rB);
-            FMA_VEC_SD(r3,r3,rA,rC);
-            FMA_VEC_SD(r4,r4,rB,rD);
-            FMA_VEC_SD(r5,r5,rC,rE);
-            
-            FMA_VEC_SD(r0,r0,rD,rF);
-            FMA_VEC_SD(r1,r1,rC,rE);
-            FMA_VEC_SD(r2,r2,rB,rD);
-            FMA_VEC_SD(r3,r3,rA,rC);
-            FMA_VEC_SD(r4,r4,r9,rB);
-            FMA_VEC_SD(r5,r5,r8,rA);
+    FMA_VEC_SD(r0,r0,r7,r0);
+    FMA_VEC_SD(r0,r1,r8,r0);
+    FMA_VEC_SD(r0,r2,r9,r0);
+    FMA_VEC_SD(r0,r3,rA,r0);
+    FMA_VEC_SD(r0,r4,rB,r0);
+    FMA_VEC_SD(r0,r5,rC,r0);
 
-            i++;
-        }
-        c++;
-    }
+    FMA_VEC_SD(r0,r0,rD,r0);
+    FMA_VEC_SD(r0,r1,rC,r0);
+    FMA_VEC_SD(r0,r2,rB,r0);
+    FMA_VEC_SD(r0,r3,rA,r0);
+    FMA_VEC_SD(r0,r4,r9,r0);
+    FMA_VEC_SD(r0,r5,r8,r0);
+
+    FMA_VEC_SD(r0,r0,r7,r0);
+    FMA_VEC_SD(r0,r1,r8,r0);
+    FMA_VEC_SD(r0,r2,r9,r0);
+    FMA_VEC_SD(r0,r3,rA,r0);
+    FMA_VEC_SD(r0,r4,rB,r0);
+    FMA_VEC_SD(r0,r5,rC,r0);
+
+    FMA_VEC_SD(r0,r0,rD,r0);
+    FMA_VEC_SD(r0,r1,rC,r0);
+    FMA_VEC_SD(r0,r2,rB,r0);
+    FMA_VEC_SD(r0,r3,rA,r0);
+    FMA_VEC_SD(r0,r4,r9,r0);
+    FMA_VEC_SD(r0,r5,r8,r0);
 
     /* Stop PAPI counters */
     if ( NULL != fp ) {
