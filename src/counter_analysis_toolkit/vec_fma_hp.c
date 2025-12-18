@@ -41,8 +41,10 @@ void test_hp_power_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet,
 static
 half test_hp_mac_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
 
-    register HP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile HP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    double values = 0.0;
     long long iterValues[1]; iterValues[0] = 0;
+    for (int iter=0; iter<ITERS; ++iter) {
 
     /* Generate starting data */
     r0 = SET_VEC_PH(0.01);
@@ -67,12 +69,7 @@ half test_hp_mac_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
         return -1;
     }
 
-    uint64 c = 0;
-    while (c < iterations){
-        size_t i = 0;
-        while (i < 1){
-        /* The performance critical part */
-
+            /* The performance critical part */
             r0 = FMA_VEC_PH(r0,r7,r9);
             r1 = FMA_VEC_PH(r1,r8,rA);
             r2 = FMA_VEC_PH(r2,r9,rB);
@@ -87,16 +84,20 @@ half test_hp_mac_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
             r4 = FMA_VEC_PH(r4,r9,rB);
             r5 = FMA_VEC_PH(r5,r8,rA);
 
-            i++;
-        }
-        c++;
-    }
-
     /* Stop PAPI counters */
-    if ( PAPI_stop(EventSet, iterValues) != PAPI_OK ) {
+    if ( NULL != fp && PAPI_stop(EventSet, iterValues) != PAPI_OK ) {
       return -1;
     }
-    papi_print(12, fp, (double)iterValues[0]);
+
+    values += iterValues[0];
+
+} // end of ITERS
+
+    values /= ITERS; // make values doubles instead of long longs; ok b/c not used in PAPI_stop().
+
+    if ( NULL != fp ) {
+      papi_print(12, fp, values);
+    }
 
     /* Use data so that compiler does not eliminate it when using -O2 */
     r0 = ADD_VEC_PH(r0,r1);
@@ -124,8 +125,10 @@ half test_hp_mac_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
 static
 half test_hp_mac_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
 
-    register HP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile HP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    double values = 0.0;
     long long iterValues[1]; iterValues[0] = 0;
+    for (int iter=0; iter<ITERS; ++iter) {
 
     /* Generate starting data */
     r0 = SET_VEC_PH(0.01);
@@ -150,12 +153,7 @@ half test_hp_mac_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
         return -1;
     }
 
-    uint64 c = 0;
-    while (c < iterations){
-        size_t i = 0;
-        while (i < 1){
             /* The performance critical part */
-
             r0 = FMA_VEC_PH(r0,r7,r9);
             r1 = FMA_VEC_PH(r1,r8,rA);
             r2 = FMA_VEC_PH(r2,r9,rB);
@@ -183,17 +181,21 @@ half test_hp_mac_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
             r3 = FMA_VEC_PH(r3,rA,rC);
             r4 = FMA_VEC_PH(r4,r9,rB);
             r5 = FMA_VEC_PH(r5,r8,rA);
-
-            i++;
-        }
-        c++;
-    }
 
     /* Stop PAPI counters */
-    if ( PAPI_stop(EventSet, iterValues) != PAPI_OK ) {
+    if ( NULL != fp && PAPI_stop(EventSet, iterValues) != PAPI_OK ) {
       return -1;
     }
-    papi_print(24, fp, (double)iterValues[0]);
+
+    values += iterValues[0];
+
+} // end of ITERS
+
+    values /= ITERS; // make values doubles instead of long longs; ok b/c not used in PAPI_stop().
+
+    if ( NULL != fp ) {
+      papi_print(24, fp, values);
+    }
 
     /* Use data so that compiler does not eliminate it when using -O2 */
     r0 = ADD_VEC_PH(r0,r1);
@@ -221,8 +223,10 @@ half test_hp_mac_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
 static
 half test_hp_mac_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
 
-    register HP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    volatile HP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
+    double values = 0.0;
     long long iterValues[1]; iterValues[0] = 0;
+    for (int iter=0; iter<ITERS; ++iter) {
 
     /* Generate starting data */
     r0 = SET_VEC_PH(0.01);
@@ -247,12 +251,7 @@ half test_hp_mac_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
         return -1;
     }
 
-    uint64 c = 0;
-    while (c < iterations){
-        size_t i = 0;
-        while (i < 1){
             /* The performance critical part */
-
             r0 = FMA_VEC_PH(r0,r7,r9);
             r1 = FMA_VEC_PH(r1,r8,rA);
             r2 = FMA_VEC_PH(r2,r9,rB);
@@ -308,17 +307,21 @@ half test_hp_mac_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
             r3 = FMA_VEC_PH(r3,rA,rC);
             r4 = FMA_VEC_PH(r4,r9,rB);
             r5 = FMA_VEC_PH(r5,r8,rA);
-
-            i++;
-        }
-        c++;
-    }
 
     /* Stop PAPI counters */
-    if ( PAPI_stop(EventSet, iterValues) != PAPI_OK ) {
+    if ( NULL != fp && PAPI_stop(EventSet, iterValues) != PAPI_OK ) {
       return -1;
     }
-    papi_print(48, fp, (double)iterValues[0]);
+
+    values += iterValues[0];
+
+} // end of ITERS
+
+    values /= ITERS; // make values doubles instead of long longs; ok b/c not used in PAPI_stop().
+
+    if ( NULL != fp ) {
+      papi_print(48, fp, values);
+    }
 
     /* Use data so that compiler does not eliminate it when using -O2 */
     r0 = ADD_VEC_PH(r0,r1);
