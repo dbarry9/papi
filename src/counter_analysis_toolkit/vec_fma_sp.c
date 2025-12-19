@@ -1,30 +1,30 @@
 #include "vec_scalar_verify.h"
 
-static float test_sp_mac_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp );
-static float test_sp_mac_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp );
-static float test_sp_mac_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp );
-static void  test_sp_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp );
+static float test_sp_mac_VEC_FMA_12( int EventSet, FILE *fp );
+static float test_sp_mac_VEC_FMA_24( int EventSet, FILE *fp );
+static float test_sp_mac_VEC_FMA_48( int EventSet, FILE *fp );
+static void  test_sp_VEC_FMA( int instr_per_loop, int EventSet, FILE *fp );
 
 /* Wrapper functions of different vector widths. */
 #if defined(X86_VEC_WIDTH_128B)
-void test_sp_x86_128B_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp ) {
-    return test_sp_VEC_FMA( instr_per_loop, iterations, EventSet, fp );
+void test_sp_x86_128B_VEC_FMA( int instr_per_loop, int EventSet, FILE *fp ) {
+    return test_sp_VEC_FMA( instr_per_loop, EventSet, fp );
 }
 #elif defined(X86_VEC_WIDTH_512B)
-void test_sp_x86_512B_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp ) {
-    return test_sp_VEC_FMA( instr_per_loop, iterations, EventSet, fp );
+void test_sp_x86_512B_VEC_FMA( int instr_per_loop, int EventSet, FILE *fp ) {
+    return test_sp_VEC_FMA( instr_per_loop, EventSet, fp );
 }
 #elif defined(X86_VEC_WIDTH_256B)
-void test_sp_x86_256B_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp ) {
-    return test_sp_VEC_FMA( instr_per_loop, iterations, EventSet, fp );
+void test_sp_x86_256B_VEC_FMA( int instr_per_loop, int EventSet, FILE *fp ) {
+    return test_sp_VEC_FMA( instr_per_loop, EventSet, fp );
 }
 #elif defined(ARM)
-void test_sp_arm_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp ) {
-    return test_sp_VEC_FMA( instr_per_loop, iterations, EventSet, fp );
+void test_sp_arm_VEC_FMA( int instr_per_loop, int EventSet, FILE *fp ) {
+    return test_sp_VEC_FMA( instr_per_loop, EventSet, fp );
 }
 #elif defined(POWER)
-void test_sp_power_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp ) {
-    return test_sp_VEC_FMA( instr_per_loop, iterations, EventSet, fp );
+void test_sp_power_VEC_FMA( int instr_per_loop, int EventSet, FILE *fp ) {
+    return test_sp_VEC_FMA( instr_per_loop, EventSet, fp );
 }
 #endif
 
@@ -32,7 +32,7 @@ void test_sp_power_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet,
 /* Loop unrolling:  12 instructions */
 /************************************/
 static
-float test_sp_mac_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
+float test_sp_mac_VEC_FMA_12( int EventSet, FILE *fp ){
 
     svbool_t pg = svptrue_b32();
     volatile SP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
@@ -117,7 +117,7 @@ float test_sp_mac_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  24 instructions */
 /************************************/
 static
-float test_sp_mac_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
+float test_sp_mac_VEC_FMA_24( int EventSet, FILE *fp ){
 
     svbool_t pg = svptrue_b32();
     volatile SP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
@@ -216,7 +216,7 @@ float test_sp_mac_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  48 instructions */
 /************************************/
 static
-float test_sp_mac_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
+float test_sp_mac_VEC_FMA_48( int EventSet, FILE *fp ){
 
     svbool_t pg = svptrue_b32();
     volatile SP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
@@ -340,22 +340,22 @@ float test_sp_mac_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
 }
 
 static
-void test_sp_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp )
+void test_sp_VEC_FMA( int instr_per_loop, int EventSet, FILE *fp )
 {
     float sum = 0.0;
     float scalar_sum = 0.0;
 
     if ( instr_per_loop == 12 ) {
-        sum += test_sp_mac_VEC_FMA_12( iterations, EventSet, fp );
-        scalar_sum += test_sp_scalar_VEC_FMA_12( iterations, EventSet, NULL );
+        sum += test_sp_mac_VEC_FMA_12( EventSet, fp );
+        scalar_sum += test_sp_scalar_VEC_FMA_12( EventSet, NULL );
     }
     else if ( instr_per_loop == 24 ) {
-        sum += test_sp_mac_VEC_FMA_24( iterations, EventSet, fp );
-        scalar_sum += test_sp_scalar_VEC_FMA_24( iterations, EventSet, NULL );
+        sum += test_sp_mac_VEC_FMA_24( EventSet, fp );
+        scalar_sum += test_sp_scalar_VEC_FMA_24( EventSet, NULL );
     }
     else if ( instr_per_loop == 48 ) {
-        sum += test_sp_mac_VEC_FMA_48( iterations, EventSet, fp );
-        scalar_sum += test_sp_scalar_VEC_FMA_48( iterations, EventSet, NULL );
+        sum += test_sp_mac_VEC_FMA_48( EventSet, fp );
+        scalar_sum += test_sp_scalar_VEC_FMA_48( EventSet, NULL );
     }
 
     if( sum/4.0 != scalar_sum ) {

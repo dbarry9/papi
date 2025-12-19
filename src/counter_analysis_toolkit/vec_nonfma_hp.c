@@ -1,36 +1,36 @@
 #include "vec_scalar_verify.h"
 
 #if defined(ARM)
-static half  test_hp_mac_VEC_24( uint64 iterations, int EventSet, FILE *fp );
-static half  test_hp_mac_VEC_48( uint64 iterations, int EventSet, FILE *fp );
-static half  test_hp_mac_VEC_96( uint64 iterations, int EventSet, FILE *fp );
+static half  test_hp_mac_VEC_24( int EventSet, FILE *fp );
+static half  test_hp_mac_VEC_48( int EventSet, FILE *fp );
+static half  test_hp_mac_VEC_96( int EventSet, FILE *fp );
 #else
-static float test_hp_mac_VEC_24( uint64 iterations, int EventSet, FILE *fp );
-static float test_hp_mac_VEC_48( uint64 iterations, int EventSet, FILE *fp );
-static float test_hp_mac_VEC_96( uint64 iterations, int EventSet, FILE *fp );
+static float test_hp_mac_VEC_24( int EventSet, FILE *fp );
+static float test_hp_mac_VEC_48( int EventSet, FILE *fp );
+static float test_hp_mac_VEC_96( int EventSet, FILE *fp );
 #endif
-static void  test_hp_VEC( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp );
+static void  test_hp_VEC( int instr_per_loop, int EventSet, FILE *fp );
 
 /* Wrapper functions of different vector widths. */
 #if defined(X86_VEC_WIDTH_128B)
-void test_hp_x86_128B_VEC( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp ) {
-    return test_hp_VEC( instr_per_loop, iterations, EventSet, fp );
+void test_hp_x86_128B_VEC( int instr_per_loop, int EventSet, FILE *fp ) {
+    return test_hp_VEC( instr_per_loop, EventSet, fp );
 }
 #elif defined(X86_VEC_WIDTH_512B)
-void test_hp_x86_512B_VEC( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp ) {
-    return test_hp_VEC( instr_per_loop, iterations, EventSet, fp );
+void test_hp_x86_512B_VEC( int instr_per_loop, int EventSet, FILE *fp ) {
+    return test_hp_VEC( instr_per_loop, EventSet, fp );
 }
 #elif defined(X86_VEC_WIDTH_256B)
-void test_hp_x86_256B_VEC( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp ) {
-    return test_hp_VEC( instr_per_loop, iterations, EventSet, fp );
+void test_hp_x86_256B_VEC( int instr_per_loop, int EventSet, FILE *fp ) {
+    return test_hp_VEC( instr_per_loop, EventSet, fp );
 }
 #elif defined(ARM)
-void test_hp_arm_VEC( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp ) {
-    return test_hp_VEC( instr_per_loop, iterations, EventSet, fp );
+void test_hp_arm_VEC( int instr_per_loop, int EventSet, FILE *fp ) {
+    return test_hp_VEC( instr_per_loop, EventSet, fp );
 }
 #elif defined(POWER)
-void test_hp_power_VEC( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp ) {
-    return test_hp_VEC( instr_per_loop, iterations, EventSet, fp );
+void test_hp_power_VEC( int instr_per_loop, int EventSet, FILE *fp ) {
+    return test_hp_VEC( instr_per_loop, EventSet, fp );
 }
 #endif
 
@@ -39,7 +39,7 @@ void test_hp_power_VEC( int instr_per_loop, uint64 iterations, int EventSet, FIL
 /* Loop unrolling:  24 instructions */
 /************************************/
 static
-half test_hp_mac_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
+half test_hp_mac_VEC_24( int EventSet, FILE *fp ){
 
     svbool_t pg = svptrue_b16();
     volatile HP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
@@ -141,7 +141,7 @@ half test_hp_mac_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  48 instructions */
 /************************************/
 static
-half test_hp_mac_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
+half test_hp_mac_VEC_48( int EventSet, FILE *fp ){
 
     svbool_t pg = svptrue_b16();
     volatile HP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
@@ -269,7 +269,7 @@ half test_hp_mac_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  96 instructions */
 /************************************/
 static
-half test_hp_mac_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
+half test_hp_mac_VEC_96( int EventSet, FILE *fp ){
 
     svbool_t pg = svptrue_b16();
     volatile HP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
@@ -446,22 +446,22 @@ half test_hp_mac_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
 }
 
 static
-void test_hp_VEC( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp )
+void test_hp_VEC( int instr_per_loop, int EventSet, FILE *fp )
 {
     half sum = 0.0;
     half scalar_sum = 0.0;
 
     if ( instr_per_loop == 24 ) {
-        sum = vaddh_f16(sum,test_hp_mac_VEC_24( iterations, EventSet, fp ));
-        scalar_sum = vaddh_f16(scalar_sum,test_hp_scalar_VEC_24( iterations, EventSet, NULL ));
+        sum = vaddh_f16(sum,test_hp_mac_VEC_24( EventSet, fp ));
+        scalar_sum = vaddh_f16(scalar_sum,test_hp_scalar_VEC_24( EventSet, NULL ));
     }
     else if ( instr_per_loop == 48 ) {
-        sum = vaddh_f16(sum,test_hp_mac_VEC_48( iterations, EventSet, fp ));
-        scalar_sum = vaddh_f16(scalar_sum,test_hp_scalar_VEC_48( iterations, EventSet, NULL ));
+        sum = vaddh_f16(sum,test_hp_mac_VEC_48( EventSet, fp ));
+        scalar_sum = vaddh_f16(scalar_sum,test_hp_scalar_VEC_48( EventSet, NULL ));
     }
     else if ( instr_per_loop == 96 ) {
-        sum = vaddh_f16(sum,test_hp_mac_VEC_96( iterations, EventSet, fp ));
-        scalar_sum = vaddh_f16(scalar_sum,test_hp_scalar_VEC_96( iterations, EventSet, NULL ));
+        sum = vaddh_f16(sum,test_hp_mac_VEC_96( EventSet, fp ));
+        scalar_sum = vaddh_f16(scalar_sum,test_hp_scalar_VEC_96( EventSet, NULL ));
     }
 
     if( vdivh_f16(sum,4.0) != scalar_sum ) {
@@ -471,7 +471,7 @@ void test_hp_VEC( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp 
 
 #else
 static
-float test_hp_mac_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
+float test_hp_mac_VEC_24( int EventSet, FILE *fp ){
 
     (void)iterations;
     (void)EventSet;
@@ -484,7 +484,7 @@ float test_hp_mac_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
 }
 
 static
-float test_hp_mac_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
+float test_hp_mac_VEC_48( int EventSet, FILE *fp ){
 
     (void)iterations;
     (void)EventSet;
@@ -497,7 +497,7 @@ float test_hp_mac_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
 }
 
 static
-float test_hp_mac_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
+float test_hp_mac_VEC_96( int EventSet, FILE *fp ){
 
     (void)iterations;
     (void)EventSet;
@@ -510,22 +510,22 @@ float test_hp_mac_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
 }
 
 static
-void test_hp_VEC( int instr_per_loop, uint64 iterations, int EventSet, FILE *fp )
+void test_hp_VEC( int instr_per_loop, int EventSet, FILE *fp )
 {
     float sum = 0.0;
     float scalar_sum = 0.0;
 
     if ( instr_per_loop == 24 ) {
-        sum += test_hp_mac_VEC_24( iterations, EventSet, fp );
-        scalar_sum += test_hp_scalar_VEC_24( iterations, EventSet, NULL );
+        sum += test_hp_mac_VEC_24( EventSet, fp );
+        scalar_sum += test_hp_scalar_VEC_24( EventSet, NULL );
     }
     else if ( instr_per_loop == 48 ) {
-        sum += test_hp_mac_VEC_48( iterations, EventSet, fp );
-        scalar_sum += test_hp_scalar_VEC_48( iterations, EventSet, NULL );
+        sum += test_hp_mac_VEC_48( EventSet, fp );
+        scalar_sum += test_hp_scalar_VEC_48( EventSet, NULL );
     }
     else if ( instr_per_loop == 96 ) {
-        sum += test_hp_mac_VEC_96( iterations, EventSet, fp );
-        scalar_sum += test_hp_scalar_VEC_96( iterations, EventSet, NULL );
+        sum += test_hp_mac_VEC_96( EventSet, fp );
+        scalar_sum += test_hp_scalar_VEC_96( EventSet, NULL );
     }
 
     if( sum/4.0 != scalar_sum ) {

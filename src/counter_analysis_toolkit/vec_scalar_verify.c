@@ -11,7 +11,7 @@ void papi_print(long long theory, FILE *fp, double values)
 }
 
 #if defined(ARM)
-half test_hp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
+half test_hp_scalar_VEC_24( int EventSet, FILE *fp ){
 
     volatile half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -105,7 +105,7 @@ half test_hp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
     return out;
 }
 
-half test_hp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
+half test_hp_scalar_VEC_48( int EventSet, FILE *fp ){
 
     volatile half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -225,7 +225,7 @@ half test_hp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
     return out;
 }
 
-half test_hp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
+half test_hp_scalar_VEC_96( int EventSet, FILE *fp ){
 
     volatile half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -398,7 +398,7 @@ half test_hp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
 }
 
 #else
-float test_hp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
+float test_hp_scalar_VEC_24( int EventSet, FILE *fp ){
 
     (void)iterations;
     (void)EventSet;
@@ -410,7 +410,7 @@ float test_hp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
     return 0.0;
 }
 
-float test_hp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
+float test_hp_scalar_VEC_48( int EventSet, FILE *fp ){
 
     (void)iterations;
     (void)EventSet;
@@ -422,7 +422,7 @@ float test_hp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
     return 0.0;
 }
 
-float test_hp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
+float test_hp_scalar_VEC_96( int EventSet, FILE *fp ){
 
     (void)iterations;
     (void)EventSet;
@@ -438,7 +438,7 @@ float test_hp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
 /************************************/
 /* Loop unrolling:  24 instructions */
 /************************************/
-float test_sp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
+float test_sp_scalar_VEC_24( int EventSet, FILE *fp ){
 
     volatile SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -535,7 +535,7 @@ float test_sp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
 /************************************/
 /* Loop unrolling:  48 instructions */
 /************************************/
-float test_sp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
+float test_sp_scalar_VEC_48( int EventSet, FILE *fp ){
 
     volatile SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -658,7 +658,7 @@ float test_sp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
 /************************************/
 /* Loop unrolling:  96 instructions */
 /************************************/
-float test_sp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
+float test_sp_scalar_VEC_96( int EventSet, FILE *fp ){
 
     volatile SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -833,7 +833,7 @@ float test_sp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
 /************************************/
 /* Loop unrolling:  24 instructions */
 /************************************/
-double test_dp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
+double test_dp_scalar_VEC_24( int EventSet, FILE *fp ){
 
     volatile DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -930,7 +930,7 @@ double test_dp_scalar_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
 /************************************/
 /* Loop unrolling:  48 instructions */
 /************************************/
-double test_dp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
+double test_dp_scalar_VEC_48( int EventSet, FILE *fp ){
 
     volatile DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -1053,7 +1053,7 @@ double test_dp_scalar_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
 /************************************/
 /* Loop unrolling:  96 instructions */
 /************************************/
-double test_dp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
+double test_dp_scalar_VEC_96( int EventSet, FILE *fp ){
 
     volatile DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -1226,7 +1226,7 @@ double test_dp_scalar_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
 }
 
 #if defined(ARM)
-half test_hp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
+half test_hp_scalar_VEC_FMA_12( int EventSet, FILE *fp ){
 
     volatile half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -1303,7 +1303,7 @@ half test_hp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
     return out;
 }
 
-half test_hp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
+half test_hp_scalar_VEC_FMA_24( int EventSet, FILE *fp ){
 
     volatile half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -1394,7 +1394,7 @@ half test_hp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
     return out;
 }
 
-half test_hp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
+half test_hp_scalar_VEC_FMA_48( int EventSet, FILE *fp ){
 
     volatile half r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -1514,7 +1514,7 @@ half test_hp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
 }
 
 #else
-float test_hp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
+float test_hp_scalar_VEC_FMA_12( int EventSet, FILE *fp ){
 
     (void)iterations;
     (void)EventSet;
@@ -1526,7 +1526,7 @@ float test_hp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
     return 0.0;
 }
 
-float test_hp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
+float test_hp_scalar_VEC_FMA_24( int EventSet, FILE *fp ){
 
     (void)iterations;
     (void)EventSet;
@@ -1538,7 +1538,7 @@ float test_hp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
     return 0.0;
 }
 
-float test_hp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
+float test_hp_scalar_VEC_FMA_48( int EventSet, FILE *fp ){
 
     (void)iterations;
     (void)EventSet;
@@ -1555,7 +1555,7 @@ float test_hp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
 /* Loop unrolling:  12 instructions */
 /************************************/
 //#pragma GCC optimize ("O2")
-float test_sp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
+float test_sp_scalar_VEC_FMA_12( int EventSet, FILE *fp ){
 
     volatile SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -1635,7 +1635,7 @@ float test_sp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
 /************************************/
 /* Loop unrolling:  24 instructions */
 /************************************/
-float test_sp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
+float test_sp_scalar_VEC_FMA_24( int EventSet, FILE *fp ){
 
     volatile SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -1729,7 +1729,7 @@ float test_sp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
 /************************************/
 /* Loop unrolling:  48 instructions */
 /************************************/
-float test_sp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
+float test_sp_scalar_VEC_FMA_48( int EventSet, FILE *fp ){
 
     volatile SP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -1851,7 +1851,7 @@ float test_sp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
 /************************************/
 /* Loop unrolling:  12 instructions */
 /************************************/
-double test_dp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
+double test_dp_scalar_VEC_FMA_12( int EventSet, FILE *fp ){
 
     volatile DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -1931,7 +1931,7 @@ double test_dp_scalar_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
 /************************************/
 /* Loop unrolling:  24 instructions */
 /************************************/
-double test_dp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
+double test_dp_scalar_VEC_FMA_24( int EventSet, FILE *fp ){
 
     volatile DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
@@ -2025,7 +2025,7 @@ double test_dp_scalar_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
 /************************************/
 /* Loop unrolling:  48 instructions */
 /************************************/
-double test_dp_scalar_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
+double test_dp_scalar_VEC_FMA_48( int EventSet, FILE *fp ){
 
     volatile DP_SCALAR_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
