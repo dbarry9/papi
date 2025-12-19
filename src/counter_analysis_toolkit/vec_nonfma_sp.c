@@ -34,6 +34,7 @@ void test_sp_power_VEC( int instr_per_loop, uint64 iterations, int EventSet, FIL
 static
 float test_sp_mac_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
 
+    svbool_t pg = svptrue_b32();
     volatile SP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
     long long iterValues[1]; iterValues[0] = 0;
@@ -135,6 +136,7 @@ float test_sp_mac_VEC_24( uint64 iterations, int EventSet, FILE *fp ){
 static
 float test_sp_mac_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
 
+    svbool_t pg = svptrue_b32();
     volatile SP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
     long long iterValues[1]; iterValues[0] = 0;
@@ -262,6 +264,7 @@ float test_sp_mac_VEC_48( uint64 iterations, int EventSet, FILE *fp ){
 static
 float test_sp_mac_VEC_96( uint64 iterations, int EventSet, FILE *fp ){
 
+    svbool_t pg = svptrue_b32();
     volatile SP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
     long long iterValues[1]; iterValues[0] = 0;

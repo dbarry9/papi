@@ -100,6 +100,28 @@ typedef __fp16 half;
 typedef __fp16 HP_SCALAR_TYPE;
 typedef float  SP_SCALAR_TYPE;
 typedef double DP_SCALAR_TYPE;
+
+typedef svfloat16_t HP_VEC_TYPE;
+typedef svfloat32_t SP_VEC_TYPE;
+typedef svfloat64_t DP_VEC_TYPE;
+
+#define SET_VEC_PH(_I_) (HP_VEC_TYPE)svdup_n_f16( _I_ )
+#define SET_VEC_PS(_I_) (SP_VEC_TYPE)svdup_n_f32( _I_ );
+#define SET_VEC_PD(_I_) (DP_VEC_TYPE)svdup_n_f64( _I_ );
+
+#define ADD_VEC_PH(_I_,_J_) (HP_VEC_TYPE)svadd_f16_m( pg, _I_ , _J_ );
+#define ADD_VEC_PS(_I_,_J_) (SP_VEC_TYPE)svadd_f32_m( pg, _I_ , _J_ );
+#define ADD_VEC_PD(_I_,_J_) (DP_VEC_TYPE)svadd_f64_m( pg, _I_ , _J_ );
+
+#define MUL_VEC_PH(_I_,_J_) (HP_VEC_TYPE)svmul_f16_m( pg, _I_ , _J_ );
+#define MUL_VEC_PS(_I_,_J_) (SP_VEC_TYPE)svmul_f32_m( pg, _I_ , _J_ );
+#define MUL_VEC_PD(_I_,_J_) (DP_VEC_TYPE)svmul_f64_m( pg, _I_ , _J_ );
+
+#define FMA_VEC_PH(_I_,_J_,_K_) (HP_VEC_TYPE)svmad_f16_m( pg, _I_ , _J_ , _K_ ); // neon order was kji..?
+#define FMA_VEC_PS(_I_,_J_,_K_) (SP_VEC_TYPE)svmad_f32_m( pg, _I_ , _J_ , _K_ );
+#define FMA_VEC_PD(_I_,_J_,_K_) (DP_VEC_TYPE)svmad_f64_m( pg, _I_ , _J_ , _K_ );
+
+#if defined(CAT_DEV_NEON)
 typedef float16x8_t HP_VEC_TYPE;
 typedef float32x4_t SP_VEC_TYPE;
 typedef float64x2_t DP_VEC_TYPE;
@@ -119,6 +141,8 @@ typedef float64x2_t DP_VEC_TYPE;
 #define FMA_VEC_PH(_I_,_J_,_K_) (HP_VEC_TYPE)vfmaq_f16( _K_ , _J_ , _I_ );
 #define FMA_VEC_PS(_I_,_J_,_K_) (SP_VEC_TYPE)vfmaq_f32( _K_ , _J_ , _I_ );
 #define FMA_VEC_PD(_I_,_J_,_K_) (DP_VEC_TYPE)vfmaq_f64( _K_ , _J_ , _I_ );
+
+#endif /* CAT_DEV_NEON */
 
 /* There is no scalar FMA intrinsic available on this architecture. */
 /* Don't use NEON intrinsics until vector ones are verified in CAT. */

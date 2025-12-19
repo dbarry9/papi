@@ -41,6 +41,7 @@ void test_hp_power_VEC_FMA( int instr_per_loop, uint64 iterations, int EventSet,
 static
 half test_hp_mac_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
 
+    svbool_t pg = svptrue_b16();
     volatile HP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
     long long iterValues[1]; iterValues[0] = 0;
@@ -125,6 +126,7 @@ half test_hp_mac_VEC_FMA_12( uint64 iterations, int EventSet, FILE *fp ){
 static
 half test_hp_mac_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
 
+    svbool_t pg = svptrue_b16();
     volatile HP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
     long long iterValues[1]; iterValues[0] = 0;
@@ -223,6 +225,7 @@ half test_hp_mac_VEC_FMA_24( uint64 iterations, int EventSet, FILE *fp ){
 static
 half test_hp_mac_VEC_FMA_48( uint64 iterations, int EventSet, FILE *fp ){
 
+    svbool_t pg = svptrue_b16();
     volatile HP_VEC_TYPE r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,rA,rB,rC,rD,rE,rF;
     double values = 0.0;
     long long iterValues[1]; iterValues[0] = 0;
