@@ -97,7 +97,7 @@ extern char **_papi_errlist;
 #define NEED_CONTEXT		1
 #define DONT_NEED_CONTEXT 	0
 
-#define PAPI_EVENTS_IN_DERIVED_EVENT	8
+#define PAPI_EVENTS_IN_DERIVED_EVENT	12
 #define PAPI_MAX_COMP_QUALS	8
 
 
