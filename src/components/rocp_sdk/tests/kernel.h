@@ -18,6 +18,14 @@ do {                                                                           \
     }                                                                          \
 } while(0)
 
+#define HIP_CALL_THD(call)                                                     \
+do {                                                                           \
+    hipError_t err = call;                                                     \
+    if(err != hipSuccess) {                                                    \
+        status[id] = PAPI_EMISC;                                               \
+    }                                                                          \
+} while(0)
+
 #define ROCTX_CALL(call)                                                       \
 do {                                                                           \
     int _status = call;                                                        \
