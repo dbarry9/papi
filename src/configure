@@ -6923,6 +6923,29 @@ for comp in $components; do
     fi
   fi
 
+  # Check version of Intel Level-Zero API.
+  if (test "x$comp" = "xintel_gpu"); then
+    for root in "$PAPI_INTEL_GPU_ROOT" "/usr"
+    do
+      if test "x$root" != "x"; then
+        for probe in "$root/include/level_zero/ze_api.h"
+        do
+          if test -f "$probe"; then
+            level_zero_ver=`grep ZE_API_VERSION_CURRENT.*[0-9] $root/include/level_zero/ze_api.h | head -1 | grep -o [0-9].*[0-9] | sed 's/,//g'`
+            level_zero_maj=`echo $level_zero_ver | awk '{print $1}'`
+            level_zero_min=`echo $level_zero_ver | awk '{print $2}'`
+            level_zero_num=$((10#$level_zero_maj * 10000 + 10#$level_zero_min * 100))
+
+            if test $level_zero_num -le 10000; then
+                CFLAGS="$CFLAGS -DUSE_ZET_EXP_API"
+            fi
+            break 2
+          fi
+        done
+      fi
+    done
+  fi
+
   # check for intel_gpu or rocp_sdk component to determine if we need -lstdc++ in LDFLAGS
   if (test "x$comp" = "xintel_gpu" || test "x$comp" = "xrocp_sdk"); then
     LDFLAGS="$LDFLAGS -lstdc++ -pthread"

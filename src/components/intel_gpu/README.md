@@ -39,12 +39,12 @@ at runtime (for libraries).
     ```
 * To enable metrics
     ```sh
-    ZET_ENABLE_METRICS=1
+    export ZET_ENABLE_METRICS=1
     ```
   Note that the component sets this automatically.
 * To change the sampling period from default 400000
     ```sh
-    METRICS_SAMPLING_PERIOD=value
+    export METRICS_SAMPLING_PERIOD=value
     ```
 
 ## Counter Collection Modes
@@ -52,11 +52,16 @@ at runtime (for libraries).
 Two metrics collection modes are supported.
 * Time-based sampling. In this mode, data collection and app can run in separate processes. To enable time-based event monitoring:
     ```sh
-    ZE_ENABLE_TRACING_LAYER=0
+    export ZE_ENABLE_TRACING_LAYER=0
     ```
-* Query-based sampling. In this mode, PAPI_start() must be called before kernel launch and PAPI_stop() must be called after kernel execution completes. To enable query-based event monitoring:
+* Query-based sampling. In this mode, PAPI_start() must be called before kernel launch and PAPI_stop() must be called after kernel execution completes.
+  To enable query-based event monitoring:
     ```sh
-    ZE_ENABLE_TRACING_LAYER=1
+    export ZE_ENABLE_TRACING_LAYER=1
+    ```
+  If you are using the deprecated Experimental API Tracing, then you must set:
+    ```sh
+    export ZET_ENABLE_API_TRACING_EXP=1
     ```
 
 ## Metrics:
