@@ -548,26 +548,54 @@ tool_tracing_callback(rocprofiler_callback_tracing_record_t record,
                       void* client_data) {
     rocprofiler_context_id_t *ctx = static_cast<rocprofiler_context_id_t*>(client_data);
 
-    if(record.phase == ROCPROFILER_CALLBACK_PHASE_ENTER &&
-       record.kind == ROCPROFILER_CALLBACK_TRACING_MARKER_CONTROL_API &&
-       record.operation == ROCPROFILER_MARKER_CONTROL_API_ID_roctxProfilerPause)
-    {
-        for(int i = 0; i < _num_events_internal; ++i) {
-            _counter_values_savestate[i] = _counter_values[i];
+    if( record.phase == ROCPROFILER_CALLBACK_PHASE_ENTER ) {
+        // ROCTX Control API
+        if( record.kind == ROCPROFILER_CALLBACK_TRACING_MARKER_CONTROL_API ) {
+            // Pause
+            if( record.operation == ROCPROFILER_MARKER_CONTROL_API_ID_roctxProfilerPause ) {
+                for(int i = 0; i < _num_events_internal; ++i) {
+                    _counter_values_savestate[i] = _counter_values[i];
+                }
+                ROCPROFILER_CALL(rocprofiler_stop_context_FPTR(*ctx), "pausing profiling context");
+                SUBDBG("Received ROCTX call to pause context.\n");
+                active_event_set_ctx->state = RPSDK_AES_PAUSED;
+            }
         }
-        ROCPROFILER_CALL(rocprofiler_stop_context_FPTR(*ctx), "pausing profiling context");
-        SUBDBG("Received ROCTX call to pause context.\n");
-        active_event_set_ctx->state = RPSDK_AES_PAUSED;
+        // ROCTX Core API
+        else if(record.kind == ROCPROFILER_CALLBACK_TRACING_MARKER_CORE_API ) {
+            // PushA
+            if( record.operation == ROCPROFILER_MARKER_CORE_API_ID_roctxRangePushA ) {
+                SUBDBG("Received ROCTX call to PushA.\n");
+            }
+            // StartA
+            if( record.operation == ROCPROFILER_MARKER_CORE_API_ID_roctxRangeStartA ) {
+                SUBDBG("Received ROCTX call to StartA.\n");
+            }
+        }
     }
-    else if(record.phase == ROCPROFILER_CALLBACK_PHASE_EXIT &&
-            record.kind == ROCPROFILER_CALLBACK_TRACING_MARKER_CONTROL_API &&
-            record.operation == ROCPROFILER_MARKER_CONTROL_API_ID_roctxProfilerResume)
-    {
-        ROCPROFILER_CALL(rocprofiler_start_context_FPTR(*ctx), "resuming profiling context");
-        SUBDBG("Received ROCTX call to resume context.\n");
-        active_event_set_ctx->state = RPSDK_AES_RUNNING;
-        for(int i = 0; i < _num_events_internal; ++i) {
-            _counter_values[i] = _counter_values_savestate[i];
+    else if(record.phase == ROCPROFILER_CALLBACK_PHASE_EXIT ) {
+        // ROCTX Control API
+        if( record.kind == ROCPROFILER_CALLBACK_TRACING_MARKER_CONTROL_API ) {
+            // Resume
+            if( record.operation == ROCPROFILER_MARKER_CONTROL_API_ID_roctxProfilerResume ) {
+                ROCPROFILER_CALL(rocprofiler_start_context_FPTR(*ctx), "resuming profiling context");
+                SUBDBG("Received ROCTX call to resume context.\n");
+                active_event_set_ctx->state = RPSDK_AES_RUNNING;
+                for(int i = 0; i < _num_events_internal; ++i) {
+                    _counter_values[i] = _counter_values_savestate[i];
+                }
+            }
+        }
+        // ROCTX Core API
+        else if(record.kind == ROCPROFILER_CALLBACK_TRACING_MARKER_CORE_API ) {
+            // Pop
+            if( record.operation == ROCPROFILER_MARKER_CORE_API_ID_roctxRangePop ) {
+                SUBDBG("Received ROCTX call to Pop.\n");
+            }
+            // Stop
+            if( record.operation == ROCPROFILER_MARKER_CORE_API_ID_roctxRangeStop ) {
+                SUBDBG("Received ROCTX call to Stop.\n");
+            }
         }
     }
 }
