@@ -172,6 +172,8 @@ void *thread_work(void *data) {
     // Get thread's ID.
     workerdata_t *wkrdata = (workerdata_t*)data;
     int id = wkrdata->id;
+    fprintf(stdout, "INFO Thread %d is pthread=%lu\n", id, pthread_self());
+    fflush(stdout);
 
     int EventSet = PAPI_NULL;
     long long *values = (long long*)malloc(total_event_count/ONT*sizeof(long long));
@@ -196,6 +198,8 @@ void *thread_work(void *data) {
     pthread_mutex_lock(&exclusive);
     int i, j, g;
     for(i = id; i < total_event_count; i+=ONT) {
+        fprintf(stdout, "Thread %d: Attempting to add event %s (%d/%d).\n", id, rocp_sdk_native_event_names[i], i, total_event_count);
+        fflush(stdout);
         stat = PAPI_add_named_event(EventSet, rocp_sdk_native_event_names[i]);
         if( PAPI_OK != stat ) {
             fprintf(stdout, "Thread %d: Failed to add event %s to set.\n", id, rocp_sdk_native_event_names[i]);

@@ -7,6 +7,9 @@
 
 #include "sdk_class.hpp"
 
+//extern rocprofiler_thread_id_t thread_locks[4];
+//extern rocprofiler_thread_id_t thread_lock;
+
 namespace papi_rocpsdk
 {
 using agent_map_t = std::map<uint64_t, const rocprofiler_agent_v0_t*>;
@@ -1170,6 +1173,12 @@ int setup() {
 //--------------------------------------------------------------------------------
 
 extern "C" int
+rocprofiler_sdk_get_thread_id(rocprofiler_thread_id_t *thread_lock)
+{
+    return papi_rocpsdk::rocprofiler_get_thread_id_FPTR(thread_lock);
+}
+
+extern "C" int
 rocprofiler_sdk_init_pre(void)
 {
     return PAPI_OK;
@@ -1292,6 +1301,8 @@ rocprofiler_sdk_ctx_read(vendorp_ctx_t ctx, long long **counters)
     if( RPSDK_MODE_DEVICE_SAMPLING == papi_rocpsdk::get_profiling_mode() ){
         papi_errno = papi_rocpsdk::read_sample();
         if (papi_errno != PAPI_OK) {
+            fprintf(stdout, "Took an early exit at point 0\n");
+            fflush(stdout);
             return papi_errno;
         }
     } else if( RPSDK_MODE_DISPATCH == papi_rocpsdk::get_profiling_mode() ) {
