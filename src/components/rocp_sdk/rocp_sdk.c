@@ -47,6 +47,9 @@ unsigned int _rocp_sdk_lock;
 //rocprofiler_thread_id_t tid;
 static atomic_int tid_lock = 0;
 //rocprofiler_thread_id_t thread_locks[4]; // temporary hard-coding to work-out logic
+#define NUM_GPU 4
+const int GPU_FREE = -1;
+int gpuOccupied[NUM_GPU] = {GPU_FREE, GPU_FREE, GPU_FREE, GPU_FREE}; // temporarily hard-coded to 4
 
 /* Init and finalize */
 static int rocp_sdk_init_component(int cid);
@@ -85,6 +88,7 @@ typedef struct {
 typedef struct {
     int *events_id;
     int num_events;
+    int dev_id; // may not need
     vendorp_ctx_t vendor_ctx;
 } rocp_sdk_control_t;
 
@@ -275,6 +279,9 @@ int
 update_native_events(rocp_sdk_control_t *ctl, NativeInfo_t *ntv_info, int ntv_count)
 {
     int papi_errno = PAPI_OK;
+    int prev_events = ctl->num_events;
+fprintf(stdout, "Vars ntv_count=%d and ctl->num_events=%d\n", ntv_count, ctl->num_events);
+fflush(stdout);
 
     if (0 == ntv_count) {
         if ( NULL != ctl->events_id ){
@@ -295,7 +302,19 @@ update_native_events(rocp_sdk_control_t *ctl, NativeInfo_t *ntv_info, int ntv_co
     }
 
     int i;
+    int new_dev_id;
     for (i = 0; i < ntv_count; ++i) {
+        new_dev_id = rocprofiler_sdk_get_event_device(ntv_info[i].ni_event);
+fprintf(stdout, "Detected device=%d\n", new_dev_id);
+fflush(stdout);
+        if( new_dev_id != ctl->dev_id ) {
+            if( prev_events == 0 && new_dev_id >= 0 ) {
+                ctl->dev_id = new_dev_id;
+            } else {
+                papi_errno = PAPI_ECOMBO;
+                goto fn_fail;
+            }
+        }
         ctl->events_id[i] = ntv_info[i].ni_event;
         ntv_info[i].ni_position = i;
     }

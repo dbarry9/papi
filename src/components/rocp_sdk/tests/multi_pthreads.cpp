@@ -214,6 +214,9 @@ void *thread_work(void *data) {
     pthread_mutex_unlock(&exclusive);
     pthread_barrier_wait(&barrier);
 
+    // Set the device such that each thread runs on a distinct device.
+    HIP_CALL_THD(hipSetDevice(id));
+
     // HIP front matter.
     int N = 16;
     dim3 threads_per_block( 1, 1, 1 );

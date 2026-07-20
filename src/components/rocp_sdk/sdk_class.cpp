@@ -10,6 +10,10 @@
 //extern rocprofiler_thread_id_t thread_locks[4];
 //extern rocprofiler_thread_id_t thread_lock;
 
+#define NUM_GPU 4
+rocprofiler_context_id_t _dev_ctx_[NUM_GPU]; // hard-coded
+std::map<int, int> thread_to_device;
+
 namespace papi_rocpsdk
 {
 using agent_map_t = std::map<uint64_t, const rocprofiler_agent_v0_t*>;
@@ -17,6 +21,7 @@ using dim_t = std::pair<uint64_t, unsigned long>;
 using dim_vector_t = std::vector< dim_t >;
 
 static inline bool dimensions_match( dim_vector_t dim_instances, dim_vector_t recorded_dims );
+static rocprofiler_context_id_t client_ctx;
 
 typedef struct {
     rocprofiler_counter_info_v0_t counter_info;
@@ -176,10 +181,25 @@ rocprofiler_query_record_dimension_position_t rocprofiler_query_record_dimension
 
 /* ** */
 rocprofiler_context_id_t&
-get_client_ctx()
+get_client_ctx(int thread_id)
 {
-    static rocprofiler_context_id_t client_ctx;
-    return client_ctx;
+    if( RPSDK_MODE_DEVICE_SAMPLING == rpsdk_profiling_mode ) {
+        return client_ctx;
+    }
+
+    auto it = thread_to_device.find(thread_id);
+    if( thread_to_device.end() == it ){
+        return client_ctx;
+    }
+
+    int dev_id = it->second;
+    if( dev_id < 0 || dev_id > NUM_GPU ) {
+        fprintf(stdout, "Could not find a device tied to given thread ID=%d.\n", thread_id);
+        fflush(stdout);
+        return client_ctx;
+    }
+
+    return _dev_ctx_[dev_id];
 }
 
 rocprofiler_buffer_id_t&
@@ -585,13 +605,27 @@ tool_init(rocprofiler_client_finalize_t fini_func, void* tool_data)
         rpsdk_profiling_mode = RPSDK_MODE_DISPATCH;
     }
 
-    // Obtain the list of available (GPU) agents.
-    gpu_agents = get_GPU_agent_info();
-
-    ROCPROFILER_CALL(rocprofiler_create_context_FPTR(&get_client_ctx()), "context creation");
+    // Tracing context.
+    rocprofiler_context_id_t _control_ctx_;
+    ROCPROFILER_CALL(rocprofiler_create_context_FPTR(&_control_ctx_), "control context creation");
 
     if( RPSDK_MODE_DEVICE_SAMPLING == get_profiling_mode() ){
-        ROCPROFILER_CALL(rocprofiler_create_buffer_FPTR(get_client_ctx(),
+
+        // Obtain the list of available (GPU) agents.
+        gpu_agents = get_GPU_agent_info();
+
+        int count=0;
+        for(auto g_it=gpu_agents.begin(); g_it!=gpu_agents.end(); ++g_it){
+            // Configure device_counting_service for all devices.
+            ROCPROFILER_CALL(rocprofiler_create_context_FPTR(&_dev_ctx_[count]), "control context creation");
+            ROCPROFILER_CALL(rocprofiler_configure_device_counting_service_FPTR(
+                         _dev_ctx_[count], get_buffer(), g_it->second->id, set_profile, nullptr),
+                         "Could not setup sampling");
+
+            fprintf(stdout, "Configured Device %d ID=%d\n", count, g_it->second->id);
+            fflush(stdout);
+
+            ROCPROFILER_CALL(rocprofiler_create_buffer_FPTR(_dev_ctx_[count],
                                                32*1024,
                                                16*1024,
                                                ROCPROFILER_BUFFER_POLICY_LOSSLESS,
@@ -600,30 +634,35 @@ tool_init(rocprofiler_client_finalize_t fini_func, void* tool_data)
                                                &get_buffer()),
                          "buffer creation failed");
 
-        // Configure device_counting_service for all devices.
-        for(auto g_it=gpu_agents.begin(); g_it!=gpu_agents.end(); ++g_it){
-            ROCPROFILER_CALL(rocprofiler_configure_device_counting_service_FPTR(
-                                 get_client_ctx(), get_buffer(), g_it->second->id, set_profile, nullptr),
-                             "Could not setup sampling");
-        }
-    }else{
-        ROCPROFILER_CALL(rocprofiler_configure_callback_dispatch_counting_service_FPTR(
-                             get_client_ctx(), dispatch_callback, tool_data, record_callback, tool_data),
-                         "Could not setup callback dispatch");
-    }
-
-    // Configure tracing service.
-    rocprofiler_context_id_t _control_ctx_;
-    ROCPROFILER_CALL(rocprofiler_create_context_FPTR(&_control_ctx_), "control context creation");
-
-    ROCPROFILER_CALL(rocprofiler_configure_callback_tracing_service_FPTR(
+            // Configure tracing service for all devices.
+            ROCPROFILER_CALL(rocprofiler_configure_callback_tracing_service_FPTR(
                          _control_ctx_,
                          ROCPROFILER_CALLBACK_TRACING_MARKER_CONTROL_API,
                          nullptr,
                          0,
                          &tool_tracing_callback,
-                         &get_client_ctx()),
+                         &_dev_ctx_[count]),
                      "Could not setup callback tracing");
+
+            ++count;
+        }
+
+    }else{
+        // Configure device_counting_service.
+        ROCPROFILER_CALL(rocprofiler_configure_callback_dispatch_counting_service_FPTR(
+                             client_ctx, dispatch_callback, tool_data, record_callback, tool_data),
+                         "Could not setup callback dispatch");
+
+        // Configure tracing service.
+        ROCPROFILER_CALL(rocprofiler_configure_callback_tracing_service_FPTR(
+                         _control_ctx_,
+                         ROCPROFILER_CALLBACK_TRACING_MARKER_CONTROL_API,
+                         nullptr,
+                         0,
+                         &tool_tracing_callback,
+                         &client_ctx),
+                     "Could not setup callback tracing");
+    }
 
     // start the context so that it is always active
     ROCPROFILER_CALL(rocprofiler_start_context_FPTR(_control_ctx_), "start control context");
@@ -713,17 +752,21 @@ populate_event_list(void){
 void stop_counting(void){
     int ctx_active, ctx_valid;
     _counter_values = NULL;
-    ROCPROFILER_CALL(rocprofiler_context_is_valid_FPTR(get_client_ctx(), &ctx_valid), "check context validity");
+
+    rocprofiler_thread_id_t tid;
+    rocprofiler_get_thread_id_FPTR(&tid);
+
+    ROCPROFILER_CALL(rocprofiler_context_is_valid_FPTR(get_client_ctx(tid), &ctx_valid), "check context validity");
     if( !ctx_valid ){
         SUBDBG("client_context is invalid\n");
         return;
     }
-    ROCPROFILER_CALL(rocprofiler_context_is_active_FPTR(get_client_ctx(), &ctx_active), "check if context is active");
+    ROCPROFILER_CALL(rocprofiler_context_is_active_FPTR(get_client_ctx(tid), &ctx_active), "check if context is active");
     if( !ctx_active ){
         SUBDBG("client_context is not active\n");
         return;
     }
-    ROCPROFILER_CALL(rocprofiler_stop_context_FPTR(get_client_ctx()), "stop context");
+    ROCPROFILER_CALL(rocprofiler_stop_context_FPTR(get_client_ctx(tid)), "stop context");
     free(_counter_values_savestate);
     _counter_values_savestate = NULL;
 }
@@ -737,7 +780,12 @@ start_counting(vendorp_ctx_t ctx){
     // API) can still find the array.
     _counter_values = ctx->counters;
 
-    ROCPROFILER_CALL(rocprofiler_start_context_FPTR(get_client_ctx()), "start context");
+    rocprofiler_thread_id_t tid;
+    rocprofiler_get_thread_id_FPTR(&tid);
+
+    // DB: this function call may be key. If we can start a list of context's here, then stop the same list,
+    // this would allow us to monitor arbitrary combinations of GPUs, supposing we have a unique context per GPU.
+    ROCPROFILER_CALL(rocprofiler_start_context_FPTR(get_client_ctx(tid)), "start context");
 }
 
 /* ** */
@@ -754,10 +802,13 @@ read_sample(){
         goto fn_fail;
     }
 
+    rocprofiler_thread_id_t tid;
+    rocprofiler_get_thread_id_FPTR(&tid);
+
     // Only update the counters if the profiling context is running, not paused.
     if( 0 != (active_event_set_ctx->state & RPSDK_AES_RUNNING) ){
         ret_val = rocprofiler_sample_device_counting_service_FPTR(
-                get_client_ctx(), {}, ROCPROFILER_COUNTER_FLAG_NONE,
+                get_client_ctx(tid), {}, ROCPROFILER_COUNTER_FLAG_NONE,
                 output_records, &rec_count);
 
         if( ret_val != ROCPROFILER_STATUS_SUCCESS ){
@@ -1328,6 +1379,17 @@ extern "C" int
 rocprofiler_sdk_evt_enum(unsigned int *event_code, int modifier)
 {
     return papi_rocpsdk::evt_enum(event_code, modifier);
+}
+
+extern "C" int
+rocprofiler_sdk_get_event_device(unsigned int event_code)
+{
+    auto it = papi_rocpsdk::papi_id_to_event_instance.find(event_code);
+    if( papi_rocpsdk::papi_id_to_event_instance.end() == it ){
+        return -1;
+    }
+
+    return it->second.device;
 }
 
 extern "C" int

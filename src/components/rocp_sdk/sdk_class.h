@@ -5,6 +5,7 @@
 
 typedef struct vendord_ctx *vendorp_ctx_t;
 
+extern int rocprofiler_sdk_get_thread_id(rocprofiler_thread_id_t *thread_lock);
 extern int rocprofiler_sdk_init_pre(void);
 extern int rocprofiler_sdk_init(void);
 extern int rocprofiler_sdk_shutdown(void);
@@ -16,9 +17,9 @@ extern int rocprofiler_sdk_ctx_read(vendorp_ctx_t ctx, long long **counters);
 extern int rocprofiler_sdk_ctx_stop(vendorp_ctx_t ctx);
 extern int rocprofiler_sdk_ctx_reset(vendorp_ctx_t ctx);
 extern int rocprofiler_sdk_ctx_close(vendorp_ctx_t ctx);
-extern int rocprofiler_sdk_get_thread_id(rocprofiler_thread_id_t *thread_lock);
 
 extern int rocprofiler_sdk_evt_enum(unsigned int *event_code, int modifier);
+extern int rocprofiler_sdk_get_event_device(unsigned int event_code);
 extern int rocprofiler_sdk_evt_code_to_name(unsigned int event_code, char *name, int len);
 extern int rocprofiler_sdk_evt_code_to_descr(unsigned int event_code, char *descr, int len);
 extern int rocprofiler_sdk_evt_code_to_info(unsigned int event_code, PAPI_event_info_t *info);
