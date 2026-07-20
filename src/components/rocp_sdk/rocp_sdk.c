@@ -44,8 +44,8 @@
 static int check_for_available_devices(char *err_msg);
 
 unsigned int _rocp_sdk_lock;
-rocprofiler_thread_id_t thread_lock;
-static atomic_ulong tid_lock = 0;
+//rocprofiler_thread_id_t tid;
+static atomic_int tid_lock = 0;
 //rocprofiler_thread_id_t thread_locks[4]; // temporary hard-coding to work-out logic
 
 /* Init and finalize */
@@ -337,17 +337,19 @@ rocp_sdk_start(hwd_context_t *ctx, hwd_control_state_t *ctl)
     rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
 
 // Set the exclusive lock.
-    unsigned long expected = 0UL;
-    unsigned long desired  =  _papi_hwi_thread_id_fn();
-
+    int expected = 0;
+    //unsigned long my_tid  =  _papi_hwi_thread_id_fn();
+    rocprofiler_thread_id_t my_tid;
+    rocprofiler_sdk_get_thread_id(&my_tid);
+;
     int swapped = atomic_compare_exchange_strong_explicit(
                       &tid_lock,
                       &expected,
-                      desired,
+                      my_tid,
                       memory_order_acq_rel,
                       memory_order_acquire);
 
-    unsigned long my_tid = _papi_hwi_thread_id_fn();
+    //unsigned long my_tid = _papi_hwi_thread_id_fn();
     fprintf(stdout, "Tid_lock ID= %lu and my_tid=%lu and swapped=%d\n", tid_lock, my_tid, swapped);
     fflush(stdout);
 
@@ -397,7 +399,10 @@ rocp_sdk_stop(hwd_context_t *ctx, hwd_control_state_t *ctl)
     rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
 
     // Get thread ID and compare to the thread ID of active profiling context.
-    unsigned long my_tid = _papi_hwi_thread_id_fn();
+    //unsigned long my_tid = _papi_hwi_thread_id_fn();
+    rocprofiler_thread_id_t my_tid;
+    rocprofiler_sdk_get_thread_id(&my_tid);
+
     fprintf(stdout, "Threadstop ID: %lu\n", my_tid);
     fflush(stdout);
 
@@ -425,18 +430,17 @@ if(my_tid == tid_lock) {
 int
 rocp_sdk_read(hwd_context_t *ctx __attribute__((unused)), hwd_control_state_t *ctl, long long **val, int flags __attribute__((unused)))
 {
-//    return PAPI_ENOTRUN;
-///*
-    unsigned long my_tid = _papi_hwi_thread_id_fn();
+    //unsigned long my_tid = _papi_hwi_thread_id_fn();
+    rocprofiler_thread_id_t my_tid;
+    rocprofiler_sdk_get_thread_id(&my_tid);
     fprintf(stdout, "Threadread ID COMPARE my=%lu to lock=%lu\n", my_tid, tid_lock);
     fflush(stdout);
-if(my_tid == tid_lock) {
-    fflush(stdout);
-    rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
-    return rocprofiler_sdk_ctx_read(rocp_sdk_ctl->vendor_ctx, val);
-} else {
-    return PAPI_ENOTRUN;
-}//*/
+    if(my_tid == tid_lock) {
+        rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
+        return rocprofiler_sdk_ctx_read(rocp_sdk_ctl->vendor_ctx, val);
+    } else {
+        return PAPI_ENOTRUN;
+    }
 }
 
 int
