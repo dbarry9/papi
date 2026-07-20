@@ -1894,6 +1894,8 @@ _papi_hwi_read( hwd_context_t * context, EventSetInfo_t * ESI,
 
 	retval = _papi_hwd[ESI->CmpIdx]->read( context, ESI->ctl_state,
 					       &dp, ESI->state );
+//            fprintf(stdout, "Got retval=%d from .read()\n", retval);
+//            fflush(stdout);
 	if ( retval != PAPI_OK ) {
 		INTDBG("EXIT: retval: %d\n", retval);
 	   return retval;

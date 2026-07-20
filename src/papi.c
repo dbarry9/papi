@@ -3306,6 +3306,8 @@ PAPI_reset( int EventSet )
 int
 PAPI_read( int EventSet, long long *values )
 {
+//fprintf(stdout, "Inside PAPI_read\n");
+//fflush(stdout);
 	APIDBG( "Entry: EventSet: %d, values: %p\n", EventSet, values);
 	EventSetInfo_t *ESI;
 	hwd_context_t *context;
@@ -3322,17 +3324,25 @@ PAPI_read( int EventSet, long long *values )
 	if ( values == NULL )
 		papi_return( PAPI_EINVAL );
 
+//fprintf(stdout, "Inside PAPI_read: Checking state...\n");
+//fflush(stdout);
 	if ( ESI->state & PAPI_RUNNING ) {
 		if ( _papi_hwi_is_sw_multiplex( ESI ) ) {
+//fprintf(stdout, "Inside PAPI_read: Hit multiplex...\n");
+//fflush(stdout);
 		  retval = MPX_read( ESI->multiplex.mpx_evset, values, 0 );
 		} else {
 			/* get the context we should use for this event set */
 			context = _papi_hwi_get_context( ESI, NULL );
 			retval = _papi_hwi_read( context, ESI, values );
+            //fprintf(stdout, "Got retval=%d from _papi_hwi_read()\n", retval);
+            //fflush(stdout);
 		}
 		if ( retval != PAPI_OK )
 			papi_return( retval );
 	} else {
+//fprintf(stdout, "Inside PAPI_read: State is not 'running'...\n");
+//fflush(stdout);
 		memcpy( values, ESI->sw_stop,
 				( size_t ) ESI->NumberOfEvents * sizeof ( long long ) );
 	}
@@ -3347,6 +3357,9 @@ PAPI_read( int EventSet, long long *values )
 #endif
 
 	APIDBG( "PAPI_read returns %d\n", retval );
+
+//fprintf(stdout, "Inside PAPI_read: Returning default OK\n");
+//fflush(stdout);
 	return ( PAPI_OK );
 }
 

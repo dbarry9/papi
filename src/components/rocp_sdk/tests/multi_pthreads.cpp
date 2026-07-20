@@ -9,7 +9,7 @@
 #include "kernel.h"
 
 #define ONT 2
-#define NUMGEMMS 5
+#define NUMGEMMS 1
 
 typedef struct {
   int id;
@@ -176,10 +176,8 @@ void *thread_work(void *data) {
     fflush(stdout);
 
     int EventSet = PAPI_NULL;
-    long long *values = (long long*)malloc(total_event_count/ONT*sizeof(long long));
-    if( NULL == values ) {
-        status[id] = PAPI_ENOMEM;
-    }
+    // Number of events in this thread's event set.
+    int numValues = 0;
 
     // Create event set.
     int stat;
@@ -204,7 +202,14 @@ void *thread_work(void *data) {
         if( PAPI_OK != stat ) {
             fprintf(stdout, "Thread %d: Failed to add event %s to set.\n", id, rocp_sdk_native_event_names[i]);
             status[id] = stat;
+        } else {
+            numValues++;
         }
+    }
+    long long *values = (long long*)malloc(numValues*sizeof(long long));
+    if( NULL == values ) {
+        status[id] = PAPI_ENOMEM;
+        return NULL;
     }
     pthread_mutex_unlock(&exclusive);
     pthread_barrier_wait(&barrier);
@@ -277,9 +282,9 @@ void *thread_work(void *data) {
         pthread_mutex_lock(&exclusive);
         stat = PAPI_read(EventSet, values);
         fprintf(stdout, "------ Thread %d ------  PAPI_read()\n", id);
-        if( PAPI_OK != stat ) {
-            fprintf(stdout, "\t<Error: Failed to read! %d>\n", stat);
-            status[id] = stat;
+        if( status[id] != PAPI_OK || stat != PAPI_OK ) {
+            fprintf(stdout, "\t<Error: Failed to read! %d>\n", status[id]);
+            //status[id] = stat;
         } else {
             for(i = id; i < total_event_count; i+=ONT) {
                 fprintf(stdout, "\t%s : %lld\n", rocp_sdk_native_event_names[i], values[i]);
@@ -293,8 +298,8 @@ void *thread_work(void *data) {
     pthread_barrier_wait(&barrier);
     pthread_mutex_lock(&exclusive);
     stat = PAPI_stop(EventSet, values);
-    if( PAPI_OK != stat ) {
-        fprintf(stdout, "Thread %d: Failed to stop. %d\n", id, stat);
+    if( status[id] != PAPI_OK || stat != PAPI_OK ) {
+        fprintf(stdout, "Thread %d: Failed to stop. %d\n", id, status[id]);
         status[id] = stat;
     }
     pthread_mutex_unlock(&exclusive);

@@ -27,13 +27,6 @@
 #include "sdk_class.h"
 #include "rocprofiler-sdk/hsa.h"
 #include "rocprofiler-sdk/fwd.h"
-/* Linux-specific includes */
-/*#include "mb.h"
-#include "linux-memory.h"
-#include "linux-timer.h"
-#include "linux-common.h"
-#include "linux-context.h"
-*/
 
 #define ROCPROF_SDK_MAX_COUNTERS (64)
 #define RPSDK_CTX_RUNNING (1)
@@ -51,10 +44,8 @@
 static int check_for_available_devices(char *err_msg);
 
 unsigned int _rocp_sdk_lock;
-////atomic_flag global_thread_exclusive_lock = ATOMIC_FLAG_INIT;
-//unsigned int global_thread_exclusive_lock = 0;
-rocprofiler_thread_id_t thread_lock; // temporary hard-coding to work-out logic
-unsigned long tid_lock = 0;
+rocprofiler_thread_id_t thread_lock;
+static atomic_ulong tid_lock = 0;
 //rocprofiler_thread_id_t thread_locks[4]; // temporary hard-coding to work-out logic
 
 /* Init and finalize */
@@ -345,20 +336,22 @@ rocp_sdk_start(hwd_context_t *ctx, hwd_control_state_t *ctl)
     rocp_sdk_context_t *rocp_sdk_ctx = (rocp_sdk_context_t *) ctx;
     rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
 
-//if(!atomic_flag_test_and_set(&global_thread_exclusive_lock)) {
-//_papi_hwi_lock(COMPONENT_LOCK);
-//if(global_thread_exclusive_lock == 0) {
-if(tid_lock == 0) {
-    //global_thread_exclusive_lock = 1;
-    rocprofiler_sdk_get_thread_id(&thread_lock);
-    fprintf(stdout, "Threadlock ID: %lu\n", thread_lock);
+// Set the exclusive lock.
+    unsigned long expected = 0UL;
+    unsigned long desired  =  _papi_hwi_thread_id_fn();
+
+    int swapped = atomic_compare_exchange_strong_explicit(
+                      &tid_lock,
+                      &expected,
+                      desired,
+                      memory_order_acq_rel,
+                      memory_order_acquire);
+
+    unsigned long my_tid = _papi_hwi_thread_id_fn();
+    fprintf(stdout, "Tid_lock ID= %lu and my_tid=%lu and swapped=%d\n", tid_lock, my_tid, swapped);
     fflush(stdout);
 
-    tid_lock = _papi_hwi_thread_id_fn();
-    fprintf(stdout, "Tid_lock ID: %lu\n", tid_lock);
-    fflush(stdout);
-    ////_papi_hwi_lock(global_thread_exclusive_lock);
-
+if(tid_lock == my_tid) {
     if (0 == rocp_sdk_ctl->num_events){
         SUBDBG("Error! Cannot PAPI_start an empty eventset.");
         return PAPI_ENOSUPP;
@@ -404,17 +397,11 @@ rocp_sdk_stop(hwd_context_t *ctx, hwd_control_state_t *ctl)
     rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
 
     // Get thread ID and compare to the thread ID of active profiling context.
-    //rocprofiler_thread_id_t my_tid;
-    //rocprofiler_sdk_get_thread_id(&my_tid);
-    //fprintf(stdout, "Threadstop ID: %lu\n", my_tid);
     unsigned long my_tid = _papi_hwi_thread_id_fn();
     fprintf(stdout, "Threadstop ID: %lu\n", my_tid);
     fflush(stdout);
 
-//if(global_thread_exclusive_lock == 1 && my_tid == tid_lock) {
 if(my_tid == tid_lock) {
-//if(rocp_sdk_ctx->state & RPSDK_CTX_RUNNING) { // segfault bc state not existing bc this struct not allocd?
-//    atomic_flag_clear(&global_thread_exclusive_lock);
     papi_errno = rocprofiler_sdk_stop(rocp_sdk_ctl->vendor_ctx);
     if (papi_errno != PAPI_OK) {
         goto fn_fail;
@@ -424,15 +411,11 @@ if(my_tid == tid_lock) {
 }
 
   fn_exit:
-//if(global_thread_exclusive_lock == 1 && my_tid == tid_lock) {
 if(my_tid == tid_lock) {
     rocp_sdk_ctx->state = 0;
-    //global_thread_exclusive_lock = 0;
     return papi_errno;
 } else {
-    //_papi_hwi_unlock(global_thread_exclusive_lock);
-    //_papi_hwi_unlock(_rocp_sdk_lock);
-    //global_thread_exclusive_lock = 0;
+    
     return PAPI_ENOTRUN;
 }
   fn_fail:
@@ -442,19 +425,18 @@ if(my_tid == tid_lock) {
 int
 rocp_sdk_read(hwd_context_t *ctx __attribute__((unused)), hwd_control_state_t *ctl, long long **val, int flags __attribute__((unused)))
 {
-    //rocprofiler_thread_id_t my_tid;
-    //rocprofiler_sdk_get_thread_id(&my_tid);
-    //fprintf(stdout, "Threadread ID: %lu\n", my_tid);
+//    return PAPI_ENOTRUN;
+///*
     unsigned long my_tid = _papi_hwi_thread_id_fn();
-    fprintf(stdout, "Threadread ID: %lu\n", my_tid);
+    fprintf(stdout, "Threadread ID COMPARE my=%lu to lock=%lu\n", my_tid, tid_lock);
     fflush(stdout);
-//if(global_thread_exclusive_lock == 1 && my_tid == tid_lock) {
 if(my_tid == tid_lock) {
+    fflush(stdout);
     rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
     return rocprofiler_sdk_ctx_read(rocp_sdk_ctl->vendor_ctx, val);
 } else {
     return PAPI_ENOTRUN;
-}
+}//*/
 }
 
 int
