@@ -48,8 +48,7 @@ unsigned int _rocp_sdk_lock;
 static atomic_int tid_lock = 0;
 //rocprofiler_thread_id_t thread_locks[4]; // temporary hard-coding to work-out logic
 #define NUM_GPU 4
-const int GPU_FREE = -1;
-int gpuOccupied[NUM_GPU] = {GPU_FREE, GPU_FREE, GPU_FREE, GPU_FREE}; // temporarily hard-coded to 4
+const int GPU_FREE = 0;
 
 /* Init and finalize */
 static int rocp_sdk_init_component(int cid);
@@ -88,7 +87,7 @@ typedef struct {
 typedef struct {
     int *events_id;
     int num_events;
-    int dev_id; // may not need
+    int dev_id[NUM_GPU];
     vendorp_ctx_t vendor_ctx;
 } rocp_sdk_control_t;
 
@@ -266,7 +265,11 @@ rocp_sdk_shutdown_thread(hwd_context_t *ctx)
 int
 rocp_sdk_cleanup_eventset(hwd_control_state_t *ctl)
 {
+    int i;
     rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
+    for( i = 0; i < NUM_GPU; ++i ) {
+        rocp_sdk_ctl->dev_id[i] = GPU_FREE;
+    }
     papi_free(rocp_sdk_ctl->events_id);
     rocp_sdk_ctl->events_id = NULL;
     rocp_sdk_ctl->num_events = 0;
@@ -279,9 +282,6 @@ int
 update_native_events(rocp_sdk_control_t *ctl, NativeInfo_t *ntv_info, int ntv_count)
 {
     int papi_errno = PAPI_OK;
-    int prev_events = ctl->num_events;
-fprintf(stdout, "Vars ntv_count=%d and ctl->num_events=%d\n", ntv_count, ctl->num_events);
-fflush(stdout);
 
     if (0 == ntv_count) {
         if ( NULL != ctl->events_id ){
@@ -305,15 +305,13 @@ fflush(stdout);
     int new_dev_id;
     for (i = 0; i < ntv_count; ++i) {
         new_dev_id = rocprofiler_sdk_get_event_device(ntv_info[i].ni_event);
-fprintf(stdout, "Detected device=%d\n", new_dev_id);
+fprintf(stdout, "Detected device=%d, setting prev ctl->dev_id[%d]=%d to %d\n", new_dev_id, new_dev_id, ctl->dev_id[new_dev_id], 1);
 fflush(stdout);
-        if( new_dev_id != ctl->dev_id ) {
-            if( prev_events == 0 && new_dev_id >= 0 ) {
-                ctl->dev_id = new_dev_id;
-            } else {
-                papi_errno = PAPI_ECOMBO;
-                goto fn_fail;
-            }
+        if( new_dev_id >= 0 && new_dev_id < NUM_GPU ) {
+            ctl->dev_id[new_dev_id] = 1;
+        } else {
+            papi_errno = PAPI_EINVAL;
+            goto fn_fail;
         }
         ctl->events_id[i] = ntv_info[i].ni_event;
         ntv_info[i].ni_position = i;
@@ -344,6 +342,12 @@ rocp_sdk_update_control_state(hwd_control_state_t *ctl, NativeInfo_t *ntv_info, 
         return papi_errno;
     }
 
+    // Set the internal array of contexts based on ctl->dev_id array.
+    papi_errno = rocprofiler_sdk_set_gpu_avail(rocp_sdk_ctl->dev_id);
+    if (papi_errno != PAPI_OK) {
+        return papi_errno;
+    }
+
     return PAPI_OK;
 }
 
@@ -357,10 +361,9 @@ rocp_sdk_start(hwd_context_t *ctx, hwd_control_state_t *ctl)
 
 // Set the exclusive lock.
     int expected = 0;
-    //unsigned long my_tid  =  _papi_hwi_thread_id_fn();
     rocprofiler_thread_id_t my_tid;
     rocprofiler_sdk_get_thread_id(&my_tid);
-;
+
     int swapped = atomic_compare_exchange_strong_explicit(
                       &tid_lock,
                       &expected,
@@ -368,7 +371,6 @@ rocp_sdk_start(hwd_context_t *ctx, hwd_control_state_t *ctl)
                       memory_order_acq_rel,
                       memory_order_acquire);
 
-    //unsigned long my_tid = _papi_hwi_thread_id_fn();
     fprintf(stdout, "Tid_lock ID= %lu and my_tid=%lu and swapped=%d\n", tid_lock, my_tid, swapped);
     fflush(stdout);
 
@@ -377,6 +379,9 @@ if(tid_lock == my_tid) {
         SUBDBG("Error! Cannot PAPI_start an empty eventset.");
         return PAPI_ENOSUPP;
     }
+
+fprintf(stdout, "rocprofiler_sdk_start says there are %d counters\n", rocp_sdk_ctl->num_events);
+fflush(stdout);
 
     if (rocp_sdk_ctx->state & RPSDK_CTX_RUNNING) {
         SUBDBG("Error! Cannot PAPI_start more than one eventset at a time for every component.");
@@ -418,12 +423,8 @@ rocp_sdk_stop(hwd_context_t *ctx, hwd_control_state_t *ctl)
     rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
 
     // Get thread ID and compare to the thread ID of active profiling context.
-    //unsigned long my_tid = _papi_hwi_thread_id_fn();
     rocprofiler_thread_id_t my_tid;
     rocprofiler_sdk_get_thread_id(&my_tid);
-
-    fprintf(stdout, "Threadstop ID: %lu\n", my_tid);
-    fflush(stdout);
 
 if(my_tid == tid_lock) {
     papi_errno = rocprofiler_sdk_stop(rocp_sdk_ctl->vendor_ctx);
@@ -449,14 +450,21 @@ if(my_tid == tid_lock) {
 int
 rocp_sdk_read(hwd_context_t *ctx __attribute__((unused)), hwd_control_state_t *ctl, long long **val, int flags __attribute__((unused)))
 {
-    //unsigned long my_tid = _papi_hwi_thread_id_fn();
     rocprofiler_thread_id_t my_tid;
     rocprofiler_sdk_get_thread_id(&my_tid);
-    fprintf(stdout, "Threadread ID COMPARE my=%lu to lock=%lu\n", my_tid, tid_lock);
-    fflush(stdout);
+    //fprintf(stdout, "Threadread ID COMPARE my=%lu to lock=%lu\n", my_tid, tid_lock);
+    //fflush(stdout);
     if(my_tid == tid_lock) {
         rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
-        return rocprofiler_sdk_ctx_read(rocp_sdk_ctl->vendor_ctx, val);
+        int papi_errno = rocprofiler_sdk_ctx_read(rocp_sdk_ctl->vendor_ctx, val);
+
+    fprintf(stdout, "Made it to the counters, of which there should be %d:\n", rocp_sdk_ctl->num_events);
+    int i;
+    for(i = 0; i < rocp_sdk_ctl->num_events; ++i ) {
+        fprintf(stdout, "  count[%d] = %lld\n", i, *val[i]);
+    }
+
+        return papi_errno;
     } else {
         return PAPI_ENOTRUN;
     }

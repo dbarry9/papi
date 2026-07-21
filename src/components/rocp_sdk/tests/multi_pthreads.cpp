@@ -206,6 +206,8 @@ void *thread_work(void *data) {
             numValues++;
         }
     }
+    fprintf(stdout, "INFO: Allocating counters buffer of size %d on thread %d\n", numValues, id);
+    fflush(stdout);
     long long *values = (long long*)malloc(numValues*sizeof(long long));
     if( NULL == values ) {
         status[id] = PAPI_ENOMEM;
@@ -218,7 +220,7 @@ void *thread_work(void *data) {
     HIP_CALL_THD(hipSetDevice(id));
 
     // HIP front matter.
-    int N = 16;
+    int N = 16*(id+1);
     dim3 threads_per_block( 1, 1, 1 );
     dim3 blocks_in_grid( ceil( float(N) / threads_per_block.x ), ceil( float(N) / threads_per_block.y ), 1 );
     size_t probSize = N*N*sizeof(double);
@@ -254,6 +256,7 @@ void *thread_work(void *data) {
     // Call PAPI_start().
     pthread_barrier_wait(&barrier);
     pthread_mutex_lock(&exclusive);
+    if(id == 1) sleep(1);
     stat = PAPI_start(EventSet);
     if( PAPI_OK != stat ) {
         fprintf(stdout, "Thread %d: Failed to start counting. %d\n", id, stat);
@@ -263,7 +266,6 @@ void *thread_work(void *data) {
     pthread_barrier_wait(&barrier);
 
     // Launch the GEMM five times.
-    for(g = 0; g < NUMGEMMS; ++g) {
         pthread_barrier_wait(&barrier);
         pthread_mutex_lock(&exclusive);
         if( main_id == id ) {
@@ -283,6 +285,7 @@ void *thread_work(void *data) {
         // Call PAPI_read() after the GEMM.
         pthread_barrier_wait(&barrier);
         pthread_mutex_lock(&exclusive);
+      if(0 == id){
         stat = PAPI_read(EventSet, values);
         fprintf(stdout, "------ Thread %d ------  PAPI_read()\n", id);
         if( status[id] != PAPI_OK || stat != PAPI_OK ) {
@@ -293,17 +296,22 @@ void *thread_work(void *data) {
                 fprintf(stdout, "\t%s : %lld\n", rocp_sdk_native_event_names[i], values[i]);
             }
         }
+      }
         pthread_mutex_unlock(&exclusive);
         pthread_barrier_wait(&barrier);
-    }
 
     // Call PAPI_stop() after the GEMM.
     pthread_barrier_wait(&barrier);
     pthread_mutex_lock(&exclusive);
     stat = PAPI_stop(EventSet, values);
+    fprintf(stdout, "------ Thread %d ------  PAPI_stop()\n", id);
     if( status[id] != PAPI_OK || stat != PAPI_OK ) {
         fprintf(stdout, "Thread %d: Failed to stop. %d\n", id, status[id]);
         status[id] = stat;
+    } else {
+       for(i = id; i < total_event_count; i+=ONT) {
+           fprintf(stdout, "\t%s : %lld\n", rocp_sdk_native_event_names[i], values[i]);
+        }
     }
     pthread_mutex_unlock(&exclusive);
     pthread_barrier_wait(&barrier);
