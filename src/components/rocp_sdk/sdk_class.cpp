@@ -453,6 +453,7 @@ record_callback(rocprofiler_dispatch_counting_service_data_t dispatch_data,
 
     _papi_hwi_unlock(_rocp_sdk_lock);
 
+    //fprintf(stdout, "record unlock\n");
     agent_mutex.unlock();
 
     return;
@@ -466,6 +467,7 @@ dispatch_callback(rocprofiler_dispatch_counting_service_data_t dispatch_data,
                   rocprofiler_user_data_t *,
                   void * )
 {
+    //fprintf(stdout, "dispatch lock\n");
     agent_mutex.lock();
 
     // All threads get a shared lock because if they are only reading the
@@ -740,6 +742,10 @@ start_counting(vendorp_ctx_t ctx){
 /* ** */
 int
 read_sample(){
+    //rocprofiler_thread_id_t tid;
+    //rocprofiler_get_thread_id_FPTR(&tid);
+    //fprintf(stdout, "sample lock in %d\n", tid);
+    //    papi_rocpsdk::agent_mutex.lock();
     int papi_errno = PAPI_OK;
     int ret_val;
     size_t rec_count = 1024;
@@ -837,6 +843,8 @@ read_sample(){
         }
         _counter_values[ei] = counter_value_sum;
     }
+    //fprintf(stdout, "sample unlock in %d\n", tid);
+    //    papi_rocpsdk::agent_mutex.unlock();
 
   fn_exit:
     return papi_errno;
@@ -1170,6 +1178,12 @@ int setup() {
 //--------------------------------------------------------------------------------
 
 extern "C" int
+rocprofiler_sdk_get_thread_id(rocprofiler_thread_id_t *thread_lock)
+{
+    return papi_rocpsdk::rocprofiler_get_thread_id_FPTR(thread_lock);
+}
+
+extern "C" int
 rocprofiler_sdk_init_pre(void)
 {
     return PAPI_OK;
@@ -1295,6 +1309,9 @@ rocprofiler_sdk_ctx_read(vendorp_ctx_t ctx, long long **counters)
             return papi_errno;
         }
     } else if( RPSDK_MODE_DISPATCH == papi_rocpsdk::get_profiling_mode() ) {
+    //rocprofiler_thread_id_t tid;
+    //papi_rocpsdk::rocprofiler_get_thread_id_FPTR(&tid);
+    //fprintf(stdout, "read lock in %d\n", tid);
         papi_rocpsdk::agent_mutex.lock();
     }
 
@@ -1307,6 +1324,7 @@ rocprofiler_sdk_ctx_read(vendorp_ctx_t ctx, long long **counters)
     *counters = ctx->counters;
 
     if( RPSDK_MODE_DISPATCH == papi_rocpsdk::get_profiling_mode() ){
+    //fprintf(stdout, "read unlock in %d\n", tid);
         papi_rocpsdk::agent_mutex.unlock();
     }
 

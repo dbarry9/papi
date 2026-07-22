@@ -18,6 +18,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <stdatomic.h>
 #include "papi.h"
 #include "papi_internal.h"
 #include "papi_vector.h"
@@ -25,6 +26,7 @@
 #include "extras.h"
 #include "sdk_class.h"
 #include "rocprofiler-sdk/hsa.h"
+#include "rocprofiler-sdk/fwd.h"
 
 #define ROCPROF_SDK_MAX_COUNTERS (64)
 #define RPSDK_CTX_RUNNING (1)
@@ -41,6 +43,7 @@
 /* Utility functions */
 static int check_for_available_devices(char *err_msg);
 
+static atomic_int tid_lock = 0;
 unsigned int _rocp_sdk_lock;
 
 /* Init and finalize */
@@ -331,6 +334,20 @@ rocp_sdk_start(hwd_context_t *ctx, hwd_control_state_t *ctl)
     rocp_sdk_context_t *rocp_sdk_ctx = (rocp_sdk_context_t *) ctx;
     rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
 
+// Set the exclusive lock.
+    int expected = 0;
+    rocprofiler_thread_id_t my_tid;
+    rocprofiler_sdk_get_thread_id(&my_tid);
+
+    int swapped = atomic_compare_exchange_strong_explicit(
+                      &tid_lock,
+                      &expected,
+                      my_tid,
+                      memory_order_acq_rel,
+                      memory_order_acquire);
+
+//tid_lock = my_tid;
+if(tid_lock == my_tid) {
     if (0 == rocp_sdk_ctl->num_events){
         SUBDBG("Error! Cannot PAPI_start an empty eventset.");
         return PAPI_ENOSUPP;
@@ -354,6 +371,12 @@ rocp_sdk_start(hwd_context_t *ctx, hwd_control_state_t *ctl)
     }
 
     rocp_sdk_ctx->state |= RPSDK_CTX_RUNNING;
+    goto fn_exit;
+}
+
+    fprintf(stdout, "Hit early exit in start()\n");
+    fflush(stdout);
+    return PAPI_ENOSUPP;
 
   fn_exit:
     return papi_errno;
@@ -369,16 +392,27 @@ rocp_sdk_stop(hwd_context_t *ctx, hwd_control_state_t *ctl)
     rocp_sdk_context_t *rocp_sdk_ctx = (rocp_sdk_context_t *) ctx;
     rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
 
+    // Get thread ID and compare to the thread ID of active profiling context.
+    rocprofiler_thread_id_t my_tid;
+    rocprofiler_sdk_get_thread_id(&my_tid);
+
+//tid_lock = my_tid;
+if(my_tid == tid_lock) {
     papi_errno = rocprofiler_sdk_stop(rocp_sdk_ctl->vendor_ctx);
     if (papi_errno != PAPI_OK) {
         goto fn_fail;
     }
 
     rocp_sdk_ctl->vendor_ctx = NULL;
+}
 
   fn_exit:
+if(my_tid == tid_lock) {
     rocp_sdk_ctx->state = 0;
     return papi_errno;
+} else {
+    return PAPI_ENOTRUN;
+}
   fn_fail:
     goto fn_exit;
 }
@@ -386,8 +420,16 @@ rocp_sdk_stop(hwd_context_t *ctx, hwd_control_state_t *ctl)
 int
 rocp_sdk_read(hwd_context_t *ctx __attribute__((unused)), hwd_control_state_t *ctl, long long **val, int flags __attribute__((unused)))
 {
-    rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
-    return rocprofiler_sdk_ctx_read(rocp_sdk_ctl->vendor_ctx, val);
+    rocprofiler_thread_id_t my_tid;
+    rocprofiler_sdk_get_thread_id(&my_tid);
+
+//tid_lock = my_tid;
+    if(my_tid == tid_lock) {
+        rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
+        return rocprofiler_sdk_ctx_read(rocp_sdk_ctl->vendor_ctx, val);
+    } else {
+        return PAPI_ENOTRUN;
+    }
 }
 
 int

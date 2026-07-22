@@ -9,7 +9,7 @@
 #include "kernel.h"
 
 #define ONT 2
-#define NUMGEMMS 5
+#define NUMGEMMS 1
 
 typedef struct {
   int id;
@@ -174,10 +174,7 @@ void *thread_work(void *data) {
     int id = wkrdata->id;
 
     int EventSet = PAPI_NULL;
-    long long *values = (long long*)malloc(total_event_count/ONT*sizeof(long long));
-    if( NULL == values ) {
-        status[id] = PAPI_ENOMEM;
-    }
+    int numValues = 0;
 
     // Create event set.
     int stat;
@@ -200,10 +197,19 @@ void *thread_work(void *data) {
         if( PAPI_OK != stat ) {
             fprintf(stdout, "Thread %d: Failed to add event %s to set.\n", id, rocp_sdk_native_event_names[i]);
             status[id] = stat;
+        } else {
+            ++numValues;
         }
+    }
+    long long *values = (long long*)malloc(numValues*sizeof(long long));
+    if( NULL == values ) {
+        status[id] = PAPI_ENOMEM;
     }
     pthread_mutex_unlock(&exclusive);
     pthread_barrier_wait(&barrier);
+
+    // Set the device such that each thread runs on a distinct device.
+    HIP_CALL_THD(hipSetDevice(id));
 
     // HIP front matter.
     int N = 16;

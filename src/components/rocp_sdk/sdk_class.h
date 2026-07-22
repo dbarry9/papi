@@ -1,8 +1,11 @@
 #ifndef __VENDOR_PROFILER_V1_H__
 #define __VENDOR_PROFILER_V1_H__
 
+#include "rocprofiler-sdk/fwd.h"
+
 typedef struct vendord_ctx *vendorp_ctx_t;
 
+extern int rocprofiler_sdk_get_thread_id(rocprofiler_thread_id_t *thread_lock);
 extern int rocprofiler_sdk_init_pre(void);
 extern int rocprofiler_sdk_init(void);
 extern int rocprofiler_sdk_shutdown(void);
