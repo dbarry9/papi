@@ -12,6 +12,7 @@
 const int GPU_FREE = 0;
 const int GPU_TAKEN = 1;
 rocprofiler_context_id_t _dev_ctx_[NUM_GPU]; // hard-coded
+std::map< int, int > thread_to_num_events_internal;
 std::map< int, int* > thread_to_device;
 std::map< int, long long* > thread_to_counter_values;
 std::map< int, long long* > thread_to_counter_values_savestate;
@@ -68,9 +69,9 @@ static std::mutex agent_mutex = {};
 static std::condition_variable agent_cond_var = {};
 static bool data_is_ready = false;
 static std::string _rocp_sdk_error_string;
-static long long int *_counter_values = NULL;
-static long long int *_counter_values_savestate = NULL;
-static int _num_events_internal = 0;
+//static long long int *_counter_values = NULL;
+//static long long int *_counter_values_savestate = NULL;
+//static int _num_events_internal = 0;
 static int rpsdk_profiling_mode = RPSDK_MODE_DEVICE_SAMPLING;
 
 static agent_map_t gpu_agents = agent_map_t{};
@@ -414,6 +415,17 @@ record_callback(rocprofiler_dispatch_counting_service_data_t dispatch_data,
     rec_info_t *tmp_rec_info;
     uint64_t device;
 
+    // Get thread ID.
+    rocprofiler_thread_id_t tid;
+    rocprofiler_get_thread_id_FPTR(&tid);
+
+    // Get the array of counter values for this thread.
+    auto cv_it = thread_to_counter_values.find(tid);
+    if( thread_to_counter_values.end() == cv_it ){
+        return;
+    }
+    long long int *_counter_values = cv_it->second;
+
     if( (NULL == _counter_values) || (NULL == active_event_set_ctx) || (0 == (active_event_set_ctx->state & RPSDK_AES_RUNNING)) ){
         return;
     }
@@ -602,6 +614,27 @@ tool_tracing_callback(rocprofiler_callback_tracing_record_t record,
     // Get calling thread.
     rocprofiler_thread_id_t my_tid;
     rocprofiler_get_thread_id_FPTR(&my_tid);
+
+    // Get the array of counter values for this thread.
+    auto cv_it = thread_to_counter_values.find(my_tid);
+    if( thread_to_counter_values.end() == cv_it ){
+        return;
+    }
+    long long int *_counter_values = cv_it->second;
+
+    // Get the counter value savestate array for this thread.
+    auto cvss_it = thread_to_counter_values_savestate.find(my_tid);
+    if( thread_to_counter_values_savestate.end() == cvss_it ){
+        return;
+    }
+    long long int *_counter_values_savestate = cvss_it->second;
+
+    // Get the internal number of events.
+    auto nei_it = thread_to_num_events_internal.find(my_tid);
+    if( thread_to_num_events_internal.end() == nei_it ){
+        return;
+    }
+    int _num_events_internal = nei_it->second;
 
     // Compare calling thread to profiling thread. If they do not match, simply return.
     if( control_thread_id != my_tid ) {
@@ -815,12 +848,31 @@ populate_event_list(void){
 /* ** */
 void stop_counting(void){
     int ctx_active, ctx_valid;
+
+    // Get calling thread.
+    rocprofiler_thread_id_t my_tid;
+    rocprofiler_get_thread_id_FPTR(&my_tid);
+
+    // Get the array of counter values for this thread.
+    auto cv_it = thread_to_counter_values.find(my_tid);
+    if( thread_to_counter_values.end() == cv_it ){
+        return;
+    }
+    long long int *_counter_values = cv_it->second;
+
+    // Get the counter value savestate array for this thread.
+    auto cvss_it = thread_to_counter_values_savestate.find(my_tid);
+    if( thread_to_counter_values_savestate.end() == cvss_it ){
+        return;
+    }
+    long long int *_counter_values_savestate = cvss_it->second;
+
     _counter_values = NULL;
 
-   rocprofiler_thread_id_t tid;
-   rocprofiler_get_thread_id_FPTR(&tid);
+    free(_counter_values_savestate); // savestate may need copy per thread.
+    _counter_values_savestate = NULL;
 
-    auto it = thread_to_device.find(tid);
+    auto it = thread_to_device.find(my_tid);
     if( thread_to_device.end() == it ){
         return;
     }
@@ -842,8 +894,6 @@ void stop_counting(void){
         return;
     }
     ROCPROFILER_CALL(rocprofiler_stop_context_FPTR(_dev_ctx_[i]), "stop context");
-    free(_counter_values_savestate); // savestate may need copy per thread.
-    _counter_values_savestate = NULL;
   }
 }
 
@@ -851,13 +901,22 @@ void stop_counting(void){
 void
 start_counting(vendorp_ctx_t ctx){
 
+    rocprofiler_thread_id_t tid;
+    rocprofiler_get_thread_id_FPTR(&tid);
+
     // Store a pointer to the counter value array in a global variable so that
     // our functions that are called from the ROCprofiler-SDK (instead of our
     // API) can still find the array.
-    _counter_values = ctx->counters;
+    // Get the array of counter values for this thread.
+    auto cv_it = thread_to_counter_values.find(tid);
+    if( thread_to_counter_values.end() == cv_it ){
+        return;
+    }
+    //long long int *_counter_values = cv_it->second;
 
-    rocprofiler_thread_id_t tid;
-    rocprofiler_get_thread_id_FPTR(&tid);
+    // We no longer want this because we need the map so that we can track all
+    // threads' counters.
+    //_counter_values = ctx->counters;
 
     auto it = thread_to_device.find(tid);
     if( thread_to_device.end() == it ){
@@ -882,14 +941,32 @@ read_sample(){
     size_t rec_count = 1024;
     rocprofiler_record_counter_t output_records[1024];
 
-    rocprofiler_thread_id_t tid;
-    rocprofiler_get_thread_id_FPTR(&tid);
-    auto it = thread_to_device.find(tid);
+    // Get calling thread.
+    rocprofiler_thread_id_t my_tid;
+    rocprofiler_get_thread_id_FPTR(&my_tid);
+
+    // Get the array of counter values for this thread.
+    auto cv_it = thread_to_counter_values.find(my_tid);
+    if( thread_to_counter_values.end() == cv_it ){
+        papi_errno = PAPI_ENOTRUN;
+        return papi_errno; // was goto fn_fail;
+    }
+    long long int *_counter_values = cv_it->second;
+
+    // Get the counter value savestate array for this thread.
+    auto cvss_it = thread_to_counter_values_savestate.find(my_tid);
+    if( thread_to_counter_values_savestate.end() == cvss_it ){
+        papi_errno = PAPI_ENOTRUN;
+        return papi_errno; // was goto fn_fail;
+    }
+    long long int *_counter_values_savestate = cvss_it->second;
+
+    auto it = thread_to_device.find(my_tid);
 
     if( (NULL == _counter_values) || (NULL == active_event_set_ctx) || \
         (0 == (active_event_set_ctx->state & (RPSDK_AES_RUNNING|RPSDK_AES_PAUSED))) ){
         papi_errno = PAPI_ENOTRUN;
-        goto fn_fail;
+        return papi_errno; // was goto fn_fail;
     }
 
     // Only update the counters if the profiling context is running, not paused.
@@ -897,6 +974,7 @@ read_sample(){
 fprintf(stdout, "Calling read_sample() routine.\n");
 fflush(stdout);
 
+    // can i not move this block to be right under the line: auto it = ...?
     if( thread_to_device.end() == it ){
         papi_errno = PAPI_ECMP;
         goto fn_fail;
@@ -1497,11 +1575,39 @@ rocprofiler_sdk_ctx_open(int *event_ids, int num_events, vendorp_ctx_t *ctx)
         return PAPI_ENOMEM;
     }
 
+    // Get calling thread.
+    rocprofiler_thread_id_t my_tid;
+    papi_rocpsdk::rocprofiler_get_thread_id_FPTR(&my_tid);
+
+    // Set the array of counter values for this thread.
+    auto cv_it = thread_to_counter_values.find(my_tid);
+    if( thread_to_counter_values.end() == cv_it ){
+        maplock.lock();
+        thread_to_counter_values.insert(std::make_pair(my_tid, (*ctx)->counters));
+        maplock.unlock();
+    }
+
+    // Set the counter value savestate array for this thread.
+    long long int *_counter_values_savestate;
+    auto cvss_it = thread_to_counter_values_savestate.find(my_tid);
+    if( thread_to_counter_values_savestate.end() == cvss_it ){
+        maplock.lock();
+        thread_to_counter_values_savestate.insert(std::make_pair(my_tid, _counter_values_savestate));
+        maplock.lock();
+    }
+
+    // Set the internal number of events.
+    auto nei_it = thread_to_num_events_internal.find(my_tid);
+    if( thread_to_num_events_internal.end() == nei_it ){
+        maplock.lock();
+        thread_to_num_events_internal.insert(std::make_pair(my_tid, num_events));
+        maplock.lock();
+    }
+
     // Dynamically allocate and init to zero
     size_t savestate_size = num_events*sizeof(long long);
-    papi_rocpsdk::_num_events_internal = num_events;
-    papi_rocpsdk::_counter_values_savestate = (long long *)papi_realloc(papi_rocpsdk::_counter_values_savestate, savestate_size);
-    memset(papi_rocpsdk::_counter_values_savestate, 0, savestate_size);
+    _counter_values_savestate = (long long *)papi_realloc(_counter_values_savestate, savestate_size);
+    memset(_counter_values_savestate, 0, savestate_size);
 
     _papi_hwi_lock(_rocp_sdk_lock);
 
