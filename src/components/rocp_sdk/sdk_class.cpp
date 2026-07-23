@@ -8,10 +8,14 @@
 #include "sdk_class.hpp"
 
 #define NUM_GPU 4
+#define PLACEHOLDER 0
 const int GPU_FREE = 0;
 const int GPU_TAKEN = 1;
 rocprofiler_context_id_t _dev_ctx_[NUM_GPU]; // hard-coded
 std::map< int, int* > thread_to_device;
+std::map< int, long long* > thread_to_counter_values;
+std::map< int, long long* > thread_to_counter_values_savestate;
+std::mutex maplock = {};
 
 namespace papi_rocpsdk
 {
@@ -75,7 +79,7 @@ static std::unordered_map<std::string, base_event_info_t>  base_events_by_name =
 
 static std::set<int> active_device_set = {};
 static vendorp_ctx_t active_event_set_ctx = NULL;
-static std::vector<bool> index_mapping;
+static std::vector<bool> index_mapping[NUM_GPU];
 
 static std::unordered_map<uint64_t, rocprofiler_profile_config_id_t> rpsdk_profile_cache = {};
 static std::unordered_map<unsigned int, event_instance_info_t> papi_id_to_event_instance = {};
@@ -427,10 +431,10 @@ record_callback(rocprofiler_dispatch_counting_service_data_t dispatch_data,
 
     // Create the mapping from events in the eventset (passed by the user) to entries in the "record_data" array.
     // The order of the entries in "record_data" will remain the same for a given profile, so we only need to do this once.
-    if( index_mapping.empty() ){
+    if( index_mapping[PLACEHOLDER].empty() ){
         rec_info_t event_set_to_rec_mapping[record_count];
 
-        index_mapping.resize( record_count*(active_event_set_ctx->num_events), false );
+        index_mapping[PLACEHOLDER].resize( record_count*(active_event_set_ctx->num_events), false );
 
         // Traverse all the recorded entries and cache some information about them
         // that we will need further down when doing the matching.
@@ -470,7 +474,7 @@ record_callback(rocprofiler_dispatch_counting_service_data_t dispatch_data,
                   ){
                     continue;
                 }
-                index_mapping[ei*record_count+i] = true;
+                index_mapping[PLACEHOLDER][ei*record_count+i] = true;
             }
         }
     }
@@ -482,7 +486,7 @@ record_callback(rocprofiler_dispatch_counting_service_data_t dispatch_data,
         for(int i=0; i<record_count; ++i){
             // All counters in the sample whose dimemsions match the qualifers of the event instance
             // will be added. This means that if a qualifier is missing, we will get the sum.
-            if( true == index_mapping[ei*record_count+i] ){
+            if( true == index_mapping[PLACEHOLDER][ei*record_count+i] ){
                 fprintf(stdout, "[evt idx=%d] hit true 2: %lf + %lf \n", ei, counter_value_sum, record_data[i].counter_value);
                 fflush(stdout);
                 counter_value_sum += record_data[i].counter_value;
@@ -923,11 +927,11 @@ fflush(stdout);
 
     // Create the mapping from events in the eventset (passed by the user) to entries (samples) in the "output_records" array.
     // The order of the entries in "output_records" will remain the same for a given profile, so we only need to do this once.
-    index_mapping.clear();
-    if( index_mapping.empty() ){
+    index_mapping[gpu].clear();
+    if( index_mapping[gpu].empty() ){
         //rec_info_t event_set_to_rec_mapping[rec_count];
 
-        index_mapping.resize( rec_count*(active_event_set_ctx->num_events), false );
+        index_mapping[gpu].resize( rec_count*(active_event_set_ctx->num_events), false );
     }
 
         rec_info_t event_set_to_rec_mapping[rec_count];
@@ -988,7 +992,7 @@ fflush(stdout);
                     continue;
                 }
 
-                index_mapping[ei*rec_count+i] = true; // this isn't getting set for one of the events
+                index_mapping[gpu][ei*rec_count+i] = true; // this isn't getting set for one of the events
             }
         }
     //}
@@ -1006,7 +1010,7 @@ fflush(stdout);
             for(int i=0; i<rec_count; ++i){
                 // All counters in the sample whose dimemsions match the qualifers of the event instance
                 // will be added. This means that if a qualifier is missing, we will get the sum.
-                if( true == index_mapping[ei*rec_count+i] ){
+                if( true == index_mapping[gpu][ei*rec_count+i] ){
                     //fprintf(stdout, "[evt idx=%d] hit true 1: %lf + %lf \n", ei, counter_value_sum, output_records[i].counter_value);
                     //fflush(stdout);
                     counter_value_sum += output_records[i].counter_value;
@@ -1250,7 +1254,7 @@ void
 empty_active_event_set(void){
     active_event_set_ctx = NULL;
 
-    index_mapping.clear();
+    index_mapping[PLACEHOLDER].clear();
 
     active_device_set.clear();
     return;
@@ -1377,7 +1381,10 @@ rocprofiler_sdk_set_gpu_avail(int *devs)
         for(int i = 0; i < NUM_GPU; ++i) {
             copy_of_devs[i] = devs[i];
         }
+        // Insert entries into the map in a thread-safe manner.
+        maplock.lock();
         thread_to_device.insert(std::make_pair(tid, copy_of_devs));
+        maplock.unlock();
     }
     // If it already exists, update it.
     else {
