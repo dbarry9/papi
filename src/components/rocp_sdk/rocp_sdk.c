@@ -366,7 +366,7 @@ rocp_sdk_start(hwd_context_t *ctx, hwd_control_state_t *ctl)
 
     int set = atomic_compare_exchange_strong_explicit(&tid_lock, &occupied, my_tid, memory_order_acq_rel, memory_order_acquire);
 
-    if(tid_lock == my_tid) {
+    //if(tid_lock == my_tid) {
 
         // Internally track the thread that has an active profiling context.
         rocprofiler_sdk_set_control_thread_id(my_tid);
@@ -395,7 +395,7 @@ rocp_sdk_start(hwd_context_t *ctx, hwd_control_state_t *ctl)
 
         rocp_sdk_ctx->state |= RPSDK_CTX_RUNNING;
         goto fn_exit;
-    }
+    //}
 
     // The thread that could not get an active profiling context gets an error.
     return PAPI_ENOSUPP;
@@ -418,23 +418,23 @@ rocp_sdk_stop(hwd_context_t *ctx, hwd_control_state_t *ctl)
     rocprofiler_thread_id_t my_tid;
     rocprofiler_sdk_get_thread_id(&my_tid);
 
-    if(my_tid == tid_lock) {
+    //if(my_tid == tid_lock) {
         papi_errno = rocprofiler_sdk_stop(rocp_sdk_ctl->vendor_ctx);
         if (papi_errno != PAPI_OK) {
             goto fn_fail;
         }
 
         rocp_sdk_ctl->vendor_ctx = NULL;
-    }
+    //}
 
   fn_exit:
-    if(my_tid == tid_lock) {
+    //if(my_tid == tid_lock) {
         rocp_sdk_ctx->state = 0;
 
         // Allow for other threads to control the profiling context.
         occupied = 0;
         return papi_errno;
-    }
+    //}
 
     // The thread that does not have an active profiling context gets an error.
     return PAPI_ENOTRUN;
@@ -448,10 +448,10 @@ rocp_sdk_read(hwd_context_t *ctx __attribute__((unused)), hwd_control_state_t *c
     rocprofiler_thread_id_t my_tid;
     rocprofiler_sdk_get_thread_id(&my_tid);
 
-    if(my_tid == tid_lock) {
+    //if(my_tid == tid_lock) {
         rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
         return rocprofiler_sdk_ctx_read(rocp_sdk_ctl->vendor_ctx, val);
-    }
+    //}
 
     // The thread that does not have an active profiling context gets an error.
     return PAPI_ENOTRUN;
