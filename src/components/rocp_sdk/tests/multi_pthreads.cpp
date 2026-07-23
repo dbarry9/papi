@@ -215,7 +215,7 @@ void *thread_work(void *data) {
     HIP_CALL_THD(hipSetDevice(id));
 
     // HIP front matter.
-    int N = 16;
+    int N = 16*(id+1);
     dim3 threads_per_block( 1, 1, 1 );
     dim3 blocks_in_grid( ceil( float(N) / threads_per_block.x ), ceil( float(N) / threads_per_block.y ), 1 );
     size_t probSize = N*N*sizeof(double);

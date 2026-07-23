@@ -39,13 +39,15 @@
     err_handle;                            \
 } while(0)
 
-
 /* Utility functions */
 static int check_for_available_devices(char *err_msg);
 
 atomic_int tid_lock = 0;
 static int occupied = 0;
 unsigned int _rocp_sdk_lock;
+
+#define NUM_GPU 4
+const int GPU_FREE = 0;
 
 /* Init and finalize */
 static int rocp_sdk_init_component(int cid);
@@ -84,6 +86,7 @@ typedef struct {
 typedef struct {
     int *events_id;
     int num_events;
+    int dev_id[NUM_GPU];
     vendorp_ctx_t vendor_ctx;
 } rocp_sdk_control_t;
 
@@ -261,7 +264,11 @@ rocp_sdk_shutdown_thread(hwd_context_t *ctx)
 int
 rocp_sdk_cleanup_eventset(hwd_control_state_t *ctl)
 {
+    int i;
     rocp_sdk_control_t *rocp_sdk_ctl = (rocp_sdk_control_t *) ctl;
+    for( i = 0; i < NUM_GPU; ++i ) {
+        rocp_sdk_ctl->dev_id[i] = GPU_FREE;
+    }
     papi_free(rocp_sdk_ctl->events_id);
     rocp_sdk_ctl->events_id = NULL;
     rocp_sdk_ctl->num_events = 0;
@@ -294,7 +301,17 @@ update_native_events(rocp_sdk_control_t *ctl, NativeInfo_t *ntv_info, int ntv_co
     }
 
     int i;
+    int new_dev_id;
     for (i = 0; i < ntv_count; ++i) {
+        new_dev_id = rocprofiler_sdk_get_event_device(ntv_info[i].ni_event);
+fprintf(stdout, "Detected device=%d, setting prev ctl->dev_id[%d]=%d to %d\n", new_dev_id, new_dev_id, ctl->dev_id[new_dev_id], 1);
+fflush(stdout);
+        if( new_dev_id >= 0 && new_dev_id < NUM_GPU ) {
+            ctl->dev_id[new_dev_id] = 1;
+        } else {
+            papi_errno = PAPI_EINVAL;
+            goto fn_fail;
+        }
         ctl->events_id[i] = ntv_info[i].ni_event;
         ntv_info[i].ni_position = i;
     }
@@ -320,6 +337,12 @@ rocp_sdk_update_control_state(hwd_control_state_t *ctl, NativeInfo_t *ntv_info, 
     }
 
     papi_errno = update_native_events(rocp_sdk_ctl, ntv_info, ntv_count);
+    if (papi_errno != PAPI_OK) {
+        return papi_errno;
+    }
+
+    // Set the internal array of contexts based on ctl->dev_id array.
+    papi_errno = rocprofiler_sdk_set_gpu_avail(rocp_sdk_ctl->dev_id);
     if (papi_errno != PAPI_OK) {
         return papi_errno;
     }
