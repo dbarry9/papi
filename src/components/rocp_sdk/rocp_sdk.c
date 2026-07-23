@@ -48,6 +48,7 @@ unsigned int _rocp_sdk_lock;
 
 #define NUM_GPU 4
 const int GPU_FREE = 0;
+const int GPU_TAKEN = 1;
 
 /* Init and finalize */
 static int rocp_sdk_init_component(int cid);
@@ -304,10 +305,10 @@ update_native_events(rocp_sdk_control_t *ctl, NativeInfo_t *ntv_info, int ntv_co
     int new_dev_id;
     for (i = 0; i < ntv_count; ++i) {
         new_dev_id = rocprofiler_sdk_get_event_device(ntv_info[i].ni_event);
-fprintf(stdout, "Detected device=%d, setting prev ctl->dev_id[%d]=%d to %d\n", new_dev_id, new_dev_id, ctl->dev_id[new_dev_id], 1);
+fprintf(stdout, "Detected device=%d, setting prev ctl->dev_id[%d]=%d to %d\n", new_dev_id, new_dev_id, ctl->dev_id[new_dev_id], GPU_TAKEN);
 fflush(stdout);
         if( new_dev_id >= 0 && new_dev_id < NUM_GPU ) {
-            ctl->dev_id[new_dev_id] = 1;
+            ctl->dev_id[new_dev_id] = GPU_TAKEN;
         } else {
             papi_errno = PAPI_EINVAL;
             goto fn_fail;

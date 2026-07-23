@@ -8,6 +8,8 @@
 #include "sdk_class.hpp"
 
 #define NUM_GPU 4
+const int GPU_FREE = 0;
+const int GPU_TAKEN = 1;
 rocprofiler_context_id_t _dev_ctx_[NUM_GPU]; // hard-coded
 std::map< int, int* > thread_to_device;
 
@@ -820,7 +822,9 @@ void stop_counting(void){
     }
 
   for(int i = 0; i < NUM_GPU; ++i) {
-   if( it->second[i] == 1 ) {
+   if( it->second[i] == GPU_FREE ) {
+    continue;
+   }
     fprintf(stdout, "Stop counting on context %d\n", i);
     fflush(stdout);
     ROCPROFILER_CALL(rocprofiler_context_is_valid_FPTR(_dev_ctx_[i], &ctx_valid), "check context validity");
@@ -836,7 +840,6 @@ void stop_counting(void){
     ROCPROFILER_CALL(rocprofiler_stop_context_FPTR(_dev_ctx_[i]), "stop context");
     free(_counter_values_savestate); // savestate may need copy per thread.
     _counter_values_savestate = NULL;
-   }
   }
 }
 
@@ -858,11 +861,12 @@ start_counting(vendorp_ctx_t ctx){
     }
 
     for(int i = 0; i < NUM_GPU; ++i) {
-        if( it->second[i] == 1 ) {
-            fprintf(stdout, "Start counting on context %d\n", i);
-            fflush(stdout);
-            ROCPROFILER_CALL(rocprofiler_start_context_FPTR(_dev_ctx_[i]), "start context");
+        if( it->second[i] == GPU_FREE ) {
+            continue;
         }
+        fprintf(stdout, "Start counting on context %d\n", i);
+        fflush(stdout);
+        ROCPROFILER_CALL(rocprofiler_start_context_FPTR(_dev_ctx_[i]), "start context");
     }
 }
 
@@ -894,8 +898,10 @@ fflush(stdout);
         goto fn_fail;
     }
 
-  for(int gpu = 0; gpu < NUM_GPU; ++gpu) { // start of
-   if( it->second[gpu] == 1 ) {            // section
+  for(int gpu = 0; gpu < NUM_GPU; ++gpu) { // start of section
+   if( it->second[gpu] == GPU_FREE ) {
+       continue;
+   }
     fprintf(stdout, "Read sample from counting on context %d\n", gpu);
     fflush(stdout);
 
@@ -1012,8 +1018,7 @@ fflush(stdout);
         _counter_values[ei] = counter_value_sum;
     }
 
-   } // end of
-  }  // section
+   } // end of section
 
   fn_exit:
     return papi_errno;
