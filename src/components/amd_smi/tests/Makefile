@@ -24,7 +24,7 @@ BASE_INCLUDES_FROM_LOG ?= -I. -I../../.. -I../../../testlib -I../../../validatio
 PAPI_DIR_INCLUDE ?= ../../../include
 
 INCLUDE_PAPI := $(BASE_INCLUDES_FROM_LOG) -I$(PAPI_DIR_INCLUDE)
-INCLUDE_AMDSMI := -I$(PAPI_AMDSMI_ROOT)/include -I$(PAPI_AMDSMI_ROOT)/include/rocm_smi
+INCLUDE_AMDSMI := -I$(PAPI_AMDSMI_ROOT)/include -I$(PAPI_AMDSMI_ROOT)/include/amd_smi
 INCLUDE_HIP := -I$(PAPI_AMDSMI_ROOT)/include/hip \
                -I$(PAPI_AMDSMI_ROOT)/include/hsa \
                -I$(PAPI_AMDSMI_ROOT)/include/rocprofiler \
