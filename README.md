@@ -110,7 +110,7 @@ you will need to do the following:
 
 # License
 
-    Copyright (c) 2025, Innovative Computing Laboratory, 
+    Copyright (c) 2026, Innovative Computing Laboratory,
     University of Tennessee Knoxville
     All rights reserved.
 
