@@ -14,6 +14,7 @@
 */
 
 #include <string.h>
+#include <errno.h>
 
 #include "papi.h"
 #include "papi_internal.h"
@@ -563,6 +564,74 @@ get_first_event_next_pmu(int pmu_idx, int pmu_type)
 }
 
 
+/** @class  generic_event_is_hw_mapped
+ *  @brief  Determines whether a generic ("perf"/"perf_raw") event is
+ *          actually backed by a counter on the running CPU. libpfm4's
+ *          generic event tables are static and list every event the
+ *          kernel interface knows about, regardless of whether the
+ *          underlying hardware implements it. Probe with a real (but
+ *          immediately closed) perf_event_open() call so unsupported
+ *          generic events can be filtered out of enumeration.
+ *
+ *  @param[in] event_string
+ *             -- fully qualified "pmu::event" name to test
+ *
+ *  @returns 1 if the event is mapped (or if we can't tell), 0 if the
+ *           kernel has told us definitively that it is not supported.
+ */
+static int
+generic_event_is_hw_mapped(const char *event_string)
+{
+	pfm_perf_encode_arg_t perf_arg;
+	struct perf_event_attr attr;
+	char *fstr = NULL;
+	int ret, fd;
+
+	memset(&attr, 0, sizeof(attr));
+	memset(&perf_arg, 0, sizeof(perf_arg));
+	attr.size = sizeof(attr);
+	perf_arg.attr = &attr;
+	perf_arg.fstr = &fstr;
+
+	ret = pfm_get_os_event_encoding(event_string, PFM_PLM0 | PFM_PLM3,
+					 PFM_OS_PERF_EVENT_EXT, &perf_arg);
+	if (fstr != NULL) {
+		free(fstr);
+	}
+
+	/* If we can't even encode it, let the normal allocate path report it. */
+	if (ret != PFM_SUCCESS) {
+		return 1;
+	}
+
+	/* Only PERF_TYPE_HARDWARE/PERF_TYPE_HW_CACHE events can be         */
+	/* legitimately "unmapped" on a given CPU.                          */
+	if ((attr.type != PERF_TYPE_HARDWARE) &&
+	    (attr.type != PERF_TYPE_HW_CACHE)) {
+		return 1;
+	}
+
+	attr.disabled = 1;
+	attr.exclude_kernel = 1;
+	attr.exclude_hv = 1;
+
+	fd = (int)syscall(__NR_perf_event_open, &attr, 0, -1, -1, 0);
+	if (fd < 0) {
+		/* ENOENT: no such generic counter on this CPU.   */
+		/* EINVAL: e.g. unsupported HW_CACHE combination.  */
+		if ((errno == ENOENT) || (errno == EINVAL)) {
+			SUBDBG("generic_event_is_hw_mapped: %s not "
+				"supported on this CPU (errno %d)\n",
+				event_string, errno);
+			return 0;
+		}
+		return 1;
+	}
+
+	close(fd);
+	return 1;
+}
+
 /***********************************************************/
 /* Exported functions                                      */
 /***********************************************************/
@@ -857,24 +926,42 @@ _pe_libpfm4_ntv_enum_events( unsigned int *PapiEventCode,
 	   }
 
 		// get the event information from libpfm4 (must zero structure)
-		memset( &einfo, 0, sizeof( pfm_event_info_t ));
-		einfo.size = sizeof(pfm_event_info_t);
-		if ((ret = pfm_get_event_info(code, PFM_OS_PERF_EVENT_EXT, &einfo)) != PFM_SUCCESS) {
-			SUBDBG("EXIT: pfm_get_event_info returned: %d\n", ret);
-			return PAPI_ENOIMPL;
+		while (1) {
+			memset( &einfo, 0, sizeof( pfm_event_info_t ));
+			einfo.size = sizeof(pfm_event_info_t);
+			if ((ret = pfm_get_event_info(code, PFM_OS_PERF_EVENT_EXT, &einfo)) != PFM_SUCCESS) {
+				SUBDBG("EXIT: pfm_get_event_info returned: %d\n", ret);
+				return PAPI_ENOIMPL;
+			}
+
+			// get the pmu information from libpfm4 (must zero structure)
+			memset( &pinfo, 0, sizeof(pfm_pmu_info_t) );
+			pinfo.size = sizeof(pfm_pmu_info_t);
+			ret=pfm_get_pmu_info(einfo.pmu, &pinfo);
+			if (ret!=PFM_SUCCESS) {
+				SUBDBG("EXIT: pfm_get_pmu_info returned: %d\n", ret);
+				return ret;
+			}
+
+			// build full event name
+			sprintf (event_string, "%s::%s", pinfo.name, einfo.name);
+
+			// skip generic events libpfm4 lists but that aren't actually
+			// backed by a counter on this CPU
+			if ((pinfo.type != PFM_PMU_TYPE_OS_GENERIC) ||
+			    generic_event_is_hw_mapped(event_string)) {
+				break;
+			}
+			SUBDBG("Skipping unmapped generic event: %s\n", event_string);
+			if ((code = pfm_get_event_next(code)) < 0) {
+				code = get_first_event_next_pmu(einfo.pmu, event_table->pmu_type);
+				if (code < 0) {
+					SUBDBG("EXIT: No mapped events found: %d\n", code);
+					return code;
+				}
+			}
 		}
 
-		// get the pmu information from libpfm4 (must zero structure)
-		memset( &pinfo, 0, sizeof(pfm_pmu_info_t) );
-		pinfo.size = sizeof(pfm_pmu_info_t);
-		ret=pfm_get_pmu_info(einfo.pmu, &pinfo);
-		if (ret!=PFM_SUCCESS) {
-			SUBDBG("EXIT: pfm_get_pmu_info returned: %d\n", ret);
-			return ret;
-		}
-
-		// build full event name
-		sprintf (event_string, "%s::%s", pinfo.name, einfo.name);
 		SUBDBG("code: %#x, pmu: %s, event: %s, event_string: %s\n", code, pinfo.name, einfo.name, event_string);
 
 		// go allocate this event, need to create tables used by the get event info call that will probably follow
@@ -927,26 +1014,43 @@ _pe_libpfm4_ntv_enum_events( unsigned int *PapiEventCode,
 			}
 		}
 
-
 		// get the event information from libpfm4 (must zero structure)
-		memset( &einfo, 0, sizeof( pfm_event_info_t ));
-		einfo.size = sizeof(pfm_event_info_t);
-		if ((ret = pfm_get_event_info(code, PFM_OS_PERF_EVENT_EXT, &einfo)) != PFM_SUCCESS) {
-			SUBDBG("EXIT: pfm_get_event_info returned: %d\n", ret);
-			return PAPI_ENOIMPL;
+		while (1) {
+			memset( &einfo, 0, sizeof( pfm_event_info_t ));
+			einfo.size = sizeof(pfm_event_info_t);
+			if ((ret = pfm_get_event_info(code, PFM_OS_PERF_EVENT_EXT, &einfo)) != PFM_SUCCESS) {
+				SUBDBG("EXIT: pfm_get_event_info returned: %d\n", ret);
+				return PAPI_ENOIMPL;
+			}
+
+			// get the pmu information from libpfm4 (must zero structure)
+			memset( &pinfo, 0, sizeof(pfm_pmu_info_t) );
+			pinfo.size = sizeof(pfm_pmu_info_t);
+			ret=pfm_get_pmu_info(einfo.pmu, &pinfo);
+			if (ret!=PFM_SUCCESS) {
+				SUBDBG("EXIT: pfm_get_pmu_info returned: %d\n", ret);
+				return ret;
+			}
+
+			// build full event name
+			sprintf (event_string, "%s::%s", pinfo.name, einfo.name);
+
+			// skip generic events libpfm4 lists but that aren't actually
+			// backed by a counter on this CPU
+			if ((pinfo.type != PFM_PMU_TYPE_OS_GENERIC) ||
+			    generic_event_is_hw_mapped(event_string)) {
+				break;
+			}
+			SUBDBG("Skipping unmapped generic event: %s\n", event_string);
+			if ((code = pfm_get_event_next(code)) < 0) {
+				code = get_first_event_next_pmu(einfo.pmu, event_table->pmu_type);
+				if (code < 0) {
+					SUBDBG("EXIT: No mapped events found: %d\n", code);
+					return code;
+				}
+			}
 		}
 
-		// get the pmu information from libpfm4 (must zero structure)
-		memset( &pinfo, 0, sizeof(pfm_pmu_info_t) );
-		pinfo.size = sizeof(pfm_pmu_info_t);
-		ret=pfm_get_pmu_info(einfo.pmu, &pinfo);
-		if (ret!=PFM_SUCCESS) {
-			SUBDBG("EXIT: pfm_get_pmu_info returned: %d\n", ret);
-			return ret;
-		}
-
-		// build full event name
-		sprintf (event_string, "%s::%s", pinfo.name, einfo.name);
 		SUBDBG("code: %#x, pmu: %s, event: %s, event_string: %s\n", code, pinfo.name, einfo.name, event_string);
 
 		// go allocate this event, need to create tables used by the get event info call that will follow
