@@ -367,7 +367,9 @@ record_callback(rocprofiler_dispatch_counting_service_data_t dispatch_data,
     rec_info_t *tmp_rec_info;
     uint64_t device;
 
-    if( (NULL == _counter_values) || (NULL == active_event_set_ctx) || (0 == (active_event_set_ctx->state & RPSDK_AES_RUNNING)) ){
+    if( (NULL == _counter_values) || (NULL == active_event_set_ctx) || \
+        (0 == (active_event_set_ctx->state & (RPSDK_AES_RUNNING|RPSDK_AES_PAUSED))) ){
+        SUBDBG("encountered error in record_callback(): %d", PAPI_ENOTRUN);
         return;
     }
 
@@ -434,13 +436,15 @@ record_callback(rocprofiler_dispatch_counting_service_data_t dispatch_data,
 
     // Traverse all events in the active event set and find which recorded entry matches each one of them.
     for( int ei=0; ei<active_event_set_ctx->num_events; ei++ ){
-        double counter_value_sum = 0.0;
+        double counter_value_sum = _counter_values_savestate[ei];
 
-        for(int i=0; i<record_count; ++i){
-            // All counters in the sample whose dimemsions match the qualifers of the event instance
-            // will be added. This means that if a qualifier is missing, we will get the sum.
-            if( true == index_mapping[ei*record_count+i] ){
-                counter_value_sum += record_data[i].counter_value;
+        if( 0 != (active_event_set_ctx->state & RPSDK_AES_RUNNING) ){
+            for(int i=0; i<record_count; ++i){
+                // All counters in the sample whose dimemsions match the qualifers of the event instance
+                // will be added. This means that if a qualifier is missing, we will get the sum.
+                if( true == index_mapping[ei*record_count+i] ){
+                    counter_value_sum += record_data[i].counter_value;
+                }
             }
         }
         // Rocprofiler-SDK default behavior in dispatch mode is to only report
